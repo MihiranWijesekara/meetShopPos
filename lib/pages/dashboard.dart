@@ -1,5 +1,7 @@
+import 'package:chicken_dilivery/pages/Item/itemPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -13,6 +15,10 @@ class DashboardPage extends StatelessWidget {
         icon: Icons.trending_up,
         color: const Color(0xFF4CAF50),
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
+        onTap: () {
+          // Navigate to Sales page
+          Navigator.pushNamed(context, '/sales');
+        },
       ),
       _DashCardData(
         title: 'Stock',
@@ -20,6 +26,10 @@ class DashboardPage extends StatelessWidget {
         icon: Icons.inventory_2_outlined,
         color: const Color(0xFF2196F3),
         gradientColors: [const Color(0xFF2196F3), const Color(0xFF42A5F5)],
+        onTap: () {
+          // Navigate to Stock page
+          Navigator.pushNamed(context, '/stock');
+        },
       ),
       _DashCardData(
         title: 'All Sales',
@@ -27,6 +37,10 @@ class DashboardPage extends StatelessWidget {
         icon: Icons.receipt_long_outlined,
         color: const Color(0xFFFF9800),
         gradientColors: [const Color(0xFFFF9800), const Color(0xFFFFB74D)],
+        onTap: () {
+          // Navigate to All Sales page
+          Navigator.pushNamed(context, '/all-sales');
+        },
       ),
       _DashCardData(
         title: 'Items',
@@ -34,6 +48,13 @@ class DashboardPage extends StatelessWidget {
         icon: Icons.category_outlined,
         color: const Color(0xFF9C27B0),
         gradientColors: [const Color(0xFF9C27B0), const Color(0xFFAB47BC)],
+        onTap: () {
+          // Navigate to Items page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ItemPage()),
+          );
+        },
       ),
     ];
 
@@ -100,7 +121,8 @@ class DashboardPage extends StatelessWidget {
                             size: 24,
                           ),
                           onPressed: () {
-                            // Notification action
+                            // Navigate to notifications
+                            Navigator.pushNamed(context, '/notifications');
                           },
                         ),
                       ),
@@ -120,7 +142,7 @@ class DashboardPage extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.95, // Changed from 1.1 to 0.95 to give more height
+            childAspectRatio: 0.95,
           ),
           itemCount: cards.length,
           itemBuilder: (context, index) {
@@ -138,6 +160,7 @@ class _DashCardData {
   final IconData icon;
   final Color color;
   final List<Color> gradientColors;
+  final VoidCallback onTap;
 
   const _DashCardData({
     required this.title,
@@ -145,6 +168,7 @@ class _DashCardData {
     required this.icon,
     required this.color,
     required this.gradientColors,
+    required this.onTap,
   });
 }
 
@@ -207,16 +231,7 @@ class _DashboardCardState extends State<_DashboardCard>
             borderRadius: BorderRadius.circular(20),
             onTap: () {
               _controller.forward().then((_) => _controller.reverse());
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${widget.cardData.title} opened'),
-                  duration: const Duration(milliseconds: 500),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
+              widget.cardData.onTap();
             },
             child: Padding(
               padding: const EdgeInsets.all(20),
