@@ -1,4 +1,4 @@
-import 'package:chicken_dilivery/pages/Item/addItem.dart';
+import 'package:chicken_dilivery/pages/sales/addSales.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -222,7 +222,7 @@ class _ThismonthsalesState extends State<Thismonthsales> {
                       ),
                     ),
                     SizedBox(
-                      width: 60,
+                      width: 50,
                       child: Text(
                         'Date',
                         style: TextStyle(
@@ -368,7 +368,7 @@ class _ThismonthsalesState extends State<Thismonthsales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 60,
+                                  width: 50,
                                   child: Text(
                                     formattedDate,
                                     style: TextStyle(
@@ -471,7 +471,7 @@ class _ThismonthsalesState extends State<Thismonthsales> {
           // Navigate to Add Item page
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddItemPage()),
+            MaterialPageRoute(builder: (context) => const Addsales()),
           );
           // handle result if needed
         },
