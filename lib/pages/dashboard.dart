@@ -42,7 +42,7 @@ class DashboardPage extends StatelessWidget {
       ),
       _DashCardData(
         title: 'All Sales',
-        subtitle: 'History',
+        subtitle: 'History of sales',
         icon: Icons.receipt_long_outlined,
         color: const Color(0xFFFF9800),
         gradientColors: [const Color(0xFFFF9800), const Color(0xFFFFB74D)],
@@ -54,7 +54,22 @@ class DashboardPage extends StatelessWidget {
           );
         },
       ),
-      _DashCardData(
+     _DashCardData(
+        title: 'All Stocks',
+        subtitle: 'History of stocks',
+        icon: Icons.history,
+        color: const Color(0xFFE91E63),
+        gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
+        onTap: () {
+          // Navigate to Items page
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ItemPage()),
+        );
+        },
+      ),
+
+       _DashCardData(
         title: 'Items',
         subtitle: 'Products',
         icon: Icons.category_outlined,
@@ -154,7 +169,7 @@ class DashboardPage extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.95,
+            childAspectRatio: 1.1, // Increased from 0.95 to make cards smaller/shorter
           ),
           itemCount: cards.length,
           itemBuilder: (context, index) {
