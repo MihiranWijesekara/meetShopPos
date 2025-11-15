@@ -1,6 +1,7 @@
 import 'package:chicken_dilivery/pages/Item/itemPage.dart';
 import 'package:chicken_dilivery/pages/sales/allSales.dart';
 import 'package:chicken_dilivery/pages/sales/thisMonthSales.dart';
+import 'package:chicken_dilivery/pages/stock/allStock.dart';
 import 'package:chicken_dilivery/pages/stock/stockDisplay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,7 +65,7 @@ class DashboardPage extends StatelessWidget {
           // Navigate to Items page
           Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ItemPage()),
+          MaterialPageRoute(builder: (context) => const Allstock()),
         );
         },
       ),

@@ -106,7 +106,7 @@ class _AddsalesState extends State<Addsales> {
                         'Add Sales',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),

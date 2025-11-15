@@ -1,25 +1,40 @@
-import 'package:chicken_dilivery/pages/sales/addSales.dart';
+import 'package:chicken_dilivery/pages/stock/addStock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class Allsales extends StatefulWidget {
-  const Allsales({super.key});
+class Allstock extends StatefulWidget {
+  const Allstock({super.key});
 
   @override
-  State<Allsales> createState() => _AllsalesState();
+  State<Allstock> createState() => _AllstockState();
 }
 
-class _AllsalesState extends State<Allsales> {
+class _AllstockState extends State<Allstock> {
   // Sample data - replace with your actual data source
   final List<Map<String, dynamic>> items = [
-    {'billNumber': 29, 'date': '2024-11-01', 'shopName': 'Thilina Store', 'kg': 12.380, 'rate': 925.00, 'amount': 11451.00},
-    {'billNumber': 2, 'date': '2024-11-02', 'shopName': 'Super Market B', 'kg': 8.5, 'rate': 180.00, 'amount': 1530.00},
-    {'billNumber': 3, 'date': '2024-11-03', 'shopName': 'Shop C', 'kg': 12.0, 'rate': 220.00, 'amount': 2640.00},
-    {'billNumber': 4, 'date': '2024-11-04', 'shopName': 'Shop D', 'kg': 15.5, 'rate': 450.00, 'amount': 6975.00},
-    {'billNumber': 5, 'date': '2024-11-05', 'shopName': 'Shop E', 'kg': 5.0, 'rate': 120.00, 'amount': 600.00},
+    {'itemName': 'Chicken Breast', 'qty': 10, 'weight': 12.5, 'rate': 925.00, 'amount': 11562.50, 'remainingStock': 25},
+    {'itemName': 'Chicken Wings', 'qty': 15, 'weight': 8.5, 'rate': 750.00, 'amount': 6375.00, 'remainingStock': 40},
+    {'itemName': 'Chicken Legs', 'qty': 8, 'weight': 10.0, 'rate': 850.00, 'amount': 8500.00, 'remainingStock': 18},
+    {'itemName': 'Whole Chicken', 'qty': 5, 'weight': 15.5, 'rate': 1200.00, 'amount': 18600.00, 'remainingStock': 10},
+    {'itemName': 'Chicken Thighs', 'qty': 12, 'weight': 9.0, 'rate': 800.00, 'amount': 7200.00, 'remainingStock': 30},
   ];
 
   DateTime? _selectedDate;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? now,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 5),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
 
   void _editItem(int index) {
     // Edit item logic
@@ -27,7 +42,7 @@ class _AllsalesState extends State<Allsales> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Item'),
-        content: Text('Edit ${items[index]['shopName']}'),
+        content: Text('Edit ${items[index]['itemName']}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -50,7 +65,7 @@ class _AllsalesState extends State<Allsales> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Item'),
-        content: Text('Are you sure you want to delete ${items[index]['shopName']}?'),
+        content: Text('Are you sure you want to delete ${items[index]['itemName']}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -74,33 +89,6 @@ class _AllsalesState extends State<Allsales> {
         ],
       ),
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: const Color.fromARGB(255, 26, 11, 167),
-            colorScheme: ColorScheme.light(
-              primary: const Color.fromARGB(255, 26, 11, 167),
-              secondary: const Color.fromARGB(255, 26, 11, 167),
-            ),
-            buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
   }
 
   @override
@@ -149,7 +137,7 @@ class _AllsalesState extends State<Allsales> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'All Sales',
+                                'All Stocks',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -173,96 +161,6 @@ class _AllsalesState extends State<Allsales> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(5, 5, 5, 8),
-              child: Row(
-                children: [
-                  // Search TextField - takes half space
-                  Expanded(
-                    child: TextField(
-                      // controller: _searchController,
-                      // onChanged: _filterItems,
-                      decoration: InputDecoration(
-                        hintText: 'Search by shop name, bill number',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[400],
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey[600],
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey[300]!,
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 26, 11, 167),
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Date Picker Button - takes half space
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectDate(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Colors.grey[300]!,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _selectedDate == null
-                                    ? 'Select Date'
-                                    : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _selectedDate == null ? Colors.grey[400] : Colors.black87,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              Icons.calendar_today,
-                              color: Colors.grey[600],
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-
             // Table Header
             Container(
               decoration: BoxDecoration(
@@ -280,92 +178,136 @@ class _AllsalesState extends State<Allsales> {
                   ),
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 35,
-                      child: Text(
-                        'Bill',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+              child: Column(
+                children: [
+                  // Date Picker only
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: () => _selectDate(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Colors.grey[300]!,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _selectedDate == null
+                                  ? 'Select Date'
+                                  : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _selectedDate == null ? Colors.grey[400] : Colors.black87,
+                              ),
+                            ),
+                            Icon(
+                              Icons.calendar_today,
+                              color: Colors.grey[600],
+                              size: 20,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        'Date',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            'Item Name',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[800],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Shop Name',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+                        SizedBox(
+                          width: 35,
+                          child: Text(
+                            'QTY',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 45,
-                      child: Text(
-                        'KG',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+                        SizedBox(
+                          width: 45,
+                          child: Text(
+                            'Weight',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
                         ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 50,
-                      child: Text(
-                        'Rate',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+                        SizedBox(
+                          width: 45,
+                          child: Text(
+                            'Rate',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
                         ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        'Amount',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+                        SizedBox(
+                          width: 55,
+                          child: Text(
+                            'Amount',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
                         ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 50,
-                      child: Text(
-                        'Action',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
+                        SizedBox(
+                          width: 50,
+                          child: Text(
+                            'R-Stock',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
                         ),
-                      ),
+                        SizedBox(
+                          width: 60,
+                          child: Text(
+                            'Action',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             // Table Body
@@ -415,13 +357,6 @@ class _AllsalesState extends State<Allsales> {
                         ),
                         itemBuilder: (context, index) {
                           final item = items[index];
-                          // Format date to show only day-month (e.g., 01-11)
-                          String formattedDate = '';
-                          if (item['date'] != null && item['date'].toString().length >= 10) {
-                            formattedDate = item['date'].toString().substring(5, 10).replaceAll('-', '/');
-                          } else {
-                            formattedDate = 'N/A';
-                          }
                           
                           return Padding(
                             padding: const EdgeInsets.symmetric(
@@ -430,31 +365,10 @@ class _AllsalesState extends State<Allsales> {
                             ),
                             child: Row(
                               children: [
-                                SizedBox(
-                                  width: 35,
-                                  child: Text(
-                                    '${item['billNumber'] ?? ''}',
-                                    style: TextStyle(
-                                       fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 60,
-                                  child: Text(
-                                    formattedDate,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
                                 Expanded(
+                                  flex: 4,
                                   child: Text(
-                                    item['shopName'] ?? '',
+                                    item['itemName'] ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -464,11 +378,11 @@ class _AllsalesState extends State<Allsales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 45,
+                                  width: 35,
                                   child: Text(
-                                    '${item['kg'] ?? 0}',
+                                    '${item['qty'] ?? 0}',
                                     style: TextStyle(
-                                       fontSize: 10,
+                                      fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -476,7 +390,19 @@ class _AllsalesState extends State<Allsales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 50,
+                                  width: 45,
+                                  child: Text(
+                                    '${item['weight'] ?? 0}',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 45,
                                   child: Text(
                                     '${(item['rate'] ?? 0).toStringAsFixed(0)}',
                                     style: TextStyle(
@@ -488,7 +414,7 @@ class _AllsalesState extends State<Allsales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 60,
+                                  width: 55,
                                   child: Text(
                                     '${(item['amount'] ?? 0).toStringAsFixed(0)}',
                                     style: TextStyle(
@@ -500,7 +426,19 @@ class _AllsalesState extends State<Allsales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 50,
+                                  width: 45,
+                                  child: Text(
+                                    '${item['remainingStock'] ?? 0}',
+                                    style: TextStyle(
+                                       fontSize: 10,
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 60,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -545,7 +483,7 @@ class _AllsalesState extends State<Allsales> {
           // Navigate to Add Item page
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Addsales()),
+            MaterialPageRoute(builder: (context) => const AddStockPage()),
           );
           // handle result if needed
         },
@@ -554,7 +492,7 @@ class _AllsalesState extends State<Allsales> {
           Icons.add,
         ),
         label: const Text(
-          'Add Sales',
+          'Add Stock',
           style: TextStyle(
             color: Color.fromARGB(255, 18, 16, 16),
             fontWeight: FontWeight.bold,
