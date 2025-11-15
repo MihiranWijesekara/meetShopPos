@@ -12,12 +12,18 @@ class _AddStockPageState extends State<AddStockPage> {
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();
   final _sellingRateController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _amountController = TextEditingController();
+  final _qtyController = TextEditingController();
   String? _selectedItem;
 
   @override
   void dispose() {
     _itemNameController.dispose();
     _sellingRateController.dispose();
+    _weightController.dispose();
+    _amountController.dispose();
+    _qtyController.dispose();
     super.dispose();
   }
 
@@ -100,56 +106,57 @@ class _AddStockPageState extends State<AddStockPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 // Item Name Field
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Item Name',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[700],
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
                           value: _selectedItem,
                           decoration: InputDecoration(
                             hintText: 'Select Item',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
+                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                              horizontal: 12,
+                              vertical: 10,
                             ),
+                            isDense: true,
                           ),
                           items: <String>['Item 1', 'Item 2', 'Item 3']
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
-                              child: Text(value),
+                              child: Text(value, style: TextStyle(fontSize: 14)),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
@@ -168,60 +175,62 @@ class _AddStockPageState extends State<AddStockPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 // Selling Rate Field
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Selling Rate',
+                          'Stock Price',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[700],
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         TextFormField(
                           controller: _sellingRateController,
                           keyboardType: TextInputType.number,
+                          style: TextStyle(fontSize: 14),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                           ],
                           decoration: InputDecoration(
-                            hintText: 'Enter selling rate',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            prefixText: '₹ ',
+                            hintText: 'Enter Stock rate',
+                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            prefixText: 'RS ',
                             prefixStyle: TextStyle(
                               color: Colors.grey[800],
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                              horizontal: 12,
+                              vertical: 10,
                             ),
+                            isDense: true,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -240,7 +249,226 @@ class _AddStockPageState extends State<AddStockPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+
+                 const SizedBox(height: 12),
+                // Weight Field
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Weight',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _weightController,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(fontSize: 14),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: 'Enter weight',
+                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            suffixText: 'kg',
+                            suffixStyle: TextStyle(
+                              color: Colors.grey[800],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F7FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            isDense: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter weight';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Please enter valid weight';
+                            }
+                            if (double.parse(value) <= 0) {
+                              return 'Weight must be greater than 0';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                 const SizedBox(height: 12),
+                // Amount Field
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Amount',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _amountController,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(fontSize: 14),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: 'Enter amount',
+                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            prefixText: 'RS ',
+                            prefixStyle: TextStyle(
+                              color: Colors.grey[800],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F7FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            isDense: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter amount';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Please enter valid amount';
+                            }
+                            if (double.parse(value) <= 0) {
+                              return 'Amount must be greater than 0';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                 const SizedBox(height: 12),
+                // QTY Field
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'QTY',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _qtyController,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(fontSize: 14),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: InputDecoration(
+                            hintText: 'Enter quantity',
+                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F7FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            isDense: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter quantity';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'Please enter valid quantity';
+                            }
+                            if (int.parse(value) <= 0) {
+                              return 'Quantity must be greater than 0';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 // Save Button
                 SizedBox(
                   width: double.infinity,
@@ -260,7 +488,7 @@ class _AddStockPageState extends State<AddStockPage> {
                         Icon(Icons.save, color: Colors.white),
                         SizedBox(width: 8),
                         Text(
-                          'Save Item',
+                          'Save Stock',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
