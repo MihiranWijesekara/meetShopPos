@@ -1,5 +1,5 @@
-import 'package:chicken_dilivery/pages/Item/itemPage.dart';
-import 'package:chicken_dilivery/pages/managementDashboard.dart';
+
+import 'package:chicken_dilivery/pages/Managemnt/managementDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/allSales.dart';
 import 'package:chicken_dilivery/pages/sales/thisMonthSales.dart';
 import 'package:chicken_dilivery/pages/stock/allStock.dart';

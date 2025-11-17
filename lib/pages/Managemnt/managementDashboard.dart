@@ -1,6 +1,6 @@
+import 'package:chicken_dilivery/pages/Item/itemPage.dart';
+import 'package:chicken_dilivery/pages/Managemnt/shopPage.dart';
 import 'package:chicken_dilivery/pages/sales/allSales.dart';
-import 'package:chicken_dilivery/pages/sales/thisMonthSales.dart';
-import 'package:chicken_dilivery/pages/stock/stockDisplay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,7 +21,7 @@ class Managementdashboard extends StatelessWidget {
           // Navigate to Items page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Thismonthsales()),
+            MaterialPageRoute(builder: (context) => const ItemPage()),
           );
         },
       ),
@@ -35,7 +35,7 @@ class Managementdashboard extends StatelessWidget {
           // Navigate to Shop page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const StockDisplay()),
+            MaterialPageRoute(builder: (context) => const ShopPage()),
           );
         },
       ),
