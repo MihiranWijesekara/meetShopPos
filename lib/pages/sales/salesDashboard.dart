@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 
-class Managementdashboard extends StatelessWidget {
-  const Managementdashboard({super.key});
+class SalesDashboard extends StatelessWidget {
+  const SalesDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final cards = <_DashCardData>[
       _DashCardData(
-        title: 'Item',
-        subtitle: 'Manage Products',
-        icon: Icons.inventory_outlined,
+        title: 'Today Sale',
+        subtitle: 'Sales for today',
+        icon: Icons.today_outlined,
         color: const Color(0xFF4CAF50),
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
          onTap: () {
@@ -26,9 +26,9 @@ class Managementdashboard extends StatelessWidget {
         },
       ),
       _DashCardData(
-        title: 'Shop',
-        subtitle: 'Store Settings',
-        icon: Icons.store_outlined,
+        title: 'Weekly Sale',
+        subtitle: 'Sales for the week',
+        icon: Icons.date_range_outlined,
         color: const Color(0xFF2196F3),
         gradientColors: [const Color(0xFF2196F3), const Color(0xFF42A5F5)],
         onTap: () {
@@ -40,9 +40,9 @@ class Managementdashboard extends StatelessWidget {
         },
       ),
       _DashCardData(
-        title: 'Root',
-        subtitle: 'Admin Access',
-        icon: Icons.admin_panel_settings_outlined,
+        title: 'Monthly Sale',
+        subtitle: 'Sales for the month',
+        icon: Icons.calendar_month_outlined,
         color: const Color(0xFFE91E63),
         gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
         onTap: () {
@@ -96,7 +96,7 @@ class Managementdashboard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Management Dashboard',
+                              ' Sales Dashboard',
                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -116,19 +116,119 @@ class Managementdashboard extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: GridView.builder(
-          physics: const BouncingScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.1, // Increased from 0.95 to make cards smaller/shorter
-          ),
-          itemCount: cards.length,
-          itemBuilder: (context, index) {
-            return _DashboardCard(cardData: cards[index]);
-          },
+        child: Column(
+          children: [
+            // Summary Cards Row
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryCard(
+                    title: 'Today Sales',
+                    amount: 'RS 500000',
+                    icon: Icons.trending_up,
+                    iconColor: const Color(0xFF4CAF50),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _SummaryCard(
+                    title: 'Yesterday',
+                    amount: 'RS 480000',
+                    icon: Icons.history,
+                    iconColor: const Color(0xFF2196F3),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // Existing Dashboard Cards
+            Expanded(
+              child: GridView.builder(
+                physics: const BouncingScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.1,
+                ),
+                itemCount: cards.length,
+                itemBuilder: (context, index) {
+                  return _DashboardCard(cardData: cards[index]);
+                },
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  final String title;
+  final String amount;
+  final IconData icon;
+  final Color iconColor;
+  final bool isPercentage;
+
+  const _SummaryCard({
+    required this.title,
+    required this.amount,
+    required this.icon,
+    required this.iconColor,
+    this.isPercentage = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Icon(
+                icon,
+                size: 17,
+                color: iconColor,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            amount,
+            style: TextStyle(
+              color: isPercentage && amount.startsWith('+') 
+                  ? const Color(0xFF4CAF50)
+                  : Colors.black87,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -227,7 +327,7 @@ class _DashboardCardState extends State<_DashboardCard>
                     ),
                     child: Icon(
                       widget.cardData.icon,
-                      size: 32,
+                      size: 28,
                       color: Colors.white,
                     ),
                   ),
@@ -246,7 +346,7 @@ class _DashboardCardState extends State<_DashboardCard>
                     widget.cardData.subtitle,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
