@@ -1,23 +1,20 @@
-import 'package:chicken_dilivery/pages/Item/itemPage.dart';
-import 'package:chicken_dilivery/pages/managementDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/allSales.dart';
 import 'package:chicken_dilivery/pages/sales/thisMonthSales.dart';
-import 'package:chicken_dilivery/pages/stock/allStock.dart';
 import 'package:chicken_dilivery/pages/stock/stockDisplay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 
-class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
+class Managementdashboard extends StatelessWidget {
+  const Managementdashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final cards = <_DashCardData>[
       _DashCardData(
-        title: 'Sales',
-        subtitle: 'View sales',
-        icon: Icons.trending_up,
+        title: 'Item',
+        subtitle: 'Manage Products',
+        icon: Icons.inventory_outlined,
         color: const Color(0xFF4CAF50),
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
          onTap: () {
@@ -29,13 +26,13 @@ class DashboardPage extends StatelessWidget {
         },
       ),
       _DashCardData(
-        title: 'Stock',
-        subtitle: 'Inventory',
-        icon: Icons.inventory_2_outlined,
+        title: 'Shop',
+        subtitle: 'Store Settings',
+        icon: Icons.store_outlined,
         color: const Color(0xFF2196F3),
         gradientColors: [const Color(0xFF2196F3), const Color(0xFF42A5F5)],
         onTap: () {
-          // Navigate to Items page
+          // Navigate to Shop page
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const StockDisplay()),
@@ -43,49 +40,20 @@ class DashboardPage extends StatelessWidget {
         },
       ),
       _DashCardData(
-        title: 'All Sales',
-        subtitle: 'History of sales',
-        icon: Icons.receipt_long_outlined,
-        color: const Color(0xFFFF9800),
-        gradientColors: [const Color(0xFFFF9800), const Color(0xFFFFB74D)],
+        title: 'Root',
+        subtitle: 'Admin Access',
+        icon: Icons.admin_panel_settings_outlined,
+        color: const Color(0xFFE91E63),
+        gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
         onTap: () {
-          // Navigate to Items page
+          // Navigate to Root page
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Allsales()),
           );
         },
       ),
-     _DashCardData(
-        title: 'All Stocks',
-        subtitle: 'History of stocks',
-        icon: Icons.history,
-        color: const Color(0xFFE91E63),
-        gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
-        onTap: () {
-          // Navigate to Items page
-          Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Allstock()),
-        );
-        },
-      ),
-
-      _DashCardData(
-        title: 'Management',
-        subtitle: 'Items & Settings',
-        icon: Icons.category_outlined,
-        color: const Color(0xFF9C27B0),
-        gradientColors: [const Color(0xFF9C27B0), const Color(0xFFAB47BC)],
-        onTap: () {
-          // Navigate to Items page
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Managementdashboard()),
-          );
-        },
-      ),
-    ];
+   ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -94,6 +62,15 @@ class DashboardPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -112,48 +89,22 @@ class DashboardPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Row(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Dashboard',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                      const SizedBox(width: 40),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Management Dashboard',
+                               style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Welcome back!',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.notifications_outlined,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                          onPressed: () {
-                            // Navigate to notifications
-                            Navigator.pushNamed(context, '/notifications');
-                          },
-                        ),
+                          ],
                       ),
                     ],
                   ),
