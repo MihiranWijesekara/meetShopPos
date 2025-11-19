@@ -1,5 +1,6 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/RootModel.dart';
+import 'package:chicken_dilivery/Model/ShopModel.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -21,7 +22,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Increased version to trigger onUpgrade
+      version: 3, // Increased version
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -42,15 +43,33 @@ class DatabaseHelper {
         name TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE shops (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        shop_name TEXT NOT NULL,
+        root_id INTEGER,
+        FOREIGN KEY (root_id) REFERENCES roots (id) ON DELETE SET NULL
+      )
+    ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Add roots table if upgrading from version 1
       await db.execute('''
         CREATE TABLE IF NOT EXISTS roots (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS shops (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          shop_name TEXT NOT NULL,
+          root_id INTEGER,
+          FOREIGN KEY (root_id) REFERENCES roots (id) ON DELETE SET NULL
         )
       ''');
     }
@@ -68,6 +87,12 @@ class DatabaseHelper {
     return await db.insert('roots', root.toMap());
   }
 
+  // Insert shop
+  Future<int> insertShop(Shopmodel shop) async {
+    final db = await database;
+    return await db.insert('shops', shop.toMap());
+  }
+
   // Get all items
   Future<List<ItemModel>> getAllItems() async {
     final db = await database;
@@ -80,6 +105,18 @@ class DatabaseHelper {
     final db = await database;
     final result = await db.query('roots', orderBy: 'id ASC');
     return result.map((map) => RootModel.fromMap(map)).toList();
+  }
+
+  // Get all shops
+  Future<List<Shopmodel>> getAllShops() async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT shops.*, roots.name as root_name
+      FROM shops
+      LEFT JOIN roots ON shops.root_id = roots.id
+      ORDER BY shops.id ASC
+    ''');
+    return result.map((map) => Shopmodel.fromMap(map)).toList();
   }
 
   // Update item
@@ -104,6 +141,17 @@ class DatabaseHelper {
     );
   }
 
+  // Update shop
+  Future<int> updateShop(Shopmodel shop) async {
+    final db = await database;
+    return await db.update(
+      'shops',
+      shop.toMap(),
+      where: 'id = ?',
+      whereArgs: [shop.id],
+    );
+  }
+
   // Delete item
   Future<int> deleteItem(int id) async {
     final db = await database;
@@ -119,6 +167,16 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(
       'roots',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Delete shop
+  Future<int> deleteShop(int id) async {
+    final db = await database;
+    return await db.delete(
+      'shops',
       where: 'id = ?',
       whereArgs: [id],
     );

@@ -1,4 +1,4 @@
-import 'package:chicken_dilivery/pages/Item/addItem.dart';
+import 'package:chicken_dilivery/pages/Managemnt/addShopPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -123,7 +123,7 @@ class _ShopPageState extends State<ShopPage> {
                                 'Shop Management',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 28,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.5,
                                 ),
@@ -198,17 +198,17 @@ class _ShopPageState extends State<ShopPage> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: 80,
-                      child: Text(
-                        'VAT Number',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
+                    // SizedBox(
+                    //   width: 80,
+                    //   child: Text(
+                    //     'VAT Number',
+                    //     style: TextStyle(
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 13,
+                    //       color: Colors.grey[800],
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(
                       width: 80,
                       child: Text(
@@ -312,16 +312,16 @@ class _ShopPageState extends State<ShopPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                    item['VAT Number'],
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                ),
+                                // SizedBox(
+                                //   width: 80,
+                                //   child: Text(
+                                //     item['VAT Number'],
+                                //     style: TextStyle(
+                                //       fontSize: 13,
+                                //       color: Colors.grey[800],
+                                //     ),
+                                //   ),
+                                // ),
                                 SizedBox(
                                   width: 80,
                                   child: Row(
@@ -368,7 +368,7 @@ class _ShopPageState extends State<ShopPage> {
           // Navigate to Add Item page
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddItemPage()),
+            MaterialPageRoute(builder: (context) => const Addshoppage()),
           );
           // handle result if needed
         },
