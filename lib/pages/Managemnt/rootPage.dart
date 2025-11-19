@@ -1,4 +1,4 @@
-import 'package:chicken_dilivery/pages/Item/addItem.dart';
+import 'package:chicken_dilivery/pages/Managemnt/addRootPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,7 +24,7 @@ class _RootpageState extends State<Rootpage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Item'),
+        title: const Text('Edit Root'),
         content: Text('Edit ${items[index]['name']}'),
         actions: [
           TextButton(
@@ -47,7 +47,7 @@ class _RootpageState extends State<Rootpage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Item'),
+        title: const Text('Delete Root'),
         content: Text('Are you sure you want to delete ${items[index]['name']}?'),
         actions: [
           TextButton(
@@ -325,7 +325,7 @@ class _RootpageState extends State<Rootpage> {
           // Navigate to Add Item page
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddItemPage()),
+            MaterialPageRoute(builder: (context) => const Addrootpage()),
           );
           // handle result if needed
         },

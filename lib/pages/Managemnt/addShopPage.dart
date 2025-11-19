@@ -5,14 +5,14 @@ import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class AddItemPage extends StatefulWidget {
-  const AddItemPage({super.key});
+class Addshoppage extends StatefulWidget {
+  const Addshoppage({super.key});
 
   @override
-  State<AddItemPage> createState() => _AddItemPageState();
+  State<Addshoppage> createState() => _AddshoppageState();
 }
 
-class _AddItemPageState extends State<AddItemPage> {
+class _AddshoppageState extends State<Addshoppage> {
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();
   final _sellingRateController = TextEditingController();
@@ -42,7 +42,7 @@ class _AddItemPageState extends State<AddItemPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Item added successfully'),
+            content: Text('Shop added successfully'),
             backgroundColor: Colors.green,
           ),
         );

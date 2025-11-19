@@ -1,4 +1,5 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
+import 'package:chicken_dilivery/Model/RootModel.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -34,12 +35,24 @@ class DatabaseHelper {
         price REAL NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE roots (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
+      )
+    ''');
   }
 
   // Insert item
   Future<int> insertItem(ItemModel item) async {
     final db = await database;
     return await db.insert('items', item.toMap());
+  }
+  // Insert root
+  Future<int> insertRoot(RootModel root) async {
+    final db = await database;
+    return await db.insert('roots', root.toMap());
   }
 
   // Get all items
