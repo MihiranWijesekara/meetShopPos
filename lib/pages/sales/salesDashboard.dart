@@ -170,15 +170,19 @@ class SalesDashboard extends StatelessWidget {
           );
           // handle result if needed
         },
-        backgroundColor: const Color.fromARGB(255, 224, 237, 51),
+        backgroundColor: const Color.fromARGB(255, 26, 11, 167),
+        elevation: 4,
         icon: const Icon(
-          Icons.add,
+          Icons.add_circle_outline,
+          color: Colors.white,
+          size: 24,
         ),
         label: const Text(
           'Add Sales',
           style: TextStyle(
-            color: Color.fromARGB(255, 18, 16, 16),
+            color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontSize: 16,
             letterSpacing: 0.5,
           ),
         ),

@@ -1,3 +1,5 @@
+import 'package:chicken_dilivery/Model/ItemModel.dart';
+import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,8 +20,19 @@ class _AddsalesState extends State<Addsales> {
   final _billNumberController = TextEditingController();
   final _shopNameController = TextEditingController();
   final _dateController = TextEditingController();
-  String? _selectedItem;
+
+  // String? _selectedItem;
+
   DateTime? _selectedDate;
+  int? _selectedItemId;
+  List<ItemModel> _items = [];
+  bool _isLoadingItems = true;
+
+   @override
+  void initState() {
+    super.initState();
+    _loadItems();
+  }
 
   @override
   void dispose() {
@@ -32,6 +45,24 @@ class _AddsalesState extends State<Addsales> {
     _shopNameController.dispose();
     _dateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadItems() async {
+    try {
+      final items = await DatabaseHelper.instance.getAllItems();
+      setState(() {
+        _items = items;
+        _isLoadingItems = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingItems = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading items: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -59,7 +90,7 @@ class _AddsalesState extends State<Addsales> {
       Navigator.pop(context, {
         'name': itemName,
         'price': sellingRate,
-        'selectedItem': _selectedItem,
+        'selectedItem': _selectedItemId,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -236,8 +267,13 @@ class _AddsalesState extends State<Addsales> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          value: _selectedItem,
+                        DropdownButtonFormField<int>(
+                          value: _selectedItemId,
+                          onChanged: (int? newValue) {
+                            setState(() {
+                              _selectedItemId = newValue;
+                            });
+                          },
                           decoration: InputDecoration(
                             hintText: 'Select Item',
                             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
@@ -270,20 +306,14 @@ class _AddsalesState extends State<Addsales> {
                             ),
                             isDense: true,
                           ),
-                          items: <String>['Item 1', 'Item 2', 'Item 3']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value, style: TextStyle(fontSize: 14)),
+                          items: _items.map((item) {
+                            return DropdownMenuItem<int>(
+                              value: item.id,
+                              child: Text(item.name),
                             );
                           }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedItem = newValue;
-                            });
-                          },
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
+                            if (value == null) {
                               return 'Please select an item';
                             }
                             return null;
