@@ -1,6 +1,7 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/RootModel.dart';
 import 'package:chicken_dilivery/Model/ShopModel.dart';
+import 'package:chicken_dilivery/Model/StockModel.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -22,9 +23,10 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3, // Increased version
+      version: 4, // Increased version
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
+      onDowngrade: onDatabaseDowngradeDelete, // Optional: handle downgrade
     );
   }
 
@@ -52,9 +54,22 @@ class DatabaseHelper {
         FOREIGN KEY (root_id) REFERENCES roots (id) ON DELETE SET NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE Stock (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL,
+        stock_price INTEGER NOT NULL,
+        quantity_kg INTEGER,
+        remain_quantity REAL,
+        added_date TEXT,
+        FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL
+      )
+    ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Use if-else if chain to handle incremental upgrades
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS roots (
@@ -63,6 +78,7 @@ class DatabaseHelper {
         )
       ''');
     }
+    
     if (oldVersion < 3) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS shops (
@@ -73,6 +89,39 @@ class DatabaseHelper {
         )
       ''');
     }
+    
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS Stock (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          item_id INTEGER NOT NULL,
+          stock_price INTEGER NOT NULL,
+          quantity_kg INTEGER,
+          remain_quantity REAL,
+          added_date TEXT,
+          FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL
+        )
+      ''');
+    }
+  }
+
+  // Debug method to check if table exists
+  Future<bool> doesTableExist(String tableName) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+      [tableName]
+    );
+    return result.isNotEmpty;
+  }
+
+  // Debug method to get all table names
+  Future<List<String>> getAllTableNames() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table'"
+    );
+    return result.map((map) => map['name'] as String).toList();
   }
 
   // Insert item
@@ -91,6 +140,12 @@ class DatabaseHelper {
   Future<int> insertShop(Shopmodel shop) async {
     final db = await database;
     return await db.insert('shops', shop.toMap());
+  }
+
+  // Insert stock
+  Future<int> insertStock(StockModel stock) async {
+    final db = await database;
+    return await db.insert('Stock', stock.toMap());
   }
 
   // Get all items
@@ -117,6 +172,18 @@ class DatabaseHelper {
       ORDER BY shops.id ASC
     ''');
     return result.map((map) => Shopmodel.fromMap(map)).toList();
+  }
+
+  // Get all stock
+  Future<List<StockModel>> getAllStock() async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT Stock.*, items.name as item_name 
+      FROM Stock
+      LEFT JOIN items ON Stock.item_id = items.id
+      ORDER BY Stock.id ASC
+    ''');
+    return result.map((map) => StockModel.fromMap(map)).toList();
   }
 
   // Update item
@@ -152,6 +219,17 @@ class DatabaseHelper {
     );
   }
 
+  // Update stock
+  Future<int> updateStock(StockModel stock) async {
+    final db = await database;
+    return await db.update(
+      'Stock',
+      stock.toMap(),
+      where: 'id = ?',
+      whereArgs: [stock.id],
+    );
+  }
+
   // Delete item
   Future<int> deleteItem(int id) async {
     final db = await database;
@@ -177,6 +255,16 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(
       'shops',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Delete stock
+  Future<int> deleteStock(int id) async {
+    final db = await database;
+    return await db.delete(
+      'Stock',
       where: 'id = ?',
       whereArgs: [id],
     );
