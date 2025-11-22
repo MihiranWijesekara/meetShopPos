@@ -195,6 +195,20 @@ class DatabaseHelper {
     return result.map((m) => StockModel.fromMap(m)).toList();
   }
 
+  // Get all available stock (remain_quantity > 0)
+  Future<List<StockModel>> getACurrentStock() async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT Stock.*, items.name as item_name
+      FROM Stock
+      LEFT JOIN items ON Stock.item_id = items.id
+      WHERE COALESCE(Stock.remain_quantity, 0) > 0
+      ORDER BY Stock.id ASC
+    ''');
+    return result.map((m) => StockModel.fromMap(m)).toList();
+  }
+
+
   // Update item
   Future<int> updateItem(ItemModel item) async {
     final db = await database;

@@ -44,7 +44,7 @@ class _StockDisplayState extends State<StockDisplay> {
   Future<void> _loadStocks() async {
     setState(() => isLoading = true);
     try {
-      final data = await DatabaseHelper.instance.getAllStock();
+      final data = await DatabaseHelper.instance.getACurrentStock();
       setState(() {
         stocks = data;
         isLoading = false;
