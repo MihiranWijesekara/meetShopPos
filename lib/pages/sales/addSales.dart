@@ -1,4 +1,6 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
+import 'package:chicken_dilivery/Model/RootModel.dart';
+import 'package:chicken_dilivery/Model/ShopModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,22 +21,33 @@ class _AddsalesState extends State<Addsales> {
   final _qtyController = TextEditingController();
   final _billNumberController = TextEditingController();
   final _shopNameController = TextEditingController();
+  final _vatController = TextEditingController(); // NEW
   final _dateController = TextEditingController();
-
-  // String? _selectedItem;
 
   DateTime? _selectedDate;
   int? _selectedItemId;
+  
+  // Items state
   List<ItemModel> _items = [];
   bool _isLoadingItems = true;
 
-   @override
+  // NEW: root + shops state
+  List<RootModel> _roots = [];
+  List<Shopmodel> _shops = [];
+  int? _selectedRootId;
+  Shopmodel? _selectedShop;
+  bool _isLoadingRoots = true;
+  bool _isLoadingShops = true;
+
+  @override
   void initState() {
     super.initState();
     _loadItems();
-    // Set today's date as default
+    _loadRoots();
+    _loadShops();
     _selectedDate = DateTime.now();
-    _dateController.text = '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
+    _dateController.text =
+        '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
   }
 
   @override
@@ -46,6 +59,7 @@ class _AddsalesState extends State<Addsales> {
     _qtyController.dispose();
     _billNumberController.dispose();
     _shopNameController.dispose();
+    _vatController.dispose(); // NEW
     _dateController.dispose();
     super.dispose();
   }
@@ -68,6 +82,36 @@ class _AddsalesState extends State<Addsales> {
     }
   }
 
+  Future<void> _loadRoots() async {
+    try {
+      final roots = await DatabaseHelper.instance.getAllRoots();
+      setState(() {
+        _roots = roots;
+        _isLoadingRoots = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingRoots = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading roots: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _loadShops() async {
+    try {
+      final shops = await DatabaseHelper.instance.getAllShops();
+      setState(() {
+        _shops = shops;
+        _isLoadingShops = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingShops = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading shops: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -83,12 +127,12 @@ class _AddsalesState extends State<Addsales> {
     }
   }
 
-   void _onItemSelected(int? itemId) {
+  void _onItemSelected(int? itemId) {
     if (itemId == null) return;
-    
+
     // Find the selected item
     final selectedItem = _items.firstWhere((item) => item.id == itemId);
-    
+
     // Auto-fill the selling rate
     setState(() {
       _selectedItemId = itemId;
@@ -98,15 +142,17 @@ class _AddsalesState extends State<Addsales> {
 
   void _saveItem() {
     if (_formKey.currentState!.validate()) {
-      // Save item logic here
       final itemName = _itemNameController.text;
       final sellingRate = double.parse(_sellingRateController.text);
 
-      // Return the data to previous screen
       Navigator.pop(context, {
         'name': itemName,
         'price': sellingRate,
         'selectedItem': _selectedItemId,
+        'rootId': _selectedRootId,
+        'shopId': _selectedShop?.id,
+        'shopName': _selectedShop?.Shopname,
+        'vatNumber': _vatController.text,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -612,12 +658,11 @@ class _AddsalesState extends State<Addsales> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Shop name Field
+                // ROOT SELECT FIELD (NEW)
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -632,69 +677,194 @@ class _AddsalesState extends State<Addsales> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Shop Name',
+                        const Text(
+                          'Root',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _shopNameController,
-                          style: TextStyle(fontSize: 14),
-                          decoration: InputDecoration(
-                            hintText: 'Enter shop name',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
+                        _isLoadingRoots
+                            ? const Center(child: SizedBox(height: 24, width:24, child: CircularProgressIndicator(strokeWidth:2)))
+                            : DropdownButtonFormField<int>(
+                                value: _selectedRootId,
+                                items: _roots
+                                    .map((r) => DropdownMenuItem<int>(
+                                          value: r.id,
+                                          child: Text(r.name),
+                                        ))
+                                    .toList(),
+                                decoration: InputDecoration(
+                                  hintText: 'Select root',
+                                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF5F7FA),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: const BorderSide(color: Colors.black, width: 1),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: const BorderSide(color: Colors.black, width: 1),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  isDense: true,
+                                ),
+                                onChanged: (val) {
+                                  setState(() {
+                                    _selectedRootId = val;
+                                    _selectedShop = null;
+                                    _shopNameController.clear();
+                                  });
+                                },
+                                validator: (v) {
+                                  if (v == null) return 'Select root';
+                                  return null;
+                                },
                               ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter shop name';
-                            }
-                            return null;
-                          },
-                        ),
                       ],
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 10),
-                // Shop name Field
+                // Shop Name SEARCHABLE (REPLACED)
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: FormField<Shopmodel>(
+                      validator: (value) {
+                        if (_selectedShop == null) return 'Please select shop';
+                        return null;
+                      },
+                      builder: (state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Shop Name',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            _isLoadingShops
+                                ? const Center(child: SizedBox(height:24,width:24,child: CircularProgressIndicator(strokeWidth:2)))
+                                : Autocomplete<Shopmodel>(
+                                    displayStringForOption: (s) => s.Shopname,
+                                    optionsBuilder: (TextEditingValue text) {
+                                      if (_selectedRootId == null) return const Iterable<Shopmodel>.empty();
+                                      final query = text.text.toLowerCase();
+                                      return _shops.where((shop) {
+                                        final matchesRoot = shop.rootId == _selectedRootId;
+                                        final matchesQuery = query.isEmpty || shop.Shopname.toLowerCase().contains(query);
+                                        return matchesRoot && matchesQuery;
+                                      });
+                                    },
+                                    onSelected: (shop) {
+                                      setState(() {
+                                        _selectedShop = shop;
+                                        _shopNameController.text = shop.Shopname;
+                                      });
+                                      state.didChange(shop);
+                                    },
+                                    fieldViewBuilder: (context, textController, focusNode, onSubmit) {
+                                      // Keep controller in sync
+                                      if (_shopNameController.text.isNotEmpty &&
+                                          textController.text != _shopNameController.text) {
+                                        textController.text = _shopNameController.text;
+                                      }
+                                      return TextFormField(
+                                        controller: textController,
+                                        focusNode: focusNode,
+                                        style: const TextStyle(fontSize: 14),
+                                        decoration: InputDecoration(
+                                          hintText: _selectedRootId == null
+                                              ? 'Select root first'
+                                              : 'Search shop name',
+                                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                          filled: true,
+                                          fillColor: const Color(0xFFF5F7FA),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                            borderSide: const BorderSide(color: Colors.black, width: 1),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                            borderSide: const BorderSide(color: Colors.black, width: 1),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                            borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 10,
+                                          ),
+                                          isDense: true,
+                                          errorText: state.errorText,
+                                        ),
+                                        enabled: _selectedRootId != null,
+                                      );
+                                    },
+                                    optionsViewBuilder: (context, onSelected, options) {
+                                      return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Material(
+                                          elevation: 4,
+                                          borderRadius: BorderRadius.circular(6),
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(maxHeight: 200, minWidth: 250),
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              itemCount: options.length,
+                                              itemBuilder: (context, index) {
+                                                final shop = options.elementAt(index);
+                                                return InkWell(
+                                                  onTap: () => onSelected(shop),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                                    child: Text(shop.Shopname),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // VAT Number Field (FIXED controller)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -709,18 +879,18 @@ class _AddsalesState extends State<Addsales> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'VAT Number',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 6),
                         TextFormField(
-                          controller: _shopNameController,
-                          style: TextStyle(fontSize: 14),
+                          controller: _vatController,
+                          style: const TextStyle(fontSize: 14),
                           decoration: InputDecoration(
                             hintText: 'Enter VAT number',
                             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
@@ -728,29 +898,17 @@ class _AddsalesState extends State<Addsales> {
                             fillColor: const Color(0xFFF5F7FA),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
+                              borderSide: const BorderSide(color: Colors.black, width: 1),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
+                              borderSide: const BorderSide(color: Colors.black, width: 1),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
+                              borderSide: const BorderSide(color: Colors.black, width: 1.5),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             isDense: true,
                           ),
                         ),
@@ -882,6 +1040,6 @@ class _AddsalesState extends State<Addsales> {
   }
 }
 
-// 2- Root select karanna karamyk ona e wagema e select karana root ekata adala shop witharak display wenna ona wenna ona
+// 2- Root select karanna karamyk ona e wagema e select karana root ekata adala shop witharak display wenna ona
 // 3 - Auto bill number genarate karanna ona
 
