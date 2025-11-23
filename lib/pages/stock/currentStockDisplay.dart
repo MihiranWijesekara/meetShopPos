@@ -14,7 +14,6 @@ class StockDisplay extends StatefulWidget {
 }
 
 class _StockDisplayState extends State<StockDisplay> {
-
   List<StockModel> stocks = [];
   List<ItemModel> _items = []; 
   bool isLoading = true;
@@ -52,7 +51,6 @@ class _StockDisplayState extends State<StockDisplay> {
     }
   }
 
-  // REPLACE old _editItem with _editStock
   void _editStock(int index) async {
     final stock = stocks[index];
 
@@ -312,337 +310,65 @@ class _StockDisplayState extends State<StockDisplay> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Table Header
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 5, // increased from 4
-                      child: Text(
-                        'Item Name',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 32, // reduced from 35
-                      child: Text(
-                        'QTY',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 42, // reduced from 45
-                      child: Text(
-                        'Weight',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Colors.grey[800],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 40, // reduced from 45
-                      child: Text(
-                        'Rate',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 50, // reduced from 55
-                      child: Text(
-                        'Amount',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Colors.grey[800],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 45, // reduced from 50
-                      child: Text(
-                        'R-Stock',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[800],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 48, // reduced from 50
-                      child: Text(
-                        'Date',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Colors.grey[800],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 50, // reduced from 60
-                      child: Text(
-                        'Action',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            Text(
+              '${stocks.length} RECORDS FOUND',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+                letterSpacing: 0.5,
               ),
             ),
-            // Table Body
+            const SizedBox(height: 16),
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: stocks.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.inventory_2_outlined,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No items available',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : stocks.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                size: 64,
+                                color: Colors.grey[400],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              Text(
+                                'No items available',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: stocks.length,
+                          itemBuilder: (context, index) {
+                            final stock = stocks[index];
+                            return _buildStockCard(stock, index);
+                          },
                         ),
-                      )
-                    : ListView.separated(
-                        itemCount: stocks.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Colors.grey[200],
-                        ),
-                        itemBuilder: (context, index) {
-                          final stock = stocks[index];
-                          
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 10,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 5, // match header
-                                  child: Text(
-                                    stock.item_name ?? '',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 32, // match header
-                                  child: Text(
-                                    stock.QTY?.toString() ?? 'N/A',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 42, // match header
-                                  child: Text(
-                                    stock.quantity_kg?.toString() ?? 'N/A',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 40, // match header
-                                  child: Text(
-                                    stock.stock_price?.toString() ?? 'N/A',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 50, // match header
-                                  child: Text(
-                                    stock.amount?.toString() ?? 'N/A',
-                                    style: TextStyle(
-                                       fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 45, // match header
-                                  child: Text(
-                                    stock.remain_quantity?.toString() ?? 'N/A',
-                                    style: TextStyle(
-                                       fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 48, // match header
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        _formatDateYear(stock.added_date ?? ''),
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          color: Color.fromARGB(255, 0, 0, 0),
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                      Text(
-                                        _formatDateDayMonth(stock.added_date ?? ''),
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          color: Color.fromARGB(255, 0, 0, 0),
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 50, // match header
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      InkWell(
-                                        onTap: () => _editStock(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          child: Icon(
-                                            Icons.edit_outlined,
-                                            color: Colors.blue,
-                                            size: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      InkWell(
-                                        onTap: () => _deleteItem(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          child: Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
-                                            size: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          // Navigate to Add Item page
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddStockPage()),
           );
-          // handle result if needed
+          if (result == true) _loadStocks();
         },
         backgroundColor: const Color.fromARGB(255, 224, 237, 51),
-        icon: const Icon(
-          Icons.add,
-        ),
+        icon: const Icon(Icons.add),
         label: const Text(
           'Add Stock',
           style: TextStyle(
@@ -655,7 +381,261 @@ class _StockDisplayState extends State<StockDisplay> {
     );
   }
 
-  // Add helper methods at bottom of _StockDisplayState class
+  Widget _buildStockCard(StockModel stock, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          title: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      stock.item_name ?? 'Unknown Item',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          'Weight: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          '${stock.quantity_kg ?? 0} Kg',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[900],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          'Amount: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          'Rs ${stock.amount?.toStringAsFixed(0) ?? '0'}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          'Remaining Stock: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          '${stock.remain_quantity?.toStringAsFixed(1) ?? '0'} Kg',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                stock.added_date ?? '',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          children: [
+            Divider(height: 1, color: Colors.grey[200]),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDetailItem(
+                    'QTY',
+                    stock.QTY?.toString() ?? '0',
+                    Icons.format_list_numbered,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailItem(
+                    'Weight',
+                    '${stock.quantity_kg ?? 0} Kg',
+                    Icons.scale,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDetailItem(
+                    'Rate',
+                    'Rs ${stock.stock_price ?? 0}',
+                    Icons.attach_money,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailItem(
+                    'Amount',
+                    'Rs ${stock.amount?.toStringAsFixed(0) ?? '0'}',
+                    Icons.attach_money,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildDetailItemWithoutIcon(
+              'Remaining Stock',
+              '${stock.remain_quantity?.toStringAsFixed(1) ?? '0'} Kg',
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => _editStock(index),
+                  icon: Icon(Icons.edit, size: 16),
+                  label: Text('Edit'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    side: BorderSide(color: Colors.blue),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: () => _deleteItem(index),
+                  icon: Icon(Icons.delete, size: 16),
+                  label: Text('Delete'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+         Icon(icon, size: 16, color: Colors.grey[600]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[900],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailItemWithoutIcon(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[900],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatDateYear(String date) {
     if (date.isEmpty) return '';
     final parts = date.split('/');
