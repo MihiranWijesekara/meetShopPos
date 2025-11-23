@@ -1,3 +1,6 @@
+import 'package:chicken_dilivery/Model/ItemModel.dart';
+import 'package:chicken_dilivery/Model/StockModel.dart';
+import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:chicken_dilivery/pages/stock/addStock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,16 +13,54 @@ class Allstock extends StatefulWidget {
 }
 
 class _AllstockState extends State<Allstock> {
-  // Sample data - replace with your actual data source
-  final List<Map<String, dynamic>> items = [
-    {'itemName': 'Chicken Breast', 'qty': 10, 'weight': 12.5, 'rate': 925.00, 'amount': 11562.50, 'remainingStock': 25},
-    {'itemName': 'Chicken Wings', 'qty': 15, 'weight': 8.5, 'rate': 750.00, 'amount': 6375.00, 'remainingStock': 40},
-    {'itemName': 'Chicken Legs', 'qty': 8, 'weight': 10.0, 'rate': 850.00, 'amount': 8500.00, 'remainingStock': 18},
-    {'itemName': 'Whole Chicken', 'qty': 5, 'weight': 15.5, 'rate': 1200.00, 'amount': 18600.00, 'remainingStock': 10},
-    {'itemName': 'Chicken Thighs', 'qty': 12, 'weight': 9.0, 'rate': 800.00, 'amount': 7200.00, 'remainingStock': 30},
-  ];
-
+  List<StockModel> stocks = [];
+  List<StockModel> filteredStocks = [];
+  List<ItemModel> _items = [];
+  bool isLoading = true;
   DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+    _loadStocks();
+  }
+
+  Future<void> _loadItems() async {
+    try {
+      final data = await DatabaseHelper.instance.getAllItems();
+      setState(() => _items = data);
+    } catch (_) {}
+  }
+
+  Future<void> _loadStocks() async {
+    setState(() => isLoading = true);
+    try {
+      final data = await DatabaseHelper.instance.getAllStock(); // NEW method
+      setState(() {
+        stocks = data;
+        _applyDateFilter();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading stocks: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _applyDateFilter() {
+    if (_selectedDate == null) {
+      filteredStocks = stocks;
+    } else {
+      final targetDate = '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
+      filteredStocks = stocks.where((s) => s.added_date == targetDate).toList();
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final now = DateTime.now();
@@ -32,57 +73,193 @@ class _AllstockState extends State<Allstock> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        _applyDateFilter();
       });
     }
   }
 
-  void _editItem(int index) {
-    // Edit item logic
+  void _editStock(int index) async {
+    final stock = filteredStocks[index];
+
+    int? selectedItemId = stock.item_id;
+    final qtyController = TextEditingController(text: stock.QTY?.toString() ?? '');
+    final weightController = TextEditingController(text: stock.quantity_kg?.toString() ?? '');
+    final rateController = TextEditingController(text: stock.stock_price.toString());
+    final amountController = TextEditingController(
+        text: (stock.amount ?? (stock.stock_price * (stock.quantity_kg ?? 0))).toString());
+    final remainController = TextEditingController(text: stock.remain_quantity?.toString() ?? '');
+    final dateController = TextEditingController(text: stock.added_date ?? '');
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Item'),
-        content: Text('Edit ${items[index]['itemName']}'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Edit Stock'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<int>(
+                  value: selectedItemId,
+                  decoration: const InputDecoration(
+                    labelText: 'Item',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _items.map((item) {
+                    return DropdownMenuItem<int>(
+                      value: item.id,
+                      child: Text(item.name),
+                    );
+                  }).toList(),
+                  onChanged: (v) => setDialogState(() => selectedItemId = v),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: qtyController,
+                  decoration: const InputDecoration(
+                    labelText: 'QTY',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: weightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Weight (Kg)',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setDialogState(() {
+                    final w = int.tryParse(weightController.text) ?? 0;
+                    final r = double.tryParse(rateController.text) ?? 0;
+                    amountController.text = (w * r).toStringAsFixed(2);
+                  }),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: rateController,
+                  decoration: const InputDecoration(
+                    labelText: 'Rate',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setDialogState(() {
+                    final w = int.tryParse(weightController.text) ?? 0;
+                    final r = double.tryParse(rateController.text) ?? 0;
+                    amountController.text = (w * r).toStringAsFixed(2);
+                  }),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: amountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                    border: OutlineInputBorder(),
+                  ),
+                  readOnly: true,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: remainController,
+                  decoration: const InputDecoration(
+                    labelText: 'Remain Stock',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: dateController,
+                  decoration: const InputDecoration(
+                    labelText: 'Date',
+                    border: OutlineInputBorder(),
+                  ),
+                  readOnly: true,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (picked != null) {
+                      setDialogState(() {
+                        dateController.text = '${picked.day}/${picked.month}/${picked.year}';
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              // Save changes
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (selectedItemId == null) return;
+                final updated = StockModel(
+                  id: stock.id,
+                  item_id: selectedItemId!,
+                  stock_price: int.tryParse(rateController.text) ?? stock.stock_price,
+                  quantity_kg: int.tryParse(weightController.text),
+                  remain_quantity: double.tryParse(remainController.text),
+                  amount: double.tryParse(amountController.text),
+                  QTY: double.tryParse(qtyController.text),
+                  added_date: dateController.text,
+                );
+                await DatabaseHelper.instance.updateStock(updated);
+                Navigator.pop(context);
+                await _loadStocks();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Stock updated'), backgroundColor: Colors.green),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _deleteItem(int index) {
+    final stock = filteredStocks[index];
+    final id = stock.id;
+    if (id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Item'),
-        content: Text('Are you sure you want to delete ${items[index]['itemName']}?'),
+        title: const Text('Delete Stock'),
+        content: Text('Delete ${stock.item_name ?? 'item'}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                items.removeAt(index);
-              });
+            onPressed: () async {
+              final rows = await DatabaseHelper.instance.deleteStock(id);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Item deleted successfully'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              if (rows > 0) {
+                await _loadStocks();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Stock deleted'), backgroundColor: Colors.red),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Delete failed'), backgroundColor: Colors.orange),
+                );
+              }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
@@ -101,22 +278,17 @@ class _AllstockState extends State<Allstock> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color.fromARGB(255, 26, 11, 167),
-                const Color.fromARGB(255, 21, 5, 196),
+                Color.fromARGB(255, 26, 11, 167),
+                Color.fromARGB(255, 21, 5, 196),
               ],
             ),
           ),
@@ -135,7 +307,7 @@ class _AllstockState extends State<Allstock> {
                           const SizedBox(width: 40),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: const [
                               Text(
                                 'All Stocks',
                                 style: TextStyle(
@@ -161,7 +333,6 @@ class _AllstockState extends State<Allstock> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            // Table Header
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -222,7 +393,7 @@ class _AllstockState extends State<Allstock> {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 4,
+                          flex: 5,
                           child: Text(
                             'Item Name',
                             style: TextStyle(
@@ -233,7 +404,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 35,
+                          width: 32,
                           child: Text(
                             'QTY',
                             style: TextStyle(
@@ -245,7 +416,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 45,
+                          width: 42,
                           child: Text(
                             'Weight',
                             style: TextStyle(
@@ -257,7 +428,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 45,
+                          width: 40,
                           child: Text(
                             'Rate',
                             style: TextStyle(
@@ -269,7 +440,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 55,
+                          width: 50,
                           child: Text(
                             'Amount',
                             style: TextStyle(
@@ -281,7 +452,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 50,
+                          width: 45,
                           child: Text(
                             'R-Stock',
                             style: TextStyle(
@@ -293,7 +464,19 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 60,
+                          width: 48,
+                          child: Text(
+                            'Date',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50,
                           child: Text(
                             'Action',
                             textAlign: TextAlign.center,
@@ -310,7 +493,6 @@ class _AllstockState extends State<Allstock> {
                 ],
               ),
             ),
-            // Table Body
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -328,151 +510,171 @@ class _AllstockState extends State<Allstock> {
                     ),
                   ],
                 ),
-                child: items.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.inventory_2_outlined,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No items available',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: items.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Colors.grey[200],
-                        ),
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 10,
-                            ),
-                            child: Row(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : filteredStocks.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    item['itemName'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 64,
+                                  color: Colors.grey[400],
                                 ),
-                                SizedBox(
-                                  width: 35,
-                                  child: Text(
-                                    '${item['qty'] ?? 0}',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 45,
-                                  child: Text(
-                                    '${item['weight'] ?? 0}',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 45,
-                                  child: Text(
-                                    '${(item['rate'] ?? 0).toStringAsFixed(0)}',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 55,
-                                  child: Text(
-                                    '${(item['amount'] ?? 0).toStringAsFixed(0)}',
-                                    style: TextStyle(
-                                       fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 45,
-                                  child: Text(
-                                    '${item['remainingStock'] ?? 0}',
-                                    style: TextStyle(
-                                       fontSize: 10,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 60,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      InkWell(
-                                        onTap: () => _editItem(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          child: Icon(
-                                            Icons.edit_outlined,
-                                            color: Colors.blue,
-                                            size: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      InkWell(
-                                        onTap: () => _deleteItem(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          child: Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
-                                            size: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No items available',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
                                   ),
                                 ),
                               ],
                             ),
-                          );
-                        },
-                      ),
+                          )
+                        : ListView.separated(
+                            itemCount: filteredStocks.length,
+                            separatorBuilder: (context, index) => Divider(
+                              height: 1,
+                              color: Colors.grey[200],
+                            ),
+                            itemBuilder: (context, index) {
+                              final stock = filteredStocks[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 5,
+                                      child: Text(
+                                        stock.item_name ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 32,
+                                      child: Text(
+                                        stock.QTY?.toString() ?? 'N/A',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 42,
+                                      child: Text(
+                                        stock.quantity_kg?.toString() ?? 'N/A',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 40,
+                                      child: Text(
+                                        stock.stock_price.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 50,
+                                      child: Text(
+                                        stock.amount?.toStringAsFixed(0) ?? 'N/A',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 45,
+                                      child: Text(
+                                        stock.remain_quantity?.toString() ?? 'N/A',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 48,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            _formatDateYear(stock.added_date ?? ''),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                          Text(
+                                            _formatDateDayMonth(stock.added_date ?? ''),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 50,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          InkWell(
+                                            onTap: () => _editStock(index),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              child: const Icon(
+                                                Icons.edit_outlined,
+                                                color: Colors.blue,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          InkWell(
+                                            onTap: () => _deleteItem(index),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              child: const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
               ),
             ),
           ],
@@ -480,17 +682,11 @@ class _AllstockState extends State<Allstock> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          // Navigate to Add Item page
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddStockPage()),
-          );
-          // handle result if needed
+          final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddStockPage()));
+          if (result == true) await _loadStocks();
         },
         backgroundColor: const Color.fromARGB(255, 224, 237, 51),
-        icon: const Icon(
-          Icons.add,
-        ),
+        icon: const Icon(Icons.add),
         label: const Text(
           'Add Stock',
           style: TextStyle(
@@ -501,5 +697,19 @@ class _AllstockState extends State<Allstock> {
         ),
       ),
     );
+  }
+
+  String _formatDateYear(String date) {
+    if (date.isEmpty) return '';
+    final parts = date.split('/');
+    if (parts.length != 3) return date;
+    return parts[2];
+  }
+
+  String _formatDateDayMonth(String date) {
+    if (date.isEmpty) return '';
+    final parts = date.split('/');
+    if (parts.length != 3) return date;
+    return '${parts[0]}/${parts[1]}';
   }
 }

@@ -67,10 +67,11 @@ class _AddStockPageState extends State<AddStockPage> {
 
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
-      final itemId = _selectedItemId;                  // NEW
+      final itemId = _selectedItemId;                
       final sellingRate = double.parse(_sellingRateController.text);
       final weight = double.parse(_weightController.text);
       final amount = double.parse(_amountController.text);
+      final qty = double.parse(_qtyController.text);
       final date = _dateController.text;
 
       final newStock = StockModel(
@@ -79,6 +80,7 @@ class _AddStockPageState extends State<AddStockPage> {
         quantity_kg: weight.toInt(),
         amount: amount,
         remain_quantity: weight,
+        QTY: qty,
         added_date: date,
       );
       await DatabaseHelper.instance.insertStock(newStock); // persist

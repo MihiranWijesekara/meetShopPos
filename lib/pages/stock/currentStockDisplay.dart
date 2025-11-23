@@ -14,27 +14,19 @@ class StockDisplay extends StatefulWidget {
 }
 
 class _StockDisplayState extends State<StockDisplay> {
-  // Sample data - replace with your actual data source
-  // final List<Map<String, dynamic>> items = [
-  //   {'itemName': 'Chicken Breast', 'qty': 10, 'weight': 12.5, 'rate': 925.00, 'amount': 11562.50, 'remainingStock': 25},
-  //   {'itemName': 'Chicken Wings', 'qty': 15, 'weight': 8.5, 'rate': 750.00, 'amount': 6375.00, 'remainingStock': 40},
-  //   {'itemName': 'Chicken Legs', 'qty': 8, 'weight': 10.0, 'rate': 850.00, 'amount': 8500.00, 'remainingStock': 18},
-  //   {'itemName': 'Whole Chicken', 'qty': 5, 'weight': 15.5, 'rate': 1200.00, 'amount': 18600.00, 'remainingStock': 10},
-  //   {'itemName': 'Chicken Thighs', 'qty': 12, 'weight': 9.0, 'rate': 800.00, 'amount': 7200.00, 'remainingStock': 30},
-  // ];
 
-    List<StockModel> stocks = [];
-  List<ItemModel> _items = []; // NEW
+  List<StockModel> stocks = [];
+  List<ItemModel> _items = []; 
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadItems();              // NEW
+    _loadItems();              
     _loadStocks();
   }
 
-  Future<void> _loadItems() async {            // NEW
+  Future<void> _loadItems() async {            
     try {
       final data = await DatabaseHelper.instance.getAllItems();
       setState(() => _items = data);
@@ -206,6 +198,15 @@ class _StockDisplayState extends State<StockDisplay> {
   }
 
   void _deleteItem(int index) {
+    final stock = stocks[index];
+    final id = stock.id;
+    if (id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -217,11 +218,19 @@ class _StockDisplayState extends State<StockDisplay> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                stocks.removeAt(index);
-              });
+            onPressed: () async {
+              final rows = await DatabaseHelper.instance.deleteStock(id);
+              if (rows == 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Error deleting item'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
               Navigator.pop(context);
+              await _loadStocks();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Item deleted successfully'),
@@ -328,7 +337,7 @@ class _StockDisplayState extends State<StockDisplay> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 4,
+                      flex: 5, // increased from 4
                       child: Text(
                         'Item Name',
                         style: TextStyle(
@@ -339,7 +348,7 @@ class _StockDisplayState extends State<StockDisplay> {
                       ),
                     ),
                     SizedBox(
-                      width: 35,
+                      width: 32, // reduced from 35
                       child: Text(
                         'QTY',
                         style: TextStyle(
@@ -351,7 +360,7 @@ class _StockDisplayState extends State<StockDisplay> {
                       ),
                     ),
                     SizedBox(
-                      width: 45,
+                      width: 42, // reduced from 45
                       child: Text(
                         'Weight',
                         style: TextStyle(
@@ -363,7 +372,7 @@ class _StockDisplayState extends State<StockDisplay> {
                       ),
                     ),
                     SizedBox(
-                      width: 45,
+                      width: 40, // reduced from 45
                       child: Text(
                         'Rate',
                         style: TextStyle(
@@ -375,7 +384,7 @@ class _StockDisplayState extends State<StockDisplay> {
                       ),
                     ),
                     SizedBox(
-                      width: 55,
+                      width: 50, // reduced from 55
                       child: Text(
                         'Amount',
                         style: TextStyle(
@@ -387,7 +396,7 @@ class _StockDisplayState extends State<StockDisplay> {
                       ),
                     ),
                     SizedBox(
-                      width: 50,
+                      width: 45, // reduced from 50
                       child: Text(
                         'R-Stock',
                         style: TextStyle(
@@ -399,7 +408,19 @@ class _StockDisplayState extends State<StockDisplay> {
                       ),
                     ),
                     SizedBox(
-                      width: 60,
+                      width: 48, // reduced from 50
+                      child: Text(
+                        'Date',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: Colors.grey[800],
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50, // reduced from 60
                       child: Text(
                         'Action',
                         textAlign: TextAlign.center,
@@ -470,32 +491,31 @@ class _StockDisplayState extends State<StockDisplay> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  flex: 4,
+                                  flex: 5, // match header
                                   child: Text(
                                     stock.item_name ?? '',
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                // SizedBox(
-                                //   width: 35,
-                                //   child: Text(
-                                //     '${stock['qty'] ?? 0}',
-                                //     stock.remain_quantity?.toString() ?? 'N/A',
-                                //     style: TextStyle(
-                                //       fontSize: 10,
-                                //       color: const Color.fromARGB(255, 0, 0, 0),
-                                //       fontWeight: FontWeight.w700,
-                                //     ),
-                                //     textAlign: TextAlign.right,
-                                //   ),
-                                // ),
                                 SizedBox(
-                                  width: 45,
+                                  width: 32, // match header
+                                  child: Text(
+                                    stock.QTY?.toString() ?? 'N/A',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 42, // match header
                                   child: Text(
                                     stock.quantity_kg?.toString() ?? 'N/A',
                                     style: TextStyle(
@@ -507,7 +527,7 @@ class _StockDisplayState extends State<StockDisplay> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 45,
+                                  width: 40, // match header
                                   child: Text(
                                     stock.stock_price?.toString() ?? 'N/A',
                                     style: TextStyle(
@@ -519,7 +539,7 @@ class _StockDisplayState extends State<StockDisplay> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 55,
+                                  width: 50, // match header
                                   child: Text(
                                     stock.amount?.toString() ?? 'N/A',
                                     style: TextStyle(
@@ -531,7 +551,7 @@ class _StockDisplayState extends State<StockDisplay> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 45,
+                                  width: 45, // match header
                                   child: Text(
                                     stock.remain_quantity?.toString() ?? 'N/A',
                                     style: TextStyle(
@@ -543,7 +563,34 @@ class _StockDisplayState extends State<StockDisplay> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 60,
+                                  width: 48, // match header
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _formatDateYear(stock.added_date ?? ''),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                      Text(
+                                        _formatDateDayMonth(stock.added_date ?? ''),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 50, // match header
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -606,5 +653,20 @@ class _StockDisplayState extends State<StockDisplay> {
         ),
       ),
     );
+  }
+
+  // Add helper methods at bottom of _StockDisplayState class
+  String _formatDateYear(String date) {
+    if (date.isEmpty) return '';
+    final parts = date.split('/');
+    if (parts.length != 3) return date;
+    return parts[2]; // year
+  }
+
+  String _formatDateDayMonth(String date) {
+    if (date.isEmpty) return '';
+    final parts = date.split('/');
+    if (parts.length != 3) return date;
+    return '${parts[0]}/${parts[1]}'; // day/month
   }
 }

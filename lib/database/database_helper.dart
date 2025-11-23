@@ -63,6 +63,7 @@ class DatabaseHelper {
         quantity_kg INTEGER,
         remain_quantity REAL,
         amount REAL DEFAULT 0,            -- NEW COLUMN
+        QTY REAL,
         added_date TEXT,
         FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL
       )
@@ -98,6 +99,8 @@ class DatabaseHelper {
           stock_price INTEGER NOT NULL,
           quantity_kg INTEGER,
           remain_quantity REAL,
+          amount REAL DEFAULT 0,
+          QTY REAL,
           added_date TEXT,
           FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL
         )
