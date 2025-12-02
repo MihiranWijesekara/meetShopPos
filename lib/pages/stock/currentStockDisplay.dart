@@ -289,7 +289,7 @@ class _StockDisplayState extends State<StockDisplay> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'This Month Stock',
+                                'Stock',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
