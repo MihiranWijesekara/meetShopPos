@@ -1,5 +1,4 @@
 // import 'package:flutter/material.dart';
-// import 'package:flutter_bluetooth_printer/flutter_bluetooth_printer.dart';
 // import 'package:permission_handler/permission_handler.dart';
 // import 'package:chicken_dilivery/Model/salesModel.dart';
 

@@ -6,6 +6,7 @@ import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:chicken_dilivery/bluthooth/printer_service.dart'; // Add this import
 
 class Addsales extends StatefulWidget {
   const Addsales({super.key});
@@ -269,9 +270,19 @@ class _AddsalesState extends State<Addsales> {
         await DatabaseHelper.instance.insertSaleFIFO(newSales.toMap());
       }
 
+      // Generate and print the bill
+      await PrinterService.printReceipt(
+        shopName: _selectedShop!.Shopname,
+        billNo: billNumber,
+        date: date,
+        cartItems: _cartItems,
+        totalAmount: _totalAmount,
+        rootName: _selectedRootId != null ? _roots.firstWhere((root) => root.id == _selectedRootId!).name : '',
+      );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Sales saved successfully!'),
+          content: Text('Sales saved and bill printed successfully!'),
           backgroundColor: Colors.green,
         ),
       );
