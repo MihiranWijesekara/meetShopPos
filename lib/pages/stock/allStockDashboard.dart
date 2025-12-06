@@ -186,10 +186,7 @@ class Allstockdashboard extends StatelessWidget {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -212,22 +209,22 @@ class Allstockdashboard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Row(
+                  Row(
                     children: [
                       const SizedBox(width: 40),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'All Stock Dashboard',
-                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'All Stock Dashboard',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
-                          ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -298,9 +295,10 @@ class _DashboardCardState extends State<_DashboardCard>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -381,6 +379,6 @@ class _DashboardCardState extends State<_DashboardCard>
           ),
         ),
       ),
-      );
+    );
   }
 }

@@ -60,7 +60,8 @@ class _AllstockState extends State<Allstock> {
       filteredStocks = stocks;
     } else if (_selectedDate != null) {
       // Date filter takes priority
-      final targetDate = '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
+      final targetDate =
+          '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
       filteredStocks = stocks.where((s) => s.added_date == targetDate).toList();
     } else if (_selectedMonth != null && _selectedYear != null) {
       // Month filter
@@ -93,8 +94,11 @@ class _AllstockState extends State<Allstock> {
 
   Future<void> _selectMonth(BuildContext context) async {
     final now = DateTime.now();
-    final initialDate = DateTime(_selectedYear ?? now.year, _selectedMonth ?? now.month);
-    
+    final initialDate = DateTime(
+      _selectedYear ?? now.year,
+      _selectedMonth ?? now.month,
+    );
+
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -102,7 +106,7 @@ class _AllstockState extends State<Allstock> {
       lastDate: DateTime(now.year + 5),
       initialDatePickerMode: DatePickerMode.year,
     );
-    
+
     if (picked != null) {
       setState(() {
         _selectedMonth = picked.month;
@@ -117,12 +121,22 @@ class _AllstockState extends State<Allstock> {
     final stock = filteredStocks[index];
 
     int? selectedItemId = stock.item_id;
-    final qtyController = TextEditingController(text: stock.QTY?.toString() ?? '');
-    final weightController = TextEditingController(text: stock.quantity_kg?.toString() ?? '');
-    final rateController = TextEditingController(text: stock.stock_price.toString());
+    final qtyController = TextEditingController(
+      text: stock.QTY?.toString() ?? '',
+    );
+    final weightController = TextEditingController(
+      text: stock.quantity_kg?.toString() ?? '',
+    );
+    final rateController = TextEditingController(
+      text: stock.stock_price.toString(),
+    );
     final amountController = TextEditingController(
-        text: (stock.amount ?? (stock.stock_price * (stock.quantity_kg ?? 0))).toString());
-    final remainController = TextEditingController(text: stock.remain_quantity?.toString() ?? '');
+      text: (stock.amount ?? (stock.stock_price * (stock.quantity_kg ?? 0)))
+          .toString(),
+    );
+    final remainController = TextEditingController(
+      text: stock.remain_quantity?.toString() ?? '',
+    );
     final dateController = TextEditingController(text: stock.added_date ?? '');
 
     showDialog(
@@ -220,7 +234,8 @@ class _AllstockState extends State<Allstock> {
                     );
                     if (picked != null) {
                       setDialogState(() {
-                        dateController.text = '${picked.day}/${picked.month}/${picked.year}';
+                        dateController.text =
+                            '${picked.day}/${picked.month}/${picked.year}';
                       });
                     }
                   },
@@ -239,7 +254,8 @@ class _AllstockState extends State<Allstock> {
                 final updated = StockModel(
                   id: stock.id,
                   item_id: selectedItemId!,
-                  stock_price: int.tryParse(rateController.text) ?? stock.stock_price,
+                  stock_price:
+                      int.tryParse(rateController.text) ?? stock.stock_price,
                   quantity_kg: int.tryParse(weightController.text),
                   remain_quantity: double.tryParse(remainController.text),
                   amount: double.tryParse(amountController.text),
@@ -250,7 +266,10 @@ class _AllstockState extends State<Allstock> {
                 Navigator.pop(context);
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Stock updated'), backgroundColor: Colors.green),
+                  const SnackBar(
+                    content: Text('Stock updated'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               },
               child: const Text('Save'),
@@ -266,7 +285,10 @@ class _AllstockState extends State<Allstock> {
     final id = stock.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Cannot delete: missing id'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -288,11 +310,17 @@ class _AllstockState extends State<Allstock> {
               if (rows > 0) {
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Stock deleted'), backgroundColor: Colors.red),
+                  const SnackBar(
+                    content: Text('Stock deleted'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Delete failed'), backgroundColor: Colors.orange),
+                  const SnackBar(
+                    content: Text('Delete failed'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
               }
             },
@@ -391,12 +419,34 @@ class _AllstockState extends State<Allstock> {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        // Month Filter
+                        // Year Filter
                         Expanded(
                           child: InkWell(
-                            onTap: () => _selectMonth(context),
+                            onTap: () async {
+                              final now = DateTime.now();
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime(
+                                  _selectedYear ?? now.year,
+                                ),
+                                firstDate: DateTime(now.year - 5),
+                                lastDate: DateTime(now.year + 5),
+                                initialDatePickerMode: DatePickerMode.year,
+                              );
+                              if (picked != null) {
+                                setState(() {
+                                  _selectedYear = picked.year;
+                                  _selectedMonth = null;
+                                  _selectedDate = null;
+                                  _applyDateFilter();
+                                });
+                              }
+                            },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 border: Border.all(
@@ -406,22 +456,22 @@ class _AllstockState extends State<Allstock> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      _selectedMonth == null
-                                          ? 'Month'
-                                          : _getMonthName(_selectedMonth!) + ' $_selectedYear',
+                                      (_selectedYear ?? DateTime.now().year)
+                                          .toString(),
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: _selectedMonth == null ? Colors.grey[400] : Colors.black87,
+                                        color: Colors.black87,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   Icon(
-                                    Icons.calendar_month,
+                                    Icons.calendar_today,
                                     color: Colors.grey[600],
                                     size: 18,
                                   ),
@@ -430,6 +480,7 @@ class _AllstockState extends State<Allstock> {
                             ),
                           ),
                         ),
+
                         if (_selectedMonth != null) ...[
                           const SizedBox(width: 6),
                           InkWell(
@@ -464,7 +515,10 @@ class _AllstockState extends State<Allstock> {
                           child: InkWell(
                             onTap: () => _selectDate(context),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 border: Border.all(
@@ -474,7 +528,8 @@ class _AllstockState extends State<Allstock> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
                                     child: Text(
@@ -483,7 +538,9 @@ class _AllstockState extends State<Allstock> {
                                           : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: _selectedDate == null ? Colors.grey[400] : Colors.black87,
+                                        color: _selectedDate == null
+                                            ? Colors.grey[400]
+                                            : Colors.black87,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -529,7 +586,10 @@ class _AllstockState extends State<Allstock> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -653,169 +713,171 @@ class _AllstockState extends State<Allstock> {
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : filteredStocks.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No items available',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: filteredStocks.length,
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
+                        itemBuilder: (context, index) {
+                          final stock = filteredStocks[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 10,
+                            ),
+                            child: Row(
                               children: [
-                                Icon(
-                                  Icons.inventory_2_outlined,
-                                  size: 64,
-                                  color: Colors.grey[400],
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    stock.item_name ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No items available',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
+                                SizedBox(
+                                  width: 35,
+                                  child: Text(
+                                    stock.QTY?.toStringAsFixed(1) ?? 'N/A',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 45,
+                                  child: Text(
+                                    stock.quantity_kg?.toString() ?? 'N/A',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 40,
+                                  child: Text(
+                                    stock.stock_price.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 55,
+                                  child: Text(
+                                    stock.amount?.toStringAsFixed(0) ?? 'N/A',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 50,
+                                  child: Text(
+                                    stock.remain_quantity?.toStringAsFixed(1) ??
+                                        'N/A',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 50,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _formatDateYear(stock.added_date ?? ''),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        _formatDateDayMonth(
+                                          stock.added_date ?? '',
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 55,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () => _editStock(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          child: const Icon(
+                                            Icons.edit_outlined,
+                                            color: Colors.blue,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      InkWell(
+                                        onTap: () => _deleteItem(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          child: const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                        : ListView.separated(
-                            itemCount: filteredStocks.length,
-                            separatorBuilder: (context, index) => Divider(
-                              height: 1,
-                              color: Colors.grey[200],
-                            ),
-                            itemBuilder: (context, index) {
-                              final stock = filteredStocks[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        stock.item_name ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 35,
-                                      child: Text(
-                                        stock.QTY?.toStringAsFixed(1) ?? 'N/A',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 45,
-                                      child: Text(
-                                        stock.quantity_kg?.toString() ?? 'N/A',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 40,
-                                      child: Text(
-                                        stock.stock_price.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 55,
-                                      child: Text(
-                                        stock.amount?.toStringAsFixed(0) ?? 'N/A',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 50,
-                                      child: Text(
-                                        stock.remain_quantity?.toStringAsFixed(1) ?? 'N/A',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 50,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            _formatDateYear(stock.added_date ?? ''),
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          Text(
-                                            _formatDateDayMonth(stock.added_date ?? ''),
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 55,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          InkWell(
-                                            onTap: () => _editStock(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              child: const Icon(
-                                                Icons.edit_outlined,
-                                                color: Colors.blue,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 3),
-                                          InkWell(
-                                            onTap: () => _deleteItem(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              child: const Icon(
-                                                Icons.delete_outline,
-                                                color: Colors.red,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                          );
+                        },
+                      ),
               ),
             ),
           ],
@@ -823,7 +885,10 @@ class _AllstockState extends State<Allstock> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddStockPage()));
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddStockPage()),
+          );
           if (result == true) await _loadStocks();
         },
         backgroundColor: const Color.fromARGB(255, 224, 237, 51),
@@ -856,8 +921,18 @@ class _AllstockState extends State<Allstock> {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[month - 1];
   }

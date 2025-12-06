@@ -6,7 +6,6 @@ import 'package:chicken_dilivery/pages/sales/weeklySales.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
 class SalesDashboard extends StatefulWidget {
   const SalesDashboard({super.key});
 
@@ -30,7 +29,7 @@ class _SalesDashboardState extends State<SalesDashboard> {
       final db = DatabaseHelper.instance;
       final t = await db.getTodaySalesTotalAmount();
       final y = await db.getYesterdaySalesTotalAmount();
-      print(    '[SalesDashboard] Today Total: $t, Yesterday Total: $y');
+      print('[SalesDashboard] Today Total: $t, Yesterday Total: $y');
       if (mounted) {
         setState(() {
           todayTotal = t;
@@ -58,7 +57,7 @@ class _SalesDashboardState extends State<SalesDashboard> {
         icon: Icons.today_outlined,
         color: const Color(0xFF4CAF50),
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
-         onTap: () {
+        onTap: () {
           // Navigate to Items page
           Navigator.push(
             context,
@@ -94,7 +93,7 @@ class _SalesDashboardState extends State<SalesDashboard> {
           );
         },
       ),
-   ];
+    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -104,10 +103,7 @@ class _SalesDashboardState extends State<SalesDashboard> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -130,22 +126,22 @@ class _SalesDashboardState extends State<SalesDashboard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Row(
+                  Row(
                     children: [
                       const SizedBox(width: 40),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ' Sales Dashboard',
-                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ' Sales Dashboard',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
-                          ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -282,18 +278,14 @@ class _SummaryCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              Icon(
-                icon,
-                size: 17,
-                color: iconColor,
-              ),
+              Icon(icon, size: 17, color: iconColor),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             amount,
             style: TextStyle(
-              color: isPercentage && amount.startsWith('+') 
+              color: isPercentage && amount.startsWith('+')
                   ? const Color(0xFF4CAF50)
                   : Colors.black87,
               fontSize: 18,
@@ -345,9 +337,10 @@ class _DashboardCardState extends State<_DashboardCard>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -428,8 +421,6 @@ class _DashboardCardState extends State<_DashboardCard>
           ),
         ),
       ),
-      
     );
   }
 }
-

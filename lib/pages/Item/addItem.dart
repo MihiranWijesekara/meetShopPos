@@ -32,13 +32,10 @@ class _AddItemPageState extends State<AddItemPage> {
         final sellingRate = double.parse(_sellingRateController.text);
 
         // Return the data to previous screen
-        
-        final newItem = ItemModel(
-            name: itemName,
-            price: sellingRate,
-        );
 
-        final id = await DatabaseHelper.instance.insertItem(newItem);  
+        final newItem = ItemModel(name: itemName, price: sellingRate);
+
+        final id = await DatabaseHelper.instance.insertItem(newItem);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -47,12 +44,12 @@ class _AddItemPageState extends State<AddItemPage> {
           ),
         );
 
-           // Return the data to previous screen
-          Navigator.pop(context, {
-            'id': id,
-            'name': itemName,
-            'price': sellingRate,
-          });
+        // Return the data to previous screen
+        Navigator.pop(context, {
+          'id': id,
+          'name': itemName,
+          'price': sellingRate,
+        });
       } catch (e) {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -210,7 +207,9 @@ class _AddItemPageState extends State<AddItemPage> {
                           controller: _sellingRateController,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter selling rate',

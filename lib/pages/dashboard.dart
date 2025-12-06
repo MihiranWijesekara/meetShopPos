@@ -1,13 +1,12 @@
-
 import 'package:chicken_dilivery/pages/Managemnt/managementDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/allSales.dart';
+import 'package:chicken_dilivery/pages/sales/allSalesDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/salesDashboard.dart';
 import 'package:chicken_dilivery/pages/stock/allStock.dart';
 import 'package:chicken_dilivery/pages/stock/allStockDashboard.dart';
 import 'package:chicken_dilivery/pages/stock/currentStockDisplay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -21,7 +20,7 @@ class DashboardPage extends StatelessWidget {
         icon: Icons.trending_up,
         color: const Color(0xFF4CAF50),
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
-         onTap: () {
+        onTap: () {
           // Navigate to Items page
           Navigator.push(
             context,
@@ -53,11 +52,11 @@ class DashboardPage extends StatelessWidget {
           // Navigate to Items page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allsales()),
+            MaterialPageRoute(builder: (context) => const Allsalesdashboard()),
           );
         },
       ),
-     _DashCardData(
+      _DashCardData(
         title: 'All Stocks',
         subtitle: 'History of stocks',
         icon: Icons.history,
@@ -66,9 +65,9 @@ class DashboardPage extends StatelessWidget {
         onTap: () {
           // Navigate to Items page
           Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Allstockdashboard()),
-        );
+            context,
+            MaterialPageRoute(builder: (context) => const Allstockdashboard()),
+          );
         },
       ),
 
@@ -82,7 +81,9 @@ class DashboardPage extends StatelessWidget {
           // Navigate to Items page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Managementdashboard()),
+            MaterialPageRoute(
+              builder: (context) => const Managementdashboard(),
+            ),
           );
         },
       ),
@@ -172,7 +173,8 @@ class DashboardPage extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 1.1, // Increased from 0.95 to make cards smaller/shorter
+            childAspectRatio:
+                1.1, // Increased from 0.95 to make cards smaller/shorter
           ),
           itemCount: cards.length,
           itemBuilder: (context, index) {
@@ -223,9 +225,10 @@ class _DashboardCardState extends State<_DashboardCard>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override

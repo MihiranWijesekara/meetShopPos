@@ -173,10 +173,7 @@ class _ShopPageState extends State<ShopPage> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -251,7 +248,10 @@ class _ShopPageState extends State<ShopPage> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     SizedBox(
@@ -324,110 +324,108 @@ class _ShopPageState extends State<ShopPage> {
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : shops.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.store_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No shops available',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: shops.length,
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
+                        itemBuilder: (context, index) {
+                          final shop = shops[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
                               children: [
-                                Icon(
-                                  Icons.store_outlined,
-                                  size: 64,
-                                  color: Colors.grey[400],
+                                SizedBox(
+                                  width: 30,
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No shops available',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    shop.Shopname,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    shop.rootName ?? 'N/A',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[800],
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () => _editItem(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          child: Icon(
+                                            Icons.edit_outlined,
+                                            color: Colors.blue,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      InkWell(
+                                        onTap: () => _deleteItem(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          child: Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                        : ListView.separated(
-                            itemCount: shops.length,
-                            separatorBuilder: (context, index) => Divider(
-                              height: 1,
-                              color: Colors.grey[200],
-                            ),
-                            itemBuilder: (context, index) {
-                              final shop = shops[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 30,
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        shop.Shopname,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[800],
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 100,
-                                      child: Text(
-                                        shop.rootName ?? 'N/A',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[800],
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 80,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          InkWell(
-                                            onTap: () => _editItem(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(6),
-                                              child: Icon(
-                                                Icons.edit_outlined,
-                                                color: Colors.blue,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          InkWell(
-                                            onTap: () => _deleteItem(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(6),
-                                              child: Icon(
-                                                Icons.delete_outline,
-                                                color: Colors.red,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                          );
+                        },
+                      ),
               ),
             ),
           ],
@@ -444,9 +442,7 @@ class _ShopPageState extends State<ShopPage> {
           }
         },
         backgroundColor: const Color.fromARGB(255, 224, 237, 51),
-        icon: const Icon(
-          Icons.add,
-        ),
+        icon: const Icon(Icons.add),
         label: const Text(
           'Add Shop',
           style: TextStyle(
@@ -459,4 +455,3 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 }
-

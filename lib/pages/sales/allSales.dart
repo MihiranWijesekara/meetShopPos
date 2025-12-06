@@ -12,11 +12,46 @@ class Allsales extends StatefulWidget {
 class _AllsalesState extends State<Allsales> {
   // Sample data - replace with your actual data source
   final List<Map<String, dynamic>> items = [
-    {'billNumber': 29, 'date': '2024-11-01', 'shopName': 'Thilina Store', 'kg': 12.380, 'rate': 925.00, 'amount': 11451.00},
-    {'billNumber': 2, 'date': '2024-11-02', 'shopName': 'Super Market B', 'kg': 8.5, 'rate': 180.00, 'amount': 1530.00},
-    {'billNumber': 3, 'date': '2024-11-03', 'shopName': 'Shop C', 'kg': 12.0, 'rate': 220.00, 'amount': 2640.00},
-    {'billNumber': 4, 'date': '2024-11-04', 'shopName': 'Shop D', 'kg': 15.5, 'rate': 450.00, 'amount': 6975.00},
-    {'billNumber': 5, 'date': '2024-11-05', 'shopName': 'Shop E', 'kg': 5.0, 'rate': 120.00, 'amount': 600.00},
+    {
+      'billNumber': 29,
+      'date': '2024-11-01',
+      'shopName': 'Thilina Store',
+      'kg': 12.380,
+      'rate': 925.00,
+      'amount': 11451.00,
+    },
+    {
+      'billNumber': 2,
+      'date': '2024-11-02',
+      'shopName': 'Super Market B',
+      'kg': 8.5,
+      'rate': 180.00,
+      'amount': 1530.00,
+    },
+    {
+      'billNumber': 3,
+      'date': '2024-11-03',
+      'shopName': 'Shop C',
+      'kg': 12.0,
+      'rate': 220.00,
+      'amount': 2640.00,
+    },
+    {
+      'billNumber': 4,
+      'date': '2024-11-04',
+      'shopName': 'Shop D',
+      'kg': 15.5,
+      'rate': 450.00,
+      'amount': 6975.00,
+    },
+    {
+      'billNumber': 5,
+      'date': '2024-11-05',
+      'shopName': 'Shop E',
+      'kg': 5.0,
+      'rate': 120.00,
+      'amount': 600.00,
+    },
   ];
 
   DateTime? _selectedDate;
@@ -50,7 +85,9 @@ class _AllsalesState extends State<Allsales> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Item'),
-        content: Text('Are you sure you want to delete ${items[index]['shopName']}?'),
+        content: Text(
+          'Are you sure you want to delete ${items[index]['shopName']}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -90,7 +127,9 @@ class _AllsalesState extends State<Allsales> {
               primary: const Color.fromARGB(255, 26, 11, 167),
               secondary: const Color.fromARGB(255, 26, 11, 167),
             ),
-            buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+            buttonTheme: const ButtonThemeData(
+              textTheme: ButtonTextTheme.primary,
+            ),
           ),
           child: child!,
         );
@@ -113,10 +152,7 @@ class _AllsalesState extends State<Allsales> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -188,10 +224,7 @@ class _AllsalesState extends State<Allsales> {
                           fontSize: 14,
                           color: Colors.grey[400],
                         ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey[600],
-                        ),
+                        prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -225,7 +258,10 @@ class _AllsalesState extends State<Allsales> {
                     child: InkWell(
                       onTap: () => _selectDate(context),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(
@@ -244,7 +280,9 @@ class _AllsalesState extends State<Allsales> {
                                     : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: _selectedDate == null ? Colors.grey[400] : Colors.black87,
+                                  color: _selectedDate == null
+                                      ? Colors.grey[400]
+                                      : Colors.black87,
                                 ),
                               ),
                             ),
@@ -261,7 +299,6 @@ class _AllsalesState extends State<Allsales> {
                 ],
               ),
             ),
-
 
             // Table Header
             Container(
@@ -281,7 +318,10 @@ class _AllsalesState extends State<Allsales> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     SizedBox(
@@ -409,20 +449,22 @@ class _AllsalesState extends State<Allsales> {
                       )
                     : ListView.separated(
                         itemCount: items.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Colors.grey[200],
-                        ),
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
                           final item = items[index];
                           // Format date to show only day-month (e.g., 01-11)
                           String formattedDate = '';
-                          if (item['date'] != null && item['date'].toString().length >= 10) {
-                            formattedDate = item['date'].toString().substring(5, 10).replaceAll('-', '/');
+                          if (item['date'] != null &&
+                              item['date'].toString().length >= 10) {
+                            formattedDate = item['date']
+                                .toString()
+                                .substring(5, 10)
+                                .replaceAll('-', '/');
                           } else {
                             formattedDate = 'N/A';
                           }
-                          
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -435,7 +477,7 @@ class _AllsalesState extends State<Allsales> {
                                   child: Text(
                                     '${item['billNumber'] ?? ''}',
                                     style: TextStyle(
-                                       fontSize: 10,
+                                      fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -468,7 +510,7 @@ class _AllsalesState extends State<Allsales> {
                                   child: Text(
                                     '${item['kg'] ?? 0}',
                                     style: TextStyle(
-                                       fontSize: 10,
+                                      fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -492,7 +534,7 @@ class _AllsalesState extends State<Allsales> {
                                   child: Text(
                                     '${(item['amount'] ?? 0).toStringAsFixed(0)}',
                                     style: TextStyle(
-                                       fontSize: 10,
+                                      fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),

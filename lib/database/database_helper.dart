@@ -157,7 +157,7 @@ class DatabaseHelper {
     final db = await database;
     final result = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-      [tableName]
+      [tableName],
     );
     return result.isNotEmpty;
   }
@@ -166,7 +166,7 @@ class DatabaseHelper {
   Future<List<String>> getAllTableNames() async {
     final db = await database;
     final result = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type='table'"
+      "SELECT name FROM sqlite_master WHERE type='table'",
     );
     return result.map((map) => map['name'] as String).toList();
   }
@@ -197,63 +197,64 @@ class DatabaseHelper {
 
   // Insert sale
   Future<int> insertSaleFIFO(Map<String, dynamic> sale) async {
-  final db = await database;
-  final itemId = sale['item_id'];
-  num qtyToSell = (sale['quantity_kg'] as num);
+    final db = await database;
+    final itemId = sale['item_id'];
+    num qtyToSell = (sale['quantity_kg'] as num);
 
-  if (qtyToSell <= 0) {
-    throw Exception('Quantity must be greater than 0');
-  }
+    if (qtyToSell <= 0) {
+      throw Exception('Quantity must be greater than 0');
+    }
 
-  // Use a transaction for atomic operation
-  return await db.transaction<int>((txn) async {
-    // Get available stock for the item, oldest first (FIFO)
-    final stockList = await txn.query(
-      'Stock',
-      where: 'item_id = ? AND COALESCE(remain_quantity, 0) > 0',
-      whereArgs: [itemId],
-      orderBy: 'added_date ASC, id ASC',
-    );
+    // Use a transaction for atomic operation
+    return await db.transaction<int>((txn) async {
+      // Get available stock for the item, oldest first (FIFO)
+      final stockList = await txn.query(
+        'Stock',
+        where: 'item_id = ? AND COALESCE(remain_quantity, 0) > 0',
+        whereArgs: [itemId],
+        orderBy: 'added_date ASC, id ASC',
+      );
 
-    for (var stock in stockList) {
-      double remainQty = (stock['remain_quantity'] as num).toDouble();
+      for (var stock in stockList) {
+        double remainQty = (stock['remain_quantity'] as num).toDouble();
 
-      if (remainQty >= qtyToSell) {
-        remainQty -= qtyToSell;
+        if (remainQty >= qtyToSell) {
+          remainQty -= qtyToSell;
 
-        await txn.update(
-          'Stock',
-          {'remain_quantity': remainQty},
-          where: 'id = ?',
-          whereArgs: [stock['id']],
-        );
+          await txn.update(
+            'Stock',
+            {'remain_quantity': remainQty},
+            where: 'id = ?',
+            whereArgs: [stock['id']],
+          );
 
-        qtyToSell = 0;
-        break;
-      } else {
-        // Use up this stock and continue
-        qtyToSell -= remainQty;
-        await txn.update(
-          'Stock',
-          {'remain_quantity': 0},
-          where: 'id = ?',
-          whereArgs: [stock['id']],
-        );
+          qtyToSell = 0;
+          break;
+        } else {
+          // Use up this stock and continue
+          qtyToSell -= remainQty;
+          await txn.update(
+            'Stock',
+            {'remain_quantity': 0},
+            where: 'id = ?',
+            whereArgs: [stock['id']],
+          );
+        }
       }
-    }
 
-    if (qtyToSell > 0) {
-      throw Exception('Insufficient stock for item ID $itemId');
-    }
+      if (qtyToSell > 0) {
+        throw Exception('Insufficient stock for item ID $itemId');
+      }
 
-    // Calculate amount for the sale
-    sale['amount'] = (sale['quantity_kg'] as int) * (sale['selling_price'] as int);
+      // Calculate amount for the sale
+      sale['amount'] =
+          (sale['quantity_kg'] as int) * (sale['selling_price'] as int);
 
-    // Insert sale
-    final saleId = await txn.insert('Sales', sale);
-    return saleId;
-  });
-}
+      // Insert sale
+      final saleId = await txn.insert('Sales', sale);
+      return saleId;
+    });
+  }
 
   // Get all items
   Future<List<ItemModel>> getAllItems() async {
@@ -319,48 +320,51 @@ class DatabaseHelper {
   }
 
   //Today sales
-Future<List<Map<String, dynamic>>> getTodaySales() async {
-  final db = await database;
-  final today = DateTime.now();
-  // Change to DD/MM/YYYY format to match your database
-  final todayString = '${today.day}/${today.month}/${today.year}';
-  
-  print('🔍 Querying for date: $todayString'); // Debug
-  
-  final result = await db.rawQuery('''
+  Future<List<Map<String, dynamic>>> getTodaySales() async {
+    final db = await database;
+    final today = DateTime.now();
+    // Change to DD/MM/YYYY format to match your database
+    final todayString = '${today.day}/${today.month}/${today.year}';
+
+    print('🔍 Querying for date: $todayString'); // Debug
+
+    final result = await db.rawQuery(
+      '''
     SELECT Sales.*, items.name as item_name, shops.shop_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
     LEFT JOIN shops ON Sales.shop_id = shops.id
     WHERE Sales.added_date = ?
     ORDER BY Sales.id DESC
-  ''', [todayString]);
-  
-  print('✅ Found ${result.length} records'); // Debug
-  return result;
-}
+  ''',
+      [todayString],
+    );
 
-  //Weekly sales
-Future<List<Map<String, dynamic>>> getWeeklySales() async {
-  final db = await database;
-  final now = DateTime.now();
-
-  // Get the start of the week (Monday)
-  final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-
-  // Generate all dates in the current week as D/M/YYYY (no leading zeros)
-  List<String> weekDates = [];
-  for (int i = 0; i < 7; i++) {
-    final date = startOfWeek.add(Duration(days: i));
-    weekDates.add('${date.day}/${date.month}/${date.year}');
+    print('✅ Found ${result.length} records'); // Debug
+    return result;
   }
 
-  print('🗓️ Week dates: $weekDates'); // Debug
+  //Weekly sales
+  Future<List<Map<String, dynamic>>> getWeeklySales() async {
+    final db = await database;
+    final now = DateTime.now();
 
-  // Create placeholders for the IN clause
-  final placeholders = List.filled(weekDates.length, '?').join(',');
+    // Get the start of the week (Monday)
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
 
-  final result = await db.rawQuery('''
+    // Generate all dates in the current week as D/M/YYYY (no leading zeros)
+    List<String> weekDates = [];
+    for (int i = 0; i < 7; i++) {
+      final date = startOfWeek.add(Duration(days: i));
+      weekDates.add('${date.day}/${date.month}/${date.year}');
+    }
+
+    print('🗓️ Week dates: $weekDates'); // Debug
+
+    // Create placeholders for the IN clause
+    final placeholders = List.filled(weekDates.length, '?').join(',');
+
+    final result = await db.rawQuery('''
     SELECT Sales.*, items.name as item_name, shops.shop_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
@@ -369,34 +373,34 @@ Future<List<Map<String, dynamic>>> getWeeklySales() async {
     ORDER BY Sales.id DESC
   ''', weekDates);
 
-  print('✅ Found ${result.length} weekly records'); // Debug
-  return result;
-}
-
-//Monthly sales
-Future<List<Map<String, dynamic>>> getMonthlySales() async {
-  final db = await database;
-  final now = DateTime.now();
-  
-  // Get the first day of the current month
-  final firstDayOfMonth = DateTime(now.year, now.month, 1);
-  
-  // Get the last day of the current month
-  final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
-  
-  // Generate all dates in the current month
-  List<String> monthDates = [];
-  for (int i = 0; i < lastDayOfMonth.day; i++) {
-    final date = firstDayOfMonth.add(Duration(days: i));
-    monthDates.add('${date.day}/${date.month}/${date.year}');
+    print('✅ Found ${result.length} weekly records'); // Debug
+    return result;
   }
-  
-  print('📆 Month dates: ${monthDates.length} dates generated'); // Debug
-  
-  // Create placeholders for the IN clause
-  final placeholders = List.filled(monthDates.length, '?').join(',');
-  
-  final result = await db.rawQuery('''
+
+  //Monthly sales
+  Future<List<Map<String, dynamic>>> getMonthlySales() async {
+    final db = await database;
+    final now = DateTime.now();
+
+    // Get the first day of the current month
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+
+    // Get the last day of the current month
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+    // Generate all dates in the current month
+    List<String> monthDates = [];
+    for (int i = 0; i < lastDayOfMonth.day; i++) {
+      final date = firstDayOfMonth.add(Duration(days: i));
+      monthDates.add('${date.day}/${date.month}/${date.year}');
+    }
+
+    print('📆 Month dates: ${monthDates.length} dates generated'); // Debug
+
+    // Create placeholders for the IN clause
+    final placeholders = List.filled(monthDates.length, '?').join(',');
+
+    final result = await db.rawQuery('''
     SELECT Sales.*, items.name as item_name, shops.shop_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
@@ -404,39 +408,46 @@ Future<List<Map<String, dynamic>>> getMonthlySales() async {
     WHERE Sales.added_date IN ($placeholders)
     ORDER BY Sales.id DESC
   ''', monthDates);
-  
-  print('✅ Found ${result.length} monthly records'); // Debug
-  return result;
-}
+
+    print('✅ Found ${result.length} monthly records'); // Debug
+    return result;
+  }
+
   //Today Sales Amount Total Price
-   Future<double> getTodaySalesTotalAmount() async {
-  final db = await database;
-  final now = DateTime.now();
-  final padded = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-  final unpadded = '${now.day}/${now.month}/${now.year}';
-  final rows = await db.rawQuery('''
+  Future<double> getTodaySalesTotalAmount() async {
+    final db = await database;
+    final now = DateTime.now();
+    final padded =
+        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+    final unpadded = '${now.day}/${now.month}/${now.year}';
+    final rows = await db.rawQuery(
+      '''
     SELECT IFNULL(SUM(amount),0) AS total_amount
     FROM Sales
     WHERE added_date = ? OR added_date = ?
-  ''', [padded, unpadded]);
-  return (rows.first['total_amount'] as num).toDouble();
-}
+  ''',
+      [padded, unpadded],
+    );
+    return (rows.first['total_amount'] as num).toDouble();
+  }
 
   //Yesterday Sales Amount Total Price
   Future<double> getYesterdaySalesTotalAmount() async {
-  final db = await database;
-  final y = DateTime.now().subtract(const Duration(days: 1));
-  final padded = '${y.day.toString().padLeft(2, '0')}/${y.month.toString().padLeft(2, '0')}/${y.year}';
-  final unpadded = '${y.day}/${y.month}/${y.year}';
-  final rows = await db.rawQuery('''
+    final db = await database;
+    final y = DateTime.now().subtract(const Duration(days: 1));
+    final padded =
+        '${y.day.toString().padLeft(2, '0')}/${y.month.toString().padLeft(2, '0')}/${y.year}';
+    final unpadded = '${y.day}/${y.month}/${y.year}';
+    final rows = await db.rawQuery(
+      '''
     SELECT IFNULL(SUM(amount),0) AS total_amount
     FROM Sales
     WHERE added_date = ? OR added_date = ?
-  ''', [padded, unpadded]);
-  return (rows.first['total_amount'] as num).toDouble();
-} 
-
-
+  ''',
+      [padded, unpadded],
+    );
+    return (rows.first['total_amount'] as num).toDouble();
+  }
 
   // Update item
   Future<int> updateItem(ItemModel item) async {
@@ -485,75 +496,50 @@ Future<List<Map<String, dynamic>>> getMonthlySales() async {
   // Update sale
   Future<int> updateSale(int id, Map<String, dynamic> sale) async {
     final db = await database;
-    return await db.update(
-      'Sales',
-      sale,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.update('Sales', sale, where: 'id = ?', whereArgs: [id]);
   }
 
   // Delete item
   Future<int> deleteItem(int id) async {
     final db = await database;
-    return await db.delete(
-      'items',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('items', where: 'id = ?', whereArgs: [id]);
   }
 
   // Delete root
   Future<int> deleteRoot(int id) async {
     final db = await database;
-    return await db.delete(
-      'roots',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('roots', where: 'id = ?', whereArgs: [id]);
   }
 
   // Delete shop
   Future<int> deleteShop(int id) async {
     final db = await database;
-    return await db.delete(
-      'shops',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('shops', where: 'id = ?', whereArgs: [id]);
   }
 
   // Delete stock
   Future<int> deleteStock(int id) async {
     final db = await database;
-    return await db.delete(
-      'Stock',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('Stock', where: 'id = ?', whereArgs: [id]);
   }
 
   // Delete sale
   Future<int> deleteSale(int id) async {
     final db = await database;
-    return await db.delete(
-      'Sales',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('Sales', where: 'id = ?', whereArgs: [id]);
   }
 
   // Get next bill number
   Future<String> getNextBillNumber() async {
     final db = await database;
     final result = await db.rawQuery(
-      'SELECT bill_no FROM Sales ORDER BY CAST(bill_no AS INTEGER) DESC LIMIT 1'
+      'SELECT bill_no FROM Sales ORDER BY CAST(bill_no AS INTEGER) DESC LIMIT 1',
     );
-    
+
     if (result.isEmpty) {
       return '000001';
     }
-    
+
     final lastBillNo = result.first['bill_no'] as String;
     final nextNumber = (int.parse(lastBillNo) + 1).toString().padLeft(6, '0');
     return nextNumber;

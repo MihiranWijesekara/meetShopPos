@@ -28,7 +28,7 @@ class _AddsalesState extends State<Addsales> {
 
   DateTime? _selectedDate;
   int? _selectedItemId;
-  
+
   // Items state
   List<ItemModel> _items = [];
   bool _isLoadingItems = true;
@@ -97,7 +97,10 @@ class _AddsalesState extends State<Addsales> {
     } catch (e) {
       setState(() => _isLoadingRoots = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading roots: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error loading roots: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -112,7 +115,10 @@ class _AddsalesState extends State<Addsales> {
     } catch (e) {
       setState(() => _isLoadingShops = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading shops: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error loading shops: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -144,7 +150,7 @@ class _AddsalesState extends State<Addsales> {
       _sellingRateController.text = selectedItem.price.toStringAsFixed(2);
     });
   }
-  
+
   Future<void> _generateBillNumber() async {
     try {
       final billNo = await DatabaseHelper.instance.getNextBillNumber();
@@ -163,54 +169,54 @@ class _AddsalesState extends State<Addsales> {
     }
   }
 
- void _saveItem() async {
-  if (_formKey.currentState!.validate()) {
-    final billNumber = _billNumberController.text;
-    final itemId = _selectedItemId;
-    final sellingRate = double.parse(_sellingRateController.text);
-    final weight = double.parse(_weightController.text);
-    final amount = double.parse(_amountController.text);
-    final date = _dateController.text;
-    final Vat_Number = _vatController.text;
+  void _saveItem() async {
+    if (_formKey.currentState!.validate()) {
+      final billNumber = _billNumberController.text;
+      final itemId = _selectedItemId;
+      final sellingRate = double.parse(_sellingRateController.text);
+      final weight = double.parse(_weightController.text);
+      final amount = double.parse(_amountController.text);
+      final date = _dateController.text;
+      final Vat_Number = _vatController.text;
 
-    // Get selected item name
-    final selectedItem = _items.firstWhere((item) => item.id == itemId);
-    final itemName = selectedItem.name;
+      // Get selected item name
+      final selectedItem = _items.firstWhere((item) => item.id == itemId);
+      final itemName = selectedItem.name;
 
-    final newSales = Salesmodel(
-      billNo: billNumber,
-      shopId: _selectedShop?.id,
-      itemId: itemId!,
-      sellingPrice: sellingRate.toInt(),
-      quantityKg: weight.toInt(),
-      amount: amount,
-      vatNumber: Vat_Number,
-      addedDate: date,
-    );
-    
-    await DatabaseHelper.instance.insertSaleFIFO(newSales.toMap());
+      final newSales = Salesmodel(
+        billNo: billNumber,
+        shopId: _selectedShop?.id,
+        itemId: itemId!,
+        sellingPrice: sellingRate.toInt(),
+        quantityKg: weight.toInt(),
+        amount: amount,
+        vatNumber: Vat_Number,
+        addedDate: date,
+      );
 
-    // Navigate to ReceiptPage with sales data
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => ReceiptPage(
-    //       salesData: newSales,
-    //       itemName: itemName,
-    //       shopName: _selectedShop?.Shopname ?? 'N/A',
-    //       rootName: _roots.firstWhere((r) => r.id == _selectedRootId, orElse: () => RootModel(id: 0, name: 'N/A')).name,
-    //     ),
-    //   ),
-    // );
+      await DatabaseHelper.instance.insertSaleFIFO(newSales.toMap());
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Sales added successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
+      // Navigate to ReceiptPage with sales data
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => ReceiptPage(
+      //       salesData: newSales,
+      //       itemName: itemName,
+      //       shopName: _selectedShop?.Shopname ?? 'N/A',
+      //       rootName: _roots.firstWhere((r) => r.id == _selectedRootId, orElse: () => RootModel(id: 0, name: 'N/A')).name,
+      //     ),
+      //   ),
+      // );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sales added successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +308,9 @@ class _AddsalesState extends State<Addsales> {
                                 child: SizedBox(
                                   height: 24,
                                   width: 24,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               )
                             : TextFormField(
@@ -315,9 +323,13 @@ class _AddsalesState extends State<Addsales> {
                                 ),
                                 decoration: InputDecoration(
                                   hintText: 'Auto-generated',
-                                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                  ),
                                   filled: true,
-                                  fillColor: Colors.grey[100], // Different background for read-only
+                                  fillColor: Colors
+                                      .grey[100], // Different background for read-only
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
                                     borderSide: BorderSide(
@@ -344,7 +356,11 @@ class _AddsalesState extends State<Addsales> {
                                     vertical: 10,
                                   ),
                                   isDense: true,
-                                  prefixIcon: Icon(Icons.tag, size: 18, color: Colors.grey[600]),
+                                  prefixIcon: Icon(
+                                    Icons.tag,
+                                    size: 18,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -363,7 +379,7 @@ class _AddsalesState extends State<Addsales> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                   
+
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -389,10 +405,13 @@ class _AddsalesState extends State<Addsales> {
                         const SizedBox(height: 6),
                         DropdownButtonFormField<int>(
                           value: _selectedItemId,
-                         onChanged: _onItemSelected,
+                          onChanged: _onItemSelected,
                           decoration: InputDecoration(
                             hintText: 'Select Item',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
                             border: OutlineInputBorder(
@@ -445,7 +464,7 @@ class _AddsalesState extends State<Addsales> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                   
+
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -473,12 +492,17 @@ class _AddsalesState extends State<Addsales> {
                           controller: _sellingRateController,
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
-                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter selling price',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             prefixText: 'RS ',
                             prefixStyle: TextStyle(
                               color: Colors.grey[800],
@@ -537,7 +561,7 @@ class _AddsalesState extends State<Addsales> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    
+
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -566,11 +590,16 @@ class _AddsalesState extends State<Addsales> {
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter weight',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             suffixText: 'kg',
                             suffixStyle: TextStyle(
                               color: Colors.grey[800],
@@ -629,7 +658,7 @@ class _AddsalesState extends State<Addsales> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                   
+
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -658,11 +687,16 @@ class _AddsalesState extends State<Addsales> {
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter amount',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             prefixText: 'RS ',
                             prefixStyle: TextStyle(
                               color: Colors.grey[800],
@@ -745,33 +779,58 @@ class _AddsalesState extends State<Addsales> {
                         ),
                         const SizedBox(height: 6),
                         _isLoadingRoots
-                            ? const Center(child: SizedBox(height: 24, width:24, child: CircularProgressIndicator(strokeWidth:2)))
+                            ? const Center(
+                                child: SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
                             : DropdownButtonFormField<int>(
                                 value: _selectedRootId,
                                 items: _roots
-                                    .map((r) => DropdownMenuItem<int>(
-                                          value: r.id,
-                                          child: Text(r.name),
-                                        ))
+                                    .map(
+                                      (r) => DropdownMenuItem<int>(
+                                        value: r.id,
+                                        child: Text(r.name),
+                                      ),
+                                    )
                                     .toList(),
                                 decoration: InputDecoration(
                                   hintText: 'Select root',
-                                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                  ),
                                   filled: true,
                                   fillColor: const Color(0xFFF5F7FA),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(color: Colors.black, width: 1),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(color: Colors.black, width: 1),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                      width: 1.5,
+                                    ),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
                                   isDense: true,
                                 ),
                                 onChanged: (val) {
@@ -826,90 +885,150 @@ class _AddsalesState extends State<Addsales> {
                             ),
                             const SizedBox(height: 6),
                             _isLoadingShops
-                                ? const Center(child: SizedBox(height:24,width:24,child: CircularProgressIndicator(strokeWidth:2)))
+                                ? const Center(
+                                    child: SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
                                 : Autocomplete<Shopmodel>(
                                     displayStringForOption: (s) => s.Shopname,
                                     optionsBuilder: (TextEditingValue text) {
-                                      if (_selectedRootId == null) return const Iterable<Shopmodel>.empty();
+                                      if (_selectedRootId == null)
+                                        return const Iterable<
+                                          Shopmodel
+                                        >.empty();
                                       final query = text.text.toLowerCase();
                                       return _shops.where((shop) {
-                                        final matchesRoot = shop.rootId == _selectedRootId;
-                                        final matchesQuery = query.isEmpty || shop.Shopname.toLowerCase().contains(query);
+                                        final matchesRoot =
+                                            shop.rootId == _selectedRootId;
+                                        final matchesQuery =
+                                            query.isEmpty ||
+                                            shop.Shopname.toLowerCase()
+                                                .contains(query);
                                         return matchesRoot && matchesQuery;
                                       });
                                     },
                                     onSelected: (shop) {
                                       setState(() {
                                         _selectedShop = shop;
-                                        _shopNameController.text = shop.Shopname;
+                                        _shopNameController.text =
+                                            shop.Shopname;
                                       });
                                       state.didChange(shop);
                                     },
-                                    fieldViewBuilder: (context, textController, focusNode, onSubmit) {
-                                      // Keep controller in sync
-                                      if (_shopNameController.text.isNotEmpty &&
-                                          textController.text != _shopNameController.text) {
-                                        textController.text = _shopNameController.text;
-                                      }
-                                      return TextFormField(
-                                        controller: textController,
-                                        focusNode: focusNode,
-                                        style: const TextStyle(fontSize: 14),
-                                        decoration: InputDecoration(
-                                          hintText: _selectedRootId == null
-                                              ? 'Select root first'
-                                              : 'Search shop name',
-                                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                                          filled: true,
-                                          fillColor: const Color(0xFFF5F7FA),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(6),
-                                            borderSide: const BorderSide(color: Colors.black, width: 1),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(6),
-                                            borderSide: const BorderSide(color: Colors.black, width: 1),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(6),
-                                            borderSide: const BorderSide(color: Colors.black, width: 1.5),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 10,
-                                          ),
-                                          isDense: true,
-                                          errorText: state.errorText,
-                                        ),
-                                        enabled: _selectedRootId != null,
-                                      );
-                                    },
-                                    optionsViewBuilder: (context, onSelected, options) {
-                                      return Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Material(
-                                          elevation: 4,
-                                          borderRadius: BorderRadius.circular(6),
-                                          child: ConstrainedBox(
-                                            constraints: const BoxConstraints(maxHeight: 200, minWidth: 250),
-                                            child: ListView.builder(
-                                              padding: EdgeInsets.zero,
-                                              itemCount: options.length,
-                                              itemBuilder: (context, index) {
-                                                final shop = options.elementAt(index);
-                                                return InkWell(
-                                                  onTap: () => onSelected(shop),
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                                    child: Text(shop.Shopname),
-                                                  ),
-                                                );
-                                              },
+                                    fieldViewBuilder:
+                                        (
+                                          context,
+                                          textController,
+                                          focusNode,
+                                          onSubmit,
+                                        ) {
+                                          // Keep controller in sync
+                                          if (_shopNameController
+                                                  .text
+                                                  .isNotEmpty &&
+                                              textController.text !=
+                                                  _shopNameController.text) {
+                                            textController.text =
+                                                _shopNameController.text;
+                                          }
+                                          return TextFormField(
+                                            controller: textController,
+                                            focusNode: focusNode,
+                                            style: const TextStyle(
+                                              fontSize: 14,
                                             ),
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                            decoration: InputDecoration(
+                                              hintText: _selectedRootId == null
+                                                  ? 'Select root first'
+                                                  : 'Search shop name',
+                                              hintStyle: TextStyle(
+                                                color: Colors.grey[400],
+                                                fontSize: 14,
+                                              ),
+                                              filled: true,
+                                              fillColor: const Color(
+                                                0xFFF5F7FA,
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                borderSide: const BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                borderSide: const BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                borderSide: const BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.5,
+                                                ),
+                                              ),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 10,
+                                                  ),
+                                              isDense: true,
+                                              errorText: state.errorText,
+                                            ),
+                                            enabled: _selectedRootId != null,
+                                          );
+                                        },
+                                    optionsViewBuilder:
+                                        (context, onSelected, options) {
+                                          return Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Material(
+                                              elevation: 4,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              child: ConstrainedBox(
+                                                constraints:
+                                                    const BoxConstraints(
+                                                      maxHeight: 200,
+                                                      minWidth: 250,
+                                                    ),
+                                                child: ListView.builder(
+                                                  padding: EdgeInsets.zero,
+                                                  itemCount: options.length,
+                                                  itemBuilder: (context, index) {
+                                                    final shop = options
+                                                        .elementAt(index);
+                                                    return InkWell(
+                                                      onTap: () =>
+                                                          onSelected(shop),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 10,
+                                                            ),
+                                                        child: Text(
+                                                          shop.Shopname,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                   ),
                           ],
                         );
@@ -951,22 +1070,37 @@ class _AddsalesState extends State<Addsales> {
                           style: const TextStyle(fontSize: 14),
                           decoration: InputDecoration(
                             hintText: 'Enter VAT number',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
-                              borderSide: const BorderSide(color: Colors.black, width: 1),
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
-                              borderSide: const BorderSide(color: Colors.black, width: 1),
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
-                              borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                                width: 1.5,
+                              ),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                             isDense: true,
                           ),
                         ),
@@ -981,7 +1115,7 @@ class _AddsalesState extends State<Addsales> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    
+
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.08),
@@ -1008,11 +1142,17 @@ class _AddsalesState extends State<Addsales> {
                         TextFormField(
                           controller: _dateController,
                           readOnly: true,
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                           onTap: () => _selectDate(context),
                           decoration: InputDecoration(
                             hintText: 'Select date',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             suffixIcon: Icon(
                               Icons.calendar_today,
                               color: const Color.fromARGB(255, 26, 11, 167),
@@ -1100,4 +1240,3 @@ class _AddsalesState extends State<Addsales> {
 
 // 2- Root select karanna karamyk ona e wagema e select karana root ekata adala shop witharak display wenna ona
 // 3 - Auto bill number genarate karanna ona
-

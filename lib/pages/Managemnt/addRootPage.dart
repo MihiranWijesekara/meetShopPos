@@ -27,9 +27,7 @@ class _AddrootpageState extends State<Addrootpage> {
       try {
         final rootName = _rootNameController.text;
 
-        final newRoot = RootModel(
-          name: rootName,
-        );
+        final newRoot = RootModel(name: rootName);
 
         final id = await DatabaseHelper.instance.insertRoot(newRoot);
 
@@ -40,10 +38,7 @@ class _AddrootpageState extends State<Addrootpage> {
           ),
         );
 
-        Navigator.pop(context, {
-          'id': id,
-          'name': rootName,
-        });
+        Navigator.pop(context, {'id': id, 'name': rootName});
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -54,6 +49,7 @@ class _AddrootpageState extends State<Addrootpage> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,34 +165,34 @@ class _AddrootpageState extends State<Addrootpage> {
                 const SizedBox(height: 32),
                 // Save Button
                 // Save Button
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: _saveRoot,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF9C27B0),
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: const [
-                                        Icon(Icons.save, color: Colors.white),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Save Root',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _saveRoot,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9C27B0),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.save, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text(
+                          'Save Root',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

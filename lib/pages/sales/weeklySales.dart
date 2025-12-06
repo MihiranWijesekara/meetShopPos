@@ -11,26 +11,21 @@ class Weeklysales extends StatefulWidget {
 }
 
 class _WeeklysalesState extends State<Weeklysales> {
-
   List<Salesmodel> sales = [];
-   bool isLoading = false;
-   List<Map<String, dynamic>> _items = [];
+  bool isLoading = false;
+  List<Map<String, dynamic>> _items = [];
 
-
-    @override
+  @override
   void initState() {
     super.initState();
     _loadItems();
     _loadStocks();
   }
 
-   Future<void> _loadItems() async {
+  Future<void> _loadItems() async {
     final items = await DatabaseHelper.instance.getAllItems();
     setState(() {
-      _items = items.map((item) => {
-        'id': item.id,
-        'name': item.name,
-      }).toList();
+      _items = items.map((item) => {'id': item.id, 'name': item.name}).toList();
     });
   }
 
@@ -44,7 +39,6 @@ class _WeeklysalesState extends State<Weeklysales> {
     return date.substring(5, 10).replaceAll('-', '/'); // Returns MM/DD
   }
 
-  
   Future<void> _loadStocks() async {
     setState(() => isLoading = true);
     try {
@@ -70,11 +64,19 @@ class _WeeklysalesState extends State<Weeklysales> {
 
     int? selectedItemId = sale.itemId;
     final shopController = TextEditingController(text: sale.shopName ?? '');
-    final billController = TextEditingController(text: sale.billNo?.toString() ?? '');
-    final quantityController = TextEditingController(text: sale.quantityKg?.toString() ?? '');
-    final rateController = TextEditingController(text: sale.sellingPrice.toString());
+    final billController = TextEditingController(
+      text: sale.billNo?.toString() ?? '',
+    );
+    final quantityController = TextEditingController(
+      text: sale.quantityKg?.toString() ?? '',
+    );
+    final rateController = TextEditingController(
+      text: sale.sellingPrice.toString(),
+    );
     final amountController = TextEditingController(
-        text: (sale.amount ?? (sale.sellingPrice * (sale.quantityKg ?? 0))).toString());
+      text: (sale.amount ?? (sale.sellingPrice * (sale.quantityKg ?? 0)))
+          .toString(),
+    );
     final dateController = TextEditingController(text: sale.addedDate ?? '');
 
     showDialog(
@@ -171,7 +173,8 @@ class _WeeklysalesState extends State<Weeklysales> {
                     );
                     if (picked != null) {
                       setDialogState(() {
-                        dateController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+                        dateController.text =
+                            '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
                       });
                     }
                   },
@@ -187,7 +190,7 @@ class _WeeklysalesState extends State<Weeklysales> {
             TextButton(
               onPressed: () async {
                 if (selectedItemId == null) return;
-    
+
                 // Create map without shop_name
                 final updateData = {
                   'id': sale.id,
@@ -200,12 +203,15 @@ class _WeeklysalesState extends State<Weeklysales> {
                   'Vat_Number': sale.vatNumber,
                   'added_date': dateController.text,
                 };
-    
+
                 await DatabaseHelper.instance.updateSale(sale.id!, updateData);
                 Navigator.pop(context);
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sale updated'), backgroundColor: Colors.green),
+                  const SnackBar(
+                    content: Text('Sale updated'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               },
               child: const Text('Save'),
@@ -221,7 +227,10 @@ class _WeeklysalesState extends State<Weeklysales> {
     final id = sale.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Cannot delete: missing id'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -243,11 +252,17 @@ class _WeeklysalesState extends State<Weeklysales> {
               if (rows > 0) {
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sale deleted'), backgroundColor: Colors.red),
+                  const SnackBar(
+                    content: Text('Sale deleted'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Delete failed'), backgroundColor: Colors.orange),
+                  const SnackBar(
+                    content: Text('Delete failed'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
               }
             },
@@ -268,10 +283,7 @@ class _WeeklysalesState extends State<Weeklysales> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -333,14 +345,8 @@ class _WeeklysalesState extends State<Weeklysales> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search by shop name, bill number',
-                  hintStyle: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[400],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600],
-                  ),
+                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                   suffixIcon: null,
                   filled: true,
                   fillColor: Colors.white,
@@ -350,10 +356,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Colors.grey[300]!,
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -388,7 +391,10 @@ class _WeeklysalesState extends State<Weeklysales> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     SizedBox(
@@ -528,19 +534,21 @@ class _WeeklysalesState extends State<Weeklysales> {
                       )
                     : ListView.separated(
                         itemCount: sales.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Colors.grey[200],
-                        ),
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
                           final saless = sales[index];
                           String formattedDate = '';
-                          if (saless.addedDate != null && saless.addedDate!.toString().length >= 10) {
-                            formattedDate = saless.addedDate!.toString().substring(5, 10).replaceAll('-', '/');
+                          if (saless.addedDate != null &&
+                              saless.addedDate!.toString().length >= 10) {
+                            formattedDate = saless.addedDate!
+                                .toString()
+                                .substring(5, 10)
+                                .replaceAll('-', '/');
                           } else {
                             formattedDate = 'N/A';
                           }
-                          
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -551,7 +559,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                                 SizedBox(
                                   width: 28,
                                   child: Text(
-                                     saless.billNo?.toString() ?? 'N/A',
+                                    saless.billNo?.toString() ?? 'N/A',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -562,17 +570,25 @@ class _WeeklysalesState extends State<Weeklysales> {
                                 SizedBox(
                                   width: 42,
                                   child: Text(
-                                    saless.addedDate != null && saless.addedDate!.isNotEmpty
-      ? (() {
-          final parts = saless.addedDate!.split('/');
-          if (parts.length == 3) {
-            final day = parts[0].padLeft(2, '0');
-            final month = parts[1].padLeft(2, '0');
-            return '$day/$month';
-          }
-          return saless.addedDate!;
-        })()
-      : 'N/A',
+                                    saless.addedDate != null &&
+                                            saless.addedDate!.isNotEmpty
+                                        ? (() {
+                                            final parts = saless.addedDate!
+                                                .split('/');
+                                            if (parts.length == 3) {
+                                              final day = parts[0].padLeft(
+                                                2,
+                                                '0',
+                                              );
+                                              final month = parts[1].padLeft(
+                                                2,
+                                                '0',
+                                              );
+                                              return '$day/$month';
+                                            }
+                                            return saless.addedDate!;
+                                          })()
+                                        : 'N/A',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -583,7 +599,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                                 Expanded(
                                   flex: 2,
                                   child: Text(
-                                     saless.shopName ?? '',
+                                    saless.shopName ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -631,7 +647,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                                 SizedBox(
                                   width: 55,
                                   child: Text(
-                                   saless.amount?.toString() ?? '0',
+                                    saless.amount?.toString() ?? '0',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

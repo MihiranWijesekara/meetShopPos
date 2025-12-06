@@ -1,54 +1,178 @@
-import 'package:chicken_dilivery/pages/Item/itemPage.dart';
-import 'package:chicken_dilivery/pages/Managemnt/rootPage.dart';
-import 'package:chicken_dilivery/pages/Managemnt/shopPage.dart';
+import 'package:chicken_dilivery/pages/sales/allSales.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class Managementdashboard extends StatelessWidget {
-  const Managementdashboard({super.key});
+class Allsalesdashboard extends StatelessWidget {
+  const Allsalesdashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final cards = <_DashCardData>[
       _DashCardData(
-        title: 'Item',
-        subtitle: 'Manage Products',
-        icon: Icons.inventory_outlined,
-        color: const Color(0xFF4CAF50),
-        gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
+        title: 'January',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.blue,
+        gradientColors: [Colors.blue, Colors.lightBlueAccent],
         onTap: () {
           // Navigate to Items page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ItemPage()),
+            MaterialPageRoute(builder: (context) => const Allsales()),
           );
         },
       ),
       _DashCardData(
-        title: 'Shop',
-        subtitle: 'Store Settings',
-        icon: Icons.store_outlined,
-        color: const Color(0xFF2196F3),
-        gradientColors: [const Color(0xFF2196F3), const Color(0xFF42A5F5)],
+        title: 'February',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.purple,
+        gradientColors: [Colors.purple, Colors.deepPurpleAccent],
         onTap: () {
           // Navigate to Shop page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ShopPage()),
+            MaterialPageRoute(builder: (context) => const Allsales()),
           );
         },
       ),
       _DashCardData(
-        title: 'Root',
-        subtitle: 'Admin Access',
-        icon: Icons.admin_panel_settings_outlined,
-        color: const Color(0xFFE91E63),
-        gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
+        title: 'March',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.green,
+        gradientColors: [Colors.green, Colors.lightGreenAccent],
         onTap: () {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Rootpage()),
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'April',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.orange,
+        gradientColors: [Colors.orange, Colors.deepOrangeAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'May',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.teal,
+        gradientColors: [Colors.teal, Colors.tealAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'June',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.indigo,
+        gradientColors: [Colors.indigo, Colors.indigoAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'July',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.red,
+        gradientColors: [Colors.red, Colors.redAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'August',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.cyan,
+        gradientColors: [Colors.cyan, Colors.cyanAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'September',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.amber,
+        gradientColors: [Colors.amber, Colors.amberAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'October',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.brown,
+        gradientColors: [Colors.brown, Colors.brown.shade300],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'November',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.deepOrange,
+        gradientColors: [Colors.deepOrange, Colors.orangeAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'December',
+        subtitle: 'Sales Overview',
+        icon: Icons.bar_chart,
+        color: Colors.deepPurple,
+        gradientColors: [Colors.deepPurple, Colors.purpleAccent],
+        onTap: () {
+          // Navigate to Root page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Allsales()),
           );
         },
       ),
@@ -92,7 +216,7 @@ class Managementdashboard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Management Dashboard',
+                            'All Stock Dashboard',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -110,21 +234,22 @@ class Managementdashboard extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: GridView.builder(
-          physics: const BouncingScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio:
-                1.1, // Increased from 0.95 to make cards smaller/shorter
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: GridView.builder(
+            physics: const BouncingScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, // 3 columns
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.75, // Square cards
+            ),
+            itemCount: cards.length,
+            itemBuilder: (context, index) {
+              return _DashboardCard(cardData: cards[index]);
+            },
           ),
-          itemCount: cards.length,
-          itemBuilder: (context, index) {
-            return _DashboardCard(cardData: cards[index]);
-          },
         ),
       ),
     );
@@ -225,7 +350,7 @@ class _DashboardCardState extends State<_DashboardCard>
                     ),
                     child: Icon(
                       widget.cardData.icon,
-                      size: 32,
+                      size: 30,
                       color: Colors.white,
                     ),
                   ),
@@ -234,9 +359,9 @@ class _DashboardCardState extends State<_DashboardCard>
                     widget.cardData.title,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+                      // letterSpacing: 0.1,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -244,7 +369,7 @@ class _DashboardCardState extends State<_DashboardCard>
                     widget.cardData.subtitle,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
-                      fontSize: 15,
+                      fontSize: 12,
                       fontWeight: FontWeight.w400,
                     ),
                   ),

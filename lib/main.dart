@@ -14,7 +14,9 @@ void main() async {
 
   // FORCE DB INIT + LOG
   final db = await DatabaseHelper.instance.database;
-  print('[APP] DB opened. Tables: ${await DatabaseHelper.instance.getAllTableNames()}');
+  print(
+    '[APP] DB opened. Tables: ${await DatabaseHelper.instance.getAllTableNames()}',
+  );
 
   runApp(const MyApp());
 }
@@ -27,10 +29,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Chicken Delivery',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-      ),
+      theme: ThemeData(),
       home: const DashboardPage(),
     );
   }
 }
-

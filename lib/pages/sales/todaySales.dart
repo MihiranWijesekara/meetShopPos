@@ -11,11 +11,11 @@ class Todaysales extends StatefulWidget {
 }
 
 class _TodaysalesState extends State<Todaysales> {
-   List<Salesmodel> sales = [];
-   bool isLoading = false;
-   List<Map<String, dynamic>> _items = [];
+  List<Salesmodel> sales = [];
+  bool isLoading = false;
+  List<Map<String, dynamic>> _items = [];
 
-    @override
+  @override
   void initState() {
     super.initState();
     _loadItems();
@@ -25,10 +25,7 @@ class _TodaysalesState extends State<Todaysales> {
   Future<void> _loadItems() async {
     final items = await DatabaseHelper.instance.getAllItems();
     setState(() {
-      _items = items.map((item) => {
-        'id': item.id,
-        'name': item.name,
-      }).toList();
+      _items = items.map((item) => {'id': item.id, 'name': item.name}).toList();
     });
   }
 
@@ -51,7 +48,6 @@ class _TodaysalesState extends State<Todaysales> {
     return '';
   }
 
-  
   Future<void> _loadStocks() async {
     setState(() => isLoading = true);
     try {
@@ -77,11 +73,19 @@ class _TodaysalesState extends State<Todaysales> {
 
     int? selectedItemId = sale.itemId;
     final shopController = TextEditingController(text: sale.shopName ?? '');
-    final billController = TextEditingController(text: sale.billNo?.toString() ?? '');
-    final quantityController = TextEditingController(text: sale.quantityKg?.toString() ?? '');
-    final rateController = TextEditingController(text: sale.sellingPrice.toString());
+    final billController = TextEditingController(
+      text: sale.billNo?.toString() ?? '',
+    );
+    final quantityController = TextEditingController(
+      text: sale.quantityKg?.toString() ?? '',
+    );
+    final rateController = TextEditingController(
+      text: sale.sellingPrice.toString(),
+    );
     final amountController = TextEditingController(
-        text: (sale.amount ?? (sale.sellingPrice * (sale.quantityKg ?? 0))).toString());
+      text: (sale.amount ?? (sale.sellingPrice * (sale.quantityKg ?? 0)))
+          .toString(),
+    );
     final dateController = TextEditingController(text: sale.addedDate ?? '');
 
     showDialog(
@@ -178,8 +182,9 @@ class _TodaysalesState extends State<Todaysales> {
                     );
                     if (picked != null) {
                       setDialogState(() {
-                          // Save as D/M/YYYY (no leading zeros)
-                          dateController.text = '${picked.day}/${picked.month}/${picked.year}';
+                        // Save as D/M/YYYY (no leading zeros)
+                        dateController.text =
+                            '${picked.day}/${picked.month}/${picked.year}';
                       });
                     }
                   },
@@ -195,7 +200,7 @@ class _TodaysalesState extends State<Todaysales> {
             TextButton(
               onPressed: () async {
                 if (selectedItemId == null) return;
-    
+
                 // Create map without shop_name
                 final updateData = {
                   'id': sale.id,
@@ -208,12 +213,15 @@ class _TodaysalesState extends State<Todaysales> {
                   'Vat_Number': sale.vatNumber,
                   'added_date': dateController.text,
                 };
-    
+
                 await DatabaseHelper.instance.updateSale(sale.id!, updateData);
                 Navigator.pop(context);
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sale updated'), backgroundColor: Colors.green),
+                  const SnackBar(
+                    content: Text('Sale updated'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               },
               child: const Text('Save'),
@@ -229,7 +237,10 @@ class _TodaysalesState extends State<Todaysales> {
     final id = sale.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Cannot delete: missing id'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -251,11 +262,17 @@ class _TodaysalesState extends State<Todaysales> {
               if (rows > 0) {
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sale deleted'), backgroundColor: Colors.red),
+                  const SnackBar(
+                    content: Text('Sale deleted'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Delete failed'), backgroundColor: Colors.orange),
+                  const SnackBar(
+                    content: Text('Delete failed'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
               }
             },
@@ -276,10 +293,7 @@ class _TodaysalesState extends State<Todaysales> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -341,14 +355,8 @@ class _TodaysalesState extends State<Todaysales> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search by shop name, bill number',
-                  hintStyle: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[400],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600],
-                  ),
+                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                   suffixIcon: null,
                   filled: true,
                   fillColor: Colors.white,
@@ -358,10 +366,7 @@ class _TodaysalesState extends State<Todaysales> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Colors.grey[300]!,
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -396,7 +401,10 @@ class _TodaysalesState extends State<Todaysales> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     SizedBox(
@@ -527,10 +535,8 @@ class _TodaysalesState extends State<Todaysales> {
                       )
                     : ListView.separated(
                         itemCount: sales.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Colors.grey[200],
-                        ),
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
                           final Sales = sales[index];
                           return Padding(

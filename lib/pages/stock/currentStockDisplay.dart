@@ -15,17 +15,17 @@ class StockDisplay extends StatefulWidget {
 
 class _StockDisplayState extends State<StockDisplay> {
   List<StockModel> stocks = [];
-  List<ItemModel> _items = []; 
+  List<ItemModel> _items = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadItems();              
+    _loadItems();
     _loadStocks();
   }
 
-  Future<void> _loadItems() async {            
+  Future<void> _loadItems() async {
     try {
       final data = await DatabaseHelper.instance.getAllItems();
       setState(() => _items = data);
@@ -55,11 +55,19 @@ class _StockDisplayState extends State<StockDisplay> {
     final stock = stocks[index];
 
     int? selectedItemId = stock.item_id;
-    final qtyController = TextEditingController(text: stock.quantity_kg?.toString() ?? '');
-    final rateController = TextEditingController(text: stock.stock_price.toString());
+    final qtyController = TextEditingController(
+      text: stock.quantity_kg?.toString() ?? '',
+    );
+    final rateController = TextEditingController(
+      text: stock.stock_price.toString(),
+    );
     final amountController = TextEditingController(
-        text: (stock.amount ?? (stock.stock_price * (stock.quantity_kg ?? 0))).toString());
-    final remainController = TextEditingController(text: stock.remain_quantity?.toString() ?? '');
+      text: (stock.amount ?? (stock.stock_price * (stock.quantity_kg ?? 0)))
+          .toString(),
+    );
+    final remainController = TextEditingController(
+      text: stock.remain_quantity?.toString() ?? '',
+    );
     final dateController = TextEditingController(text: stock.added_date ?? '');
 
     showDialog(
@@ -67,99 +75,99 @@ class _StockDisplayState extends State<StockDisplay> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Edit Stock'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButtonFormField<int>(
-                    value: selectedItemId,
-                    decoration: const InputDecoration(
-                      labelText: 'Item',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: _items.map((item) {
-                      return DropdownMenuItem<int>(
-                        value: item.id,
-                        child: Text(item.name),
-                      );
-                    }).toList(),
-                    onChanged: (v) => setDialogState(() => selectedItemId = v),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<int>(
+                  value: selectedItemId,
+                  decoration: const InputDecoration(
+                    labelText: 'Item',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: qtyController,
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity (Kg)',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setDialogState(() {
-                      final q = int.tryParse(qtyController.text) ?? 0;
-                      final r = double.tryParse(rateController.text) ?? 0;
-                      amountController.text = (q * r).toStringAsFixed(2);
-                      if (remainController.text.isEmpty) {
-                        remainController.text = q.toString();
-                      }
-                    }),
+                  items: _items.map((item) {
+                    return DropdownMenuItem<int>(
+                      value: item.id,
+                      child: Text(item.name),
+                    );
+                  }).toList(),
+                  onChanged: (v) => setDialogState(() => selectedItemId = v),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: qtyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity (Kg)',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: rateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Rate',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setDialogState(() {
-                      final q = int.tryParse(qtyController.text) ?? 0;
-                      final r = double.tryParse(rateController.text) ?? 0;
-                      amountController.text = (q * r).toStringAsFixed(2);
-                    }),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setDialogState(() {
+                    final q = int.tryParse(qtyController.text) ?? 0;
+                    final r = double.tryParse(rateController.text) ?? 0;
+                    amountController.text = (q * r).toStringAsFixed(2);
+                    if (remainController.text.isEmpty) {
+                      remainController.text = q.toString();
+                    }
+                  }),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: rateController,
+                  decoration: const InputDecoration(
+                    labelText: 'Rate',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                      border: OutlineInputBorder(),
-                    ),
-                    readOnly: true,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setDialogState(() {
+                    final q = int.tryParse(qtyController.text) ?? 0;
+                    final r = double.tryParse(rateController.text) ?? 0;
+                    amountController.text = (q * r).toStringAsFixed(2);
+                  }),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: amountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: remainController,
-                    decoration: const InputDecoration(
-                      labelText: 'Remain Stock',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
+                  readOnly: true,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: remainController,
+                  decoration: const InputDecoration(
+                    labelText: 'Remain Stock',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: dateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Date',
-                      border: OutlineInputBorder(),
-                    ),
-                    readOnly: true,
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if (picked != null) {
-                        setDialogState(() {
-                          dateController.text =
-                              '${picked.day}/${picked.month}/${picked.year}';
-                        });
-                      }
-                    },
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: dateController,
+                  decoration: const InputDecoration(
+                    labelText: 'Date',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-              ),
+                  readOnly: true,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (picked != null) {
+                      setDialogState(() {
+                        dateController.text =
+                            '${picked.day}/${picked.month}/${picked.year}';
+                      });
+                    }
+                  },
+                ),
+              ],
             ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -171,7 +179,8 @@ class _StockDisplayState extends State<StockDisplay> {
                 final updated = StockModel(
                   id: stock.id,
                   item_id: selectedItemId!,
-                  stock_price: int.tryParse(rateController.text) ?? stock.stock_price,
+                  stock_price:
+                      int.tryParse(rateController.text) ?? stock.stock_price,
                   quantity_kg: int.tryParse(qtyController.text),
                   remain_quantity: double.tryParse(remainController.text),
                   amount: double.tryParse(amountController.text),
@@ -200,7 +209,10 @@ class _StockDisplayState extends State<StockDisplay> {
     final id = stock.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Cannot delete: missing id'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -209,7 +221,9 @@ class _StockDisplayState extends State<StockDisplay> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Item'),
-        content: Text('Are you sure you want to delete ${stocks[index].item_name}?'),
+        content: Text(
+          'Are you sure you want to delete ${stocks[index].item_name}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -253,10 +267,7 @@ class _StockDisplayState extends State<StockDisplay> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -328,33 +339,33 @@ class _StockDisplayState extends State<StockDisplay> {
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : stocks.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.inventory_2_outlined,
-                                size: 64,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No items available',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 64,
+                            color: Colors.grey[400],
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: stocks.length,
-                          itemBuilder: (context, index) {
-                            final stock = stocks[index];
-                            return _buildStockCard(stock, index);
-                          },
-                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No items available',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: stocks.length,
+                      itemBuilder: (context, index) {
+                        final stock = stocks[index];
+                        return _buildStockCard(stock, index);
+                      },
+                    ),
             ),
           ],
         ),
@@ -543,7 +554,10 @@ class _StockDisplayState extends State<StockDisplay> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue,
                     side: BorderSide(color: Colors.blue),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -554,7 +568,10 @@ class _StockDisplayState extends State<StockDisplay> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     side: BorderSide(color: Colors.red),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
                 ),
               ],
@@ -570,7 +587,7 @@ class _StockDisplayState extends State<StockDisplay> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-         Icon(icon, size: 16, color: Colors.grey[600]),
+          Icon(icon, size: 16, color: Colors.grey[600]),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

@@ -11,26 +11,21 @@ class Monthlysales extends StatefulWidget {
 }
 
 class _MonthlysalesState extends State<Monthlysales> {
-  
   List<Salesmodel> sales = [];
-   bool isLoading = false;
-   List<Map<String, dynamic>> _items = [];
+  bool isLoading = false;
+  List<Map<String, dynamic>> _items = [];
 
-
-    @override
+  @override
   void initState() {
     super.initState();
     _loadItems();
     _loadStocks();
   }
 
-   Future<void> _loadItems() async {
+  Future<void> _loadItems() async {
     final items = await DatabaseHelper.instance.getAllItems();
     setState(() {
-      _items = items.map((item) => {
-        'id': item.id,
-        'name': item.name,
-      }).toList();
+      _items = items.map((item) => {'id': item.id, 'name': item.name}).toList();
     });
   }
 
@@ -44,7 +39,6 @@ class _MonthlysalesState extends State<Monthlysales> {
     return date.substring(5, 10).replaceAll('-', '/'); // Returns MM/DD
   }
 
-  
   Future<void> _loadStocks() async {
     setState(() => isLoading = true);
     try {
@@ -70,11 +64,19 @@ class _MonthlysalesState extends State<Monthlysales> {
 
     int? selectedItemId = sale.itemId;
     final shopController = TextEditingController(text: sale.shopName ?? '');
-    final billController = TextEditingController(text: sale.billNo?.toString() ?? '');
-    final quantityController = TextEditingController(text: sale.quantityKg?.toString() ?? '');
-    final rateController = TextEditingController(text: sale.sellingPrice.toString());
+    final billController = TextEditingController(
+      text: sale.billNo?.toString() ?? '',
+    );
+    final quantityController = TextEditingController(
+      text: sale.quantityKg?.toString() ?? '',
+    );
+    final rateController = TextEditingController(
+      text: sale.sellingPrice.toString(),
+    );
     final amountController = TextEditingController(
-        text: (sale.amount ?? (sale.sellingPrice * (sale.quantityKg ?? 0))).toString());
+      text: (sale.amount ?? (sale.sellingPrice * (sale.quantityKg ?? 0)))
+          .toString(),
+    );
     final dateController = TextEditingController(text: sale.addedDate ?? '');
 
     showDialog(
@@ -171,7 +173,8 @@ class _MonthlysalesState extends State<Monthlysales> {
                     );
                     if (picked != null) {
                       setDialogState(() {
-                        dateController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+                        dateController.text =
+                            '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
                       });
                     }
                   },
@@ -187,7 +190,7 @@ class _MonthlysalesState extends State<Monthlysales> {
             TextButton(
               onPressed: () async {
                 if (selectedItemId == null) return;
-    
+
                 // Create map without shop_name
                 final updateData = {
                   'id': sale.id,
@@ -200,12 +203,15 @@ class _MonthlysalesState extends State<Monthlysales> {
                   'Vat_Number': sale.vatNumber,
                   'added_date': dateController.text,
                 };
-    
+
                 await DatabaseHelper.instance.updateSale(sale.id!, updateData);
                 Navigator.pop(context);
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sale updated'), backgroundColor: Colors.green),
+                  const SnackBar(
+                    content: Text('Sale updated'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               },
               child: const Text('Save'),
@@ -216,12 +222,15 @@ class _MonthlysalesState extends State<Monthlysales> {
     );
   }
 
-   void _deleteItem(int index) {
+  void _deleteItem(int index) {
     final sale = sales[index];
     final id = sale.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot delete: missing id'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Cannot delete: missing id'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -243,11 +252,17 @@ class _MonthlysalesState extends State<Monthlysales> {
               if (rows > 0) {
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sale deleted'), backgroundColor: Colors.red),
+                  const SnackBar(
+                    content: Text('Sale deleted'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Delete failed'), backgroundColor: Colors.orange),
+                  const SnackBar(
+                    content: Text('Delete failed'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
               }
             },
@@ -268,10 +283,7 @@ class _MonthlysalesState extends State<Monthlysales> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -333,14 +345,8 @@ class _MonthlysalesState extends State<Monthlysales> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search by shop name, bill number',
-                  hintStyle: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[400],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600],
-                  ),
+                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                   suffixIcon: null,
                   filled: true,
                   fillColor: Colors.white,
@@ -350,10 +356,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Colors.grey[300]!,
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -388,7 +391,10 @@ class _MonthlysalesState extends State<Monthlysales> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     SizedBox(
@@ -528,19 +534,20 @@ class _MonthlysalesState extends State<Monthlysales> {
                       )
                     : ListView.separated(
                         itemCount: sales.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Colors.grey[200],
-                        ),
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
                           final mSales = sales[index];
                           String formattedDate = '';
-                          if (mSales.addedDate != null && mSales.addedDate!.length >= 10) {
-                            formattedDate = mSales.addedDate!.substring(5, 10).replaceAll('-', '/');
+                          if (mSales.addedDate != null &&
+                              mSales.addedDate!.length >= 10) {
+                            formattedDate = mSales.addedDate!
+                                .substring(5, 10)
+                                .replaceAll('-', '/');
                           } else {
                             formattedDate = 'N/A';
                           }
-                          
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -562,17 +569,25 @@ class _MonthlysalesState extends State<Monthlysales> {
                                 SizedBox(
                                   width: 42,
                                   child: Text(
-                                                                 mSales.addedDate != null && mSales.addedDate!.isNotEmpty
-      ? (() {
-          final parts = mSales.addedDate!.split('/');
-          if (parts.length == 3) {
-            final day = parts[0].padLeft(2, '0');
-            final month = parts[1].padLeft(2, '0');
-            return '$day/$month';
-          }
-          return mSales.addedDate!;
-        })()
-      : 'N/A',
+                                    mSales.addedDate != null &&
+                                            mSales.addedDate!.isNotEmpty
+                                        ? (() {
+                                            final parts = mSales.addedDate!
+                                                .split('/');
+                                            if (parts.length == 3) {
+                                              final day = parts[0].padLeft(
+                                                2,
+                                                '0',
+                                              );
+                                              final month = parts[1].padLeft(
+                                                2,
+                                                '0',
+                                              );
+                                              return '$day/$month';
+                                            }
+                                            return mSales.addedDate!;
+                                          })()
+                                        : 'N/A',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -595,7 +610,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                 SizedBox(
                                   width: 30,
                                   child: Text(
-                                   mSales.itemId.toString(),
+                                    mSales.itemId.toString(),
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -631,7 +646,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                 SizedBox(
                                   width: 55,
                                   child: Text(
-                                   mSales.amount?.toString() ?? '0',
+                                    mSales.amount?.toString() ?? '0',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

@@ -50,7 +50,7 @@ class _AddStockPageState extends State<AddStockPage> {
     });
   }
 
- Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
@@ -67,7 +67,7 @@ class _AddStockPageState extends State<AddStockPage> {
 
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
-      final itemId = _selectedItemId;                
+      final itemId = _selectedItemId;
       final sellingRate = double.parse(_sellingRateController.text);
       final weight = double.parse(_weightController.text);
       final amount = double.parse(_amountController.text);
@@ -85,12 +85,12 @@ class _AddStockPageState extends State<AddStockPage> {
       );
       await DatabaseHelper.instance.insertStock(newStock); // persist
 
-      Navigator.pop(context, {
-        'itemId': itemId,
-        'price': sellingRate,
-      });
+      Navigator.pop(context, {'itemId': itemId, 'price': sellingRate});
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Stock saved'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Stock saved'),
+          backgroundColor: Colors.green,
+        ),
       );
     }
   }
@@ -123,7 +123,6 @@ class _AddStockPageState extends State<AddStockPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                 
                   Row(
                     children: [
                       const SizedBox(width: 40),
@@ -185,10 +184,13 @@ class _AddStockPageState extends State<AddStockPage> {
                           value: _selectedItemId,
                           decoration: InputDecoration(
                             hintText: 'Select Item',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
-                             border: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide(
                                 color: Colors.black,
@@ -218,7 +220,10 @@ class _AddStockPageState extends State<AddStockPage> {
                           items: _items.map((item) {
                             return DropdownMenuItem<int>(
                               value: item.id,
-                              child: Text(item.name, style: const TextStyle(fontSize: 14)),
+                              child: Text(
+                                item.name,
+                                style: const TextStyle(fontSize: 14),
+                              ),
                             );
                           }).toList(),
                           onChanged: (int? newValue) {
@@ -271,11 +276,16 @@ class _AddStockPageState extends State<AddStockPage> {
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter Stock rate',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             prefixText: 'RS ',
                             prefixStyle: TextStyle(
                               color: Colors.grey[800],
@@ -284,7 +294,7 @@ class _AddStockPageState extends State<AddStockPage> {
                             ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
-                             border: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide(
                                 color: Colors.black,
@@ -329,7 +339,7 @@ class _AddStockPageState extends State<AddStockPage> {
                   ),
                 ),
 
-                 const SizedBox(height: 12),
+                const SizedBox(height: 12),
                 // Weight Field
                 Container(
                   decoration: BoxDecoration(
@@ -363,11 +373,16 @@ class _AddStockPageState extends State<AddStockPage> {
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter weight',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             suffixText: 'kg',
                             suffixStyle: TextStyle(
                               color: Colors.grey[800],
@@ -421,7 +436,7 @@ class _AddStockPageState extends State<AddStockPage> {
                   ),
                 ),
 
-                 const SizedBox(height: 12),
+                const SizedBox(height: 12),
                 // Amount Field
                 Container(
                   decoration: BoxDecoration(
@@ -455,11 +470,16 @@ class _AddStockPageState extends State<AddStockPage> {
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter amount',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             prefixText: 'RS ',
                             prefixStyle: TextStyle(
                               color: Colors.grey[800],
@@ -468,7 +488,7 @@ class _AddStockPageState extends State<AddStockPage> {
                             ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
-                             border: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide(
                                 color: Colors.black,
@@ -513,7 +533,7 @@ class _AddStockPageState extends State<AddStockPage> {
                   ),
                 ),
 
-                 const SizedBox(height: 12),
+                const SizedBox(height: 12),
                 // QTY Field
                 Container(
                   decoration: BoxDecoration(
@@ -551,10 +571,13 @@ class _AddStockPageState extends State<AddStockPage> {
                           ],
                           decoration: InputDecoration(
                             hintText: 'Enter quantity',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
-                             border: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide(
                                 color: Colors.black,
@@ -599,7 +622,7 @@ class _AddStockPageState extends State<AddStockPage> {
                   ),
                 ),
 
-                 const SizedBox(height: 12),
+                const SizedBox(height: 12),
                 // Date Field
                 Container(
                   decoration: BoxDecoration(
@@ -635,7 +658,10 @@ class _AddStockPageState extends State<AddStockPage> {
                           onTap: () => _selectDate(context),
                           decoration: InputDecoration(
                             hintText: 'Select date',
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
                             suffixIcon: Icon(
                               Icons.calendar_today,
                               color: Colors.grey[600],
@@ -643,7 +669,7 @@ class _AddStockPageState extends State<AddStockPage> {
                             ),
                             filled: true,
                             fillColor: const Color(0xFFF5F7FA),
-                             border: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide(
                                 color: Colors.black,

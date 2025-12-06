@@ -54,10 +54,7 @@ class _AddshoppageState extends State<Addshoppage> {
       try {
         final shopName = _shopNameController.text;
 
-        final newShop = Shopmodel(
-          Shopname: shopName,
-          rootId: _selectedRootId,
-        );
+        final newShop = Shopmodel(Shopname: shopName, rootId: _selectedRootId);
 
         final id = await DatabaseHelper.instance.insertShop(newShop);
 
@@ -231,7 +228,9 @@ class _AddshoppageState extends State<Addshoppage> {
                                 decoration: InputDecoration(
                                   hintText: 'Select Root',
                                   hintStyle: TextStyle(
-                                      color: Colors.grey[400], fontSize: 14),
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                  ),
                                   filled: true,
                                   fillColor: const Color(0xFFF5F7FA),
                                   border: OutlineInputBorder(
@@ -244,12 +243,15 @@ class _AddshoppageState extends State<Addshoppage> {
                                   ),
                                   isDense: true,
                                 ),
-                                items: _roots.map<DropdownMenuItem<int>>(
-                                    (RootModel root) {
+                                items: _roots.map<DropdownMenuItem<int>>((
+                                  RootModel root,
+                                ) {
                                   return DropdownMenuItem<int>(
                                     value: root.id,
-                                    child: Text(root.name,
-                                        style: TextStyle(fontSize: 14)),
+                                    child: Text(
+                                      root.name,
+                                      style: TextStyle(fontSize: 14),
+                                    ),
                                   );
                                 }).toList(),
                                 onChanged: (int? newValue) {

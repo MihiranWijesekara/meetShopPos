@@ -67,11 +67,11 @@ class _RootpageState extends State<Rootpage> {
                   id: root.id,
                   name: nameController.text.trim(),
                 );
-                
+
                 await DatabaseHelper.instance.updateRoot(updatedRoot);
                 Navigator.pop(context);
                 _loadRoots();
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Root updated successfully'),
@@ -89,7 +89,7 @@ class _RootpageState extends State<Rootpage> {
 
   void _deleteItem(int index) {
     final root = roots[index];
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -105,7 +105,7 @@ class _RootpageState extends State<Rootpage> {
               await DatabaseHelper.instance.deleteRoot(root.id!);
               Navigator.pop(context);
               _loadRoots();
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Root deleted successfully'),
@@ -130,10 +130,7 @@ class _RootpageState extends State<Rootpage> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -208,7 +205,10 @@ class _RootpageState extends State<Rootpage> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     SizedBox(
@@ -270,99 +270,97 @@ class _RootpageState extends State<Rootpage> {
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : roots.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.route_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No roots available',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: roots.length,
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey[200]),
+                        itemBuilder: (context, index) {
+                          final root = roots[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
                               children: [
-                                Icon(
-                                  Icons.route_outlined,
-                                  size: 64,
-                                  color: Colors.grey[400],
+                                SizedBox(
+                                  width: 30,
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No roots available',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    root.name,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () => _editItem(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          child: Icon(
+                                            Icons.edit_outlined,
+                                            color: Colors.blue,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      InkWell(
+                                        onTap: () => _deleteItem(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          child: Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                        : ListView.separated(
-                            itemCount: roots.length,
-                            separatorBuilder: (context, index) => Divider(
-                              height: 1,
-                              color: Colors.grey[200],
-                            ),
-                            itemBuilder: (context, index) {
-                              final root = roots[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 30,
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        root.name,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[800],
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 80,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          InkWell(
-                                            onTap: () => _editItem(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(6),
-                                              child: Icon(
-                                                Icons.edit_outlined,
-                                                color: Colors.blue,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          InkWell(
-                                            onTap: () => _deleteItem(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(6),
-                                              child: Icon(
-                                                Icons.delete_outline,
-                                                color: Colors.red,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                          );
+                        },
+                      ),
               ),
             ),
           ],
@@ -392,4 +390,3 @@ class _RootpageState extends State<Rootpage> {
     );
   }
 }
-
