@@ -1,9 +1,9 @@
+import 'package:chicken_dilivery/Model/CartItemModel.dart';
 import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/RootModel.dart';
 import 'package:chicken_dilivery/Model/ShopModel.dart';
 import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
-import 'package:chicken_dilivery/pages/sales/PrintPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,32 +16,30 @@ class Addsales extends StatefulWidget {
 
 class _AddsalesState extends State<Addsales> {
   final _formKey = GlobalKey<FormState>();
-  final _itemNameController = TextEditingController();
   final _sellingRateController = TextEditingController();
   final _weightController = TextEditingController();
-  final _amountController = TextEditingController();
-  final _qtyController = TextEditingController();
   final _billNumberController = TextEditingController();
-  final _shopNameController = TextEditingController();
-  final _vatController = TextEditingController(); // NEW
+  final _vatController = TextEditingController();
   final _dateController = TextEditingController();
 
   DateTime? _selectedDate;
   int? _selectedItemId;
 
+  // Cart items list
+  List<CartItem> _cartItems = [];
+
   // Items state
   List<ItemModel> _items = [];
   bool _isLoadingItems = true;
 
-  // NEW: root + shops state
+  // Root + shops state
   List<RootModel> _roots = [];
   List<Shopmodel> _shops = [];
   int? _selectedRootId;
   Shopmodel? _selectedShop;
   bool _isLoadingRoots = true;
   bool _isLoadingShops = true;
-
-  bool _isGeneratingBillNumber = true; // Add this
+  bool _isGeneratingBillNumber = true;
 
   @override
   void initState() {
@@ -49,7 +47,7 @@ class _AddsalesState extends State<Addsales> {
     _loadItems();
     _loadRoots();
     _loadShops();
-    _generateBillNumber(); // Add this
+    _generateBillNumber();
     _selectedDate = DateTime.now();
     _dateController.text =
         '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
@@ -57,14 +55,10 @@ class _AddsalesState extends State<Addsales> {
 
   @override
   void dispose() {
-    _itemNameController.dispose();
     _sellingRateController.dispose();
     _weightController.dispose();
-    _amountController.dispose();
-    _qtyController.dispose();
     _billNumberController.dispose();
-    _shopNameController.dispose();
-    _vatController.dispose(); // NEW
+    _vatController.dispose();
     _dateController.dispose();
     super.dispose();
   }
@@ -140,11 +134,7 @@ class _AddsalesState extends State<Addsales> {
 
   void _onItemSelected(int? itemId) {
     if (itemId == null) return;
-
-    // Find the selected item
     final selectedItem = _items.firstWhere((item) => item.id == itemId);
-
-    // Auto-fill the selling rate
     setState(() {
       _selectedItemId = itemId;
       _sellingRateController.text = selectedItem.price.toStringAsFixed(2);
@@ -169,50 +159,138 @@ class _AddsalesState extends State<Addsales> {
     }
   }
 
-  void _saveItem() async {
-    if (_formKey.currentState!.validate()) {
-      final billNumber = _billNumberController.text;
-      final itemId = _selectedItemId;
-      final sellingRate = double.parse(_sellingRateController.text);
-      final weight = double.parse(_weightController.text);
-      final amount = double.parse(_amountController.text);
-      final date = _dateController.text;
-      final Vat_Number = _vatController.text;
-
-      // Get selected item name
-      final selectedItem = _items.firstWhere((item) => item.id == itemId);
-      final itemName = selectedItem.name;
-
-      final newSales = Salesmodel(
-        billNo: billNumber,
-        shopId: _selectedShop?.id,
-        itemId: itemId!,
-        sellingPrice: sellingRate.toInt(),
-        quantityKg: weight.toInt(),
-        amount: amount,
-        vatNumber: Vat_Number,
-        addedDate: date,
+  void _addToCart() {
+    if (_selectedItemId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an item'),
+          backgroundColor: Colors.orange,
+        ),
       );
+      return;
+    }
 
-      await DatabaseHelper.instance.insertSaleFIFO(newSales.toMap());
+    if (_sellingRateController.text.isEmpty ||
+        _weightController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter selling price and weight'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
-      // Navigate to ReceiptPage with sales data
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => ReceiptPage(
-      //       salesData: newSales,
-      //       itemName: itemName,
-      //       shopName: _selectedShop?.Shopname ?? 'N/A',
-      //       rootName: _roots.firstWhere((r) => r.id == _selectedRootId, orElse: () => RootModel(id: 0, name: 'N/A')).name,
-      //     ),
-      //   ),
-      // );
+    final selectedItem = _items.firstWhere((item) => item.id == _selectedItemId);
+    final sellingPrice = double.parse(_sellingRateController.text);
+    final weight = double.parse(_weightController.text);
+    final amount = sellingPrice * weight;
+
+    setState(() {
+      _cartItems.add(CartItem(
+        itemId: _selectedItemId!,
+        itemName: selectedItem.name,
+        sellingPrice: sellingPrice,
+        weight: weight,
+        amount: amount,
+      ));
+
+      // Clear fields
+      _selectedItemId = null;
+      _sellingRateController.clear();
+      _weightController.clear();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${selectedItem.name} added to cart'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _removeFromCart(int index) {
+    setState(() {
+      _cartItems.removeAt(index);
+    });
+  }
+
+  void _updateCartItem(int index, double newWeight) {
+    setState(() {
+      _cartItems[index].weight = newWeight;
+      _cartItems[index].amount = _cartItems[index].sellingPrice * newWeight;
+    });
+  }
+
+  double get _totalAmount {
+    return _cartItems.fold(0.0, (sum, item) => sum + item.amount);
+  }
+
+  Future<void> _saveAllSales() async {
+    if (_cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cart is empty. Add items first.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedShop == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a shop'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final billNumber = _billNumberController.text;
+      final date = _dateController.text;
+      final vatNumber = _vatController.text;
+
+      // Save each cart item to database
+      for (var cartItem in _cartItems) {
+        final newSales = Salesmodel(
+          billNo: billNumber,
+          shopId: _selectedShop!.id,
+          itemId: cartItem.itemId,
+          sellingPrice: cartItem.sellingPrice.toInt(),
+          quantityKg: cartItem.weight.toInt(),
+          amount: cartItem.amount,
+          vatNumber: vatNumber,
+          addedDate: date,
+        );
+
+        await DatabaseHelper.instance.insertSaleFIFO(newSales.toMap());
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Sales added successfully'),
+          content: Text('Sales saved successfully!'),
           backgroundColor: Colors.green,
+        ),
+      );
+
+      // Clear cart and reset
+      setState(() {
+        _cartItems.clear();
+        _selectedShop = null;
+        _selectedRootId = null;
+        _vatController.clear();
+      });
+
+      // Generate new bill number for next sale
+      _generateBillNumber();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving sales: $e'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -223,1020 +301,719 @@ class _AddsalesState extends State<Addsales> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        toolbarHeight: 80,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 60,
+        backgroundColor: const Color.fromARGB(255, 26, 11, 167),
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                const Color.fromARGB(255, 26, 11, 167),
-                const Color.fromARGB(255, 21, 5, 196),
-              ],
-            ),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Add Sales',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+        ),
+        centerTitle: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Bill Info Section
+            _buildSectionHeader('Bill Information'),
+            const SizedBox(height: 10),
+            _buildBillNumberField(),
+            const SizedBox(height: 10),
+            _buildDateField(),
+            const SizedBox(height: 18),
+
+            // Shop Selection Section
+            _buildSectionHeader('Shop Details'),
+            const SizedBox(height: 10),
+            _buildRootField(),
+            const SizedBox(height: 10),
+            _buildShopField(),
+            const SizedBox(height: 10),
+            _buildVatField(),
+            const SizedBox(height: 18),
+
+            // Item Entry Section
+            _buildSectionHeader('Add Items'),
+            const SizedBox(height: 10),
+            _buildItemField(),
+            const SizedBox(height: 10),
+            _buildSellingPriceField(),
+            const SizedBox(height: 10),
+            _buildWeightField(),
+            const SizedBox(height: 15),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _addToCart,
+                icon: const Icon(Icons.add_shopping_cart, size: 19),
+                label: const Text(
+                  'Add to Cart',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 26, 11, 167),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Cart Summary Section
+            _buildSectionHeader('Cart'),
+            const SizedBox(height: 10),
+            _cartItems.isEmpty
+                ? Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.shopping_cart_outlined, size: 60, color: Colors.grey[300]),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Cart is empty',
+                          style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _cartItems.length,
+                    itemBuilder: (context, index) => _buildCartItem(index),
+                  ),
+            const SizedBox(height: 20),
+
+            // Total and Save Button
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(width: 40),
-                      Text(
-                        'Add Sales',
+                      const Text(
+                        'Total Amount',
                         style: TextStyle(
-                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'RS ${_totalAmount.toStringAsFixed(2)}',
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                          color: Color.fromARGB(255, 26, 11, 167),
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _saveAllSales,
+                      icon: const Icon(Icons.save, size: 20), // smaller icon
+                      label: const Text(
+                        'Complete Sale',
+                        style: TextStyle(
+                          fontSize: 16, // reduced font size
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10), // reduced padding
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
+            const SizedBox(height: 30),
+          ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: Color.fromARGB(255, 26, 11, 167),
+      ),
+    );
+  }
+
+  Widget _buildBillNumberField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Bill No.',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            _isGeneratingBillNumber
+                ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+                : TextFormField(
+                    controller: _billNumberController,
+                    readOnly: true,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(6),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      isDense: true,
+                    ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Date',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _dateController,
+              readOnly: true,
+              onTap: () => _selectDate(context),
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                suffixIcon: const Icon(Icons.calendar_today, size: 18),
+                filled: true,
+                fillColor: const Color(0xFFF5F7FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRootField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Root',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<int>(
+              value: _selectedRootId,
+              items: _roots
+                  .map((r) => DropdownMenuItem<int>(
+                        value: r.id,
+                        child: Text(r.name),
+                      ))
+                  .toList(),
+              decoration: InputDecoration(
+                hintText: 'Select root',
+                filled: true,
+                fillColor: const Color(0xFFF5F7FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                isDense: true,
+              ),
+              onChanged: (val) {
+                setState(() {
+                  _selectedRootId = val;
+                  _selectedShop = null;
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShopField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Shop Name',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            Autocomplete<Shopmodel>(
+              displayStringForOption: (s) => s.Shopname,
+              optionsBuilder: (TextEditingValue text) {
+                if (_selectedRootId == null) return const Iterable<Shopmodel>.empty();
+                final query = text.text.toLowerCase();
+                return _shops.where((shop) {
+                  final matchesRoot = shop.rootId == _selectedRootId;
+                  final matchesQuery =
+                      query.isEmpty || shop.Shopname.toLowerCase().contains(query);
+                  return matchesRoot && matchesQuery;
+                });
+              },
+              onSelected: (shop) {
+                setState(() => _selectedShop = shop);
+              },
+              fieldViewBuilder: (context, textController, focusNode, onSubmit) {
+                return TextFormField(
+                  controller: textController,
+                  focusNode: focusNode,
+                  decoration: InputDecoration(
+                    hintText: _selectedRootId == null
+                        ? 'Select root first'
+                        : 'Search shop name',
+                    filled: true,
+                    fillColor: const Color(0xFFF5F7FA),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: const BorderSide(color: Colors.black),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    isDense: true,
+                  ),
+                  enabled: _selectedRootId != null,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVatField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'VAT Number',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _vatController,
+              decoration: InputDecoration(
+                hintText: 'Enter VAT number',
+                filled: true,
+                fillColor: const Color(0xFFF5F7FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Item Name',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<int>(
+              value: _selectedItemId,
+              onChanged: _onItemSelected,
+              decoration: InputDecoration(
+                hintText: 'Select Item',
+                filled: true,
+                fillColor: const Color(0xFFF5F7FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                isDense: true,
+              ),
+              items: _items
+                  .map((item) => DropdownMenuItem<int>(
+                        value: item.id,
+                        child: Text(item.name),
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSellingPriceField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Price (RS/kg)',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _sellingRateController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: '0.00',
+                prefixText: 'RS ',
+                filled: true,
+                fillColor: const Color(0xFFF5F7FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeightField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Weight (kg)',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: '0.00',
+                suffixText: 'kg',
+                filled: true,
+                fillColor: const Color(0xFFF5F7FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCartItem(int index) {
+    final item = _cartItems[index];
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8), // less margin
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6), // smaller radius
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8), // less padding
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                const SizedBox(height: 5),
-                // Bill Number Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Bill Number',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        _isGeneratingBillNumber
-                            ? const Center(
-                                child: SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            : TextFormField(
-                                controller: _billNumberController,
-                                readOnly: true, // Changed to read-only
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey[700],
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: 'Auto-generated',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 14,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors
-                                      .grey[100], // Different background for read-only
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[400]!,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-                                  isDense: true,
-                                  prefixIcon: Icon(
-                                    Icons.tag,
-                                    size: 18,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Bill number not generated';
-                                  }
-                                  return null;
-                                },
-                              ),
-                      ],
+                Expanded(
+                  child: Text(
+                    item.itemName,
+                    style: const TextStyle(
+                      fontSize: 13, // reduced font size
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                // Item Name Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Item Name',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<int>(
-                          value: _selectedItemId,
-                          onChanged: _onItemSelected,
-                          decoration: InputDecoration(
-                            hintText: 'Select Item',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          items: _items.map((item) {
-                            return DropdownMenuItem<int>(
-                              value: item.id,
-                              child: Text(item.name),
-                            );
-                          }).toList(),
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select an item';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18), // smaller icon
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => _removeFromCart(index),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4), // less spacing
+            Row(
+              children: [
+                Text(
+                  'RS ${item.sellingPrice.toStringAsFixed(2)}/kg',
+                  style: TextStyle(
+                    fontSize: 11, // reduced font size
+                    color: Colors.grey[600],
                   ),
                 ),
-                const SizedBox(height: 10),
-                // Selling Rate Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Selling Price',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _sellingRateController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(fontSize: 14),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            hintText: 'Enter selling price',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            prefixText: 'RS ',
-                            prefixStyle: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter selling rate';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter valid amount';
-                            }
-                            if (double.parse(value) <= 0) {
-                              return 'Amount must be greater than 0';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Weight Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Weight',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _weightController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(fontSize: 14),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            hintText: 'Enter weight',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            suffixText: 'kg',
-                            suffixStyle: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter weight';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter valid weight';
-                            }
-                            if (double.parse(value) <= 0) {
-                              return 'Weight must be greater than 0';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Amount Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Amount',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _amountController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(fontSize: 14),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            hintText: 'Enter amount',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            prefixText: 'RS ',
-                            prefixStyle: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter amount';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter valid amount';
-                            }
-                            if (double.parse(value) <= 0) {
-                              return 'Amount must be greater than 0';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // ROOT SELECT FIELD (NEW)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Root',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        _isLoadingRoots
-                            ? const Center(
-                                child: SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            : DropdownButtonFormField<int>(
-                                value: _selectedRootId,
-                                items: _roots
-                                    .map(
-                                      (r) => DropdownMenuItem<int>(
-                                        value: r.id,
-                                        child: Text(r.name),
-                                      ),
-                                    )
-                                    .toList(),
-                                decoration: InputDecoration(
-                                  hintText: 'Select root',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 14,
-                                  ),
-                                  filled: true,
-                                  fillColor: const Color(0xFFF5F7FA),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Colors.black,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-                                  isDense: true,
-                                ),
-                                onChanged: (val) {
-                                  setState(() {
-                                    _selectedRootId = val;
-                                    _selectedShop = null;
-                                    _shopNameController.clear();
-                                  });
-                                },
-                                validator: (v) {
-                                  if (v == null) return 'Select root';
-                                  return null;
-                                },
-                              ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Shop Name SEARCHABLE (REPLACED)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: FormField<Shopmodel>(
-                      validator: (value) {
-                        if (_selectedShop == null) return 'Please select shop';
-                        return null;
-                      },
-                      builder: (state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Shop Name',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            _isLoadingShops
-                                ? const Center(
-                                    child: SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  )
-                                : Autocomplete<Shopmodel>(
-                                    displayStringForOption: (s) => s.Shopname,
-                                    optionsBuilder: (TextEditingValue text) {
-                                      if (_selectedRootId == null)
-                                        return const Iterable<
-                                          Shopmodel
-                                        >.empty();
-                                      final query = text.text.toLowerCase();
-                                      return _shops.where((shop) {
-                                        final matchesRoot =
-                                            shop.rootId == _selectedRootId;
-                                        final matchesQuery =
-                                            query.isEmpty ||
-                                            shop.Shopname.toLowerCase()
-                                                .contains(query);
-                                        return matchesRoot && matchesQuery;
-                                      });
-                                    },
-                                    onSelected: (shop) {
-                                      setState(() {
-                                        _selectedShop = shop;
-                                        _shopNameController.text =
-                                            shop.Shopname;
-                                      });
-                                      state.didChange(shop);
-                                    },
-                                    fieldViewBuilder:
-                                        (
-                                          context,
-                                          textController,
-                                          focusNode,
-                                          onSubmit,
-                                        ) {
-                                          // Keep controller in sync
-                                          if (_shopNameController
-                                                  .text
-                                                  .isNotEmpty &&
-                                              textController.text !=
-                                                  _shopNameController.text) {
-                                            textController.text =
-                                                _shopNameController.text;
-                                          }
-                                          return TextFormField(
-                                            controller: textController,
-                                            focusNode: focusNode,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                            decoration: InputDecoration(
-                                              hintText: _selectedRootId == null
-                                                  ? 'Select root first'
-                                                  : 'Search shop name',
-                                              hintStyle: TextStyle(
-                                                color: Colors.grey[400],
-                                                fontSize: 14,
-                                              ),
-                                              filled: true,
-                                              fillColor: const Color(
-                                                0xFFF5F7FA,
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                borderSide: const BorderSide(
-                                                  color: Colors.black,
-                                                  width: 1,
-                                                ),
-                                              ),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                borderSide: const BorderSide(
-                                                  color: Colors.black,
-                                                  width: 1,
-                                                ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                borderSide: const BorderSide(
-                                                  color: Colors.black,
-                                                  width: 1.5,
-                                                ),
-                                              ),
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 10,
-                                                  ),
-                                              isDense: true,
-                                              errorText: state.errorText,
-                                            ),
-                                            enabled: _selectedRootId != null,
-                                          );
-                                        },
-                                    optionsViewBuilder:
-                                        (context, onSelected, options) {
-                                          return Align(
-                                            alignment: Alignment.topLeft,
-                                            child: Material(
-                                              elevation: 4,
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              child: ConstrainedBox(
-                                                constraints:
-                                                    const BoxConstraints(
-                                                      maxHeight: 200,
-                                                      minWidth: 250,
-                                                    ),
-                                                child: ListView.builder(
-                                                  padding: EdgeInsets.zero,
-                                                  itemCount: options.length,
-                                                  itemBuilder: (context, index) {
-                                                    final shop = options
-                                                        .elementAt(index);
-                                                    return InkWell(
-                                                      onTap: () =>
-                                                          onSelected(shop),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 12,
-                                                              vertical: 10,
-                                                            ),
-                                                        child: Text(
-                                                          shop.Shopname,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                  ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // VAT Number Field (FIXED controller)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'VAT Number',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _vatController,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: InputDecoration(
-                            hintText: 'Enter VAT number',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: const BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: const BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: const BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-                // Date Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
-                        spreadRadius: 0,
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Date',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _dateController,
-                          readOnly: true,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          onTap: () => _selectDate(context),
-                          decoration: InputDecoration(
-                            hintText: 'Select date',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            suffixIcon: Icon(
-                              Icons.calendar_today,
-                              color: const Color.fromARGB(255, 26, 11, 167),
-                              size: 20,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: const Color.fromARGB(255, 26, 11, 167),
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select a date';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _saveItem,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 26, 11, 167),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.save, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text(
-                          'Save Sales',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                const SizedBox(width: 10), // less spacing
+                Text(
+                  '× ${item.weight.toStringAsFixed(2)} kg',
+                  style: TextStyle(
+                    fontSize: 11, // reduced font size
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 4), // less spacing
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'RS ${item.amount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 13, // reduced font size
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 26, 11, 167),
+                  ),
+                ),
+                SizedBox(
+                  width: 80, // reduced width
+                  child: TextFormField(
+                    initialValue: item.weight.toStringAsFixed(2),
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(fontSize: 11), // reduced font size
+                    decoration: InputDecoration(
+                      labelText: 'Weight',
+                      labelStyle: const TextStyle(fontSize: 11),
+                      suffixText: 'kg',
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 6,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      isDense: true,
+                    ),
+                    onChanged: (value) {
+                      final newWeight = double.tryParse(value);
+                      if (newWeight != null && newWeight > 0) {
+                        _updateCartItem(index, newWeight);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-// 2- Root select karanna karamyk ona e wagema e select karana root ekata adala shop witharak display wenna ona
-// 3 - Auto bill number genarate karanna ona
