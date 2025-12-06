@@ -883,25 +883,6 @@ class _AllstockState extends State<Allstock> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddStockPage()),
-          );
-          if (result == true) await _loadStocks();
-        },
-        backgroundColor: const Color.fromARGB(255, 224, 237, 51),
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Add Stock',
-          style: TextStyle(
-            color: Color.fromARGB(255, 18, 16, 16),
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
     );
   }
 
