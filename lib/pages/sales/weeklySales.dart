@@ -430,8 +430,19 @@ class _WeeklysalesState extends State<Weeklysales> {
                         ),
                       ),
                     ),
+                    // SizedBox(
+                    //   width: 30, // Make sure this is 30 for both header and row
+                    //   child: Text(
+                    //     'Item',
+                    //     style: TextStyle(
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 11,
+                    //       color: Colors.grey[800],
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(
-                      width: 30, // Make sure this is 30 for both header and row
+                      width: 25, // Make sure this is 30 for both header and row
                       child: Text(
                         'Item',
                         style: TextStyle(
@@ -442,7 +453,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: 25,
                       child: Text(
                         'KG',
                         style: TextStyle(
@@ -454,7 +465,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: 25,
                       child: Text(
                         'QTY',
                         style: TextStyle(
@@ -618,14 +629,16 @@ class _WeeklysalesState extends State<Weeklysales> {
                                       fontWeight: FontWeight.w700,
                                     ),
                                     maxLines: 2, // <-- Allow up to 2 lines
-                                    overflow: TextOverflow.visible, // <-- Show wrapped text
+                                    overflow: TextOverflow
+                                        .visible, // <-- Show wrapped text
                                     softWrap: true, // <-- Enable soft wrapping
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 30,
+                                  width: 25,
                                   child: Text(
-                                    saless.itemId.toString(), // <-- This displays the item ID
+                                    saless.itemId
+                                        .toString(), // <-- This displays the item ID
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -635,7 +648,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 40,
+                                  width: 25,
                                   child: Text(
                                     saless.quantityKg?.toString() ?? '0',
                                     style: TextStyle(
@@ -647,9 +660,10 @@ class _WeeklysalesState extends State<Weeklysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 40, // <-- Add this for QTY
+                                  width: 25, // <-- Add this for QTY
                                   child: Text(
-                                    saless.qty?.toString() ?? '0', // <-- Display QTY here
+                                    saless.qty?.toString() ??
+                                        '0', // <-- Display QTY here
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

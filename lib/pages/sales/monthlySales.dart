@@ -431,7 +431,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 30,
+                      width: 25,
                       child: Text(
                         'Item',
                         style: TextStyle(
@@ -442,7 +442,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: 25,
                       child: Text(
                         'KG',
                         style: TextStyle(
@@ -454,7 +454,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: 30,
                       child: Text(
                         'QTY',
                         style: TextStyle(
@@ -623,7 +623,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 30,
+                                  width: 25,
                                   child: Text(
                                     mSales.itemId.toString(),
                                     style: TextStyle(
@@ -635,7 +635,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 40,
+                                  width: 25,
                                   child: Text(
                                     mSales.quantityKg?.toString() ?? '0',
                                     style: TextStyle(
@@ -648,7 +648,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                 ),
                                 SizedBox(
                                   width:
-                                      40, // <-- Add this for QTY, match header width
+                                      30, // <-- Add this for QTY, match header width
                                   child: Text(
                                     mSales.qty?.toString() ??
                                         '0', // <-- Display QTY here

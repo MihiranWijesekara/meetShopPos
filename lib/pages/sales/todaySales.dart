@@ -431,7 +431,7 @@ class _TodaysalesState extends State<Todaysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 30,
+                      width: 25,
                       child: Text(
                         'Item',
                         style: TextStyle(
@@ -443,7 +443,7 @@ class _TodaysalesState extends State<Todaysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: 25,
                       child: Text(
                         'KG',
                         style: TextStyle(
@@ -455,7 +455,7 @@ class _TodaysalesState extends State<Todaysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: 30,
                       child: Text(
                         'QTY',
                         style: TextStyle(
@@ -467,7 +467,7 @@ class _TodaysalesState extends State<Todaysales> {
                       ),
                     ),
                     SizedBox(
-                      width: 42,
+                      width: 40,
                       child: Text(
                         'Rate',
                         style: TextStyle(
@@ -585,7 +585,7 @@ class _TodaysalesState extends State<Todaysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 30,
+                                  width: 25,
                                   child: Text(
                                     Sales.itemId.toString(),
                                     style: TextStyle(
@@ -597,7 +597,7 @@ class _TodaysalesState extends State<Todaysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 40,
+                                  width: 25,
                                   child: Text(
                                     Sales.quantityKg?.toString() ?? '0',
                                     style: TextStyle(
@@ -609,7 +609,7 @@ class _TodaysalesState extends State<Todaysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 40,
+                                  width: 30,
                                   child: Text(
                                     Sales.qty?.toString() ??
                                         '0', // <-- Display QTY here
@@ -622,7 +622,7 @@ class _TodaysalesState extends State<Todaysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 42,
+                                  width: 40,
                                   child: Text(
                                     Sales.sellingPrice.toString(),
                                     style: TextStyle(
