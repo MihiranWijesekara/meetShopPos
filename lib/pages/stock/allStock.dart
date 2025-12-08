@@ -594,7 +594,7 @@ class _AllstockState extends State<Allstock> {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 3,
+                          flex: 2,
                           child: Text(
                             'Item Name',
                             style: TextStyle(
@@ -605,7 +605,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 35,
+                          width: 30,
                           child: Text(
                             'QTY',
                             style: TextStyle(
@@ -617,7 +617,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 45,
+                          width: 35,
                           child: Text(
                             'Weight',
                             style: TextStyle(
