@@ -2,6 +2,7 @@ import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 class Monthlysales extends StatefulWidget {
   const Monthlysales({super.key});
@@ -14,6 +15,8 @@ class _MonthlysalesState extends State<Monthlysales> {
   List<Salesmodel> sales = [];
   bool isLoading = false;
   List<Map<String, dynamic>> _items = [];
+  int _currentPage = 0;
+  final int _pageSize = 30;
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _MonthlysalesState extends State<Monthlysales> {
       print('Loaded sales data: $data');
       setState(() {
         sales = data.map((map) => Salesmodel.fromMap(map)).toList();
+        _currentPage = 0;
         isLoading = false;
       });
     } catch (e) {
@@ -59,8 +63,26 @@ class _MonthlysalesState extends State<Monthlysales> {
     }
   }
 
+  List<Salesmodel> get _pagedSales {
+    final start = _currentPage * _pageSize;
+    final end = start + _pageSize;
+    if (sales.isEmpty) return [];
+    return sales.sublist(start, end > sales.length ? sales.length : end);
+  }
+
+  int get _totalPages {
+    if (sales.isEmpty) return 1;
+    return ((sales.length + _pageSize - 1) / _pageSize).ceil();
+  }
+
+  void _goToPage(int page) {
+    setState(() {
+      _currentPage = page.clamp(0, max(_totalPages - 1, 0));
+    });
+  }
+
   void _editItem(int index) async {
-    final sale = sales[index];
+    final sale = _pagedSales[index];
 
     int? selectedItemId = sale.itemId;
     final shopController = TextEditingController(text: sale.shopName ?? '');
@@ -223,7 +245,7 @@ class _MonthlysalesState extends State<Monthlysales> {
   }
 
   void _deleteItem(int index) {
-    final sale = sales[index];
+    final sale = _pagedSales[index];
     final id = sale.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -545,11 +567,11 @@ class _MonthlysalesState extends State<Monthlysales> {
                         ),
                       )
                     : ListView.separated(
-                        itemCount: sales.length,
+                        itemCount: _pagedSales.length,
                         separatorBuilder: (context, index) =>
                             Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
-                          final mSales = sales[index];
+                          final mSales = _pagedSales[index];
                           String formattedDate = '';
                           if (mSales.addedDate != null &&
                               mSales.addedDate!.length >= 10) {
@@ -616,10 +638,9 @@ class _MonthlysalesState extends State<Monthlysales> {
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),
-                                    maxLines: 2, // <-- Allow up to 2 lines
-                                    overflow: TextOverflow
-                                        .visible, // <-- Show wrapped text
-                                    softWrap: true, // <-- Enable soft wrapping
+                                    maxLines: 2,
+                                    overflow: TextOverflow.visible,
+                                    softWrap: true,
                                   ),
                                 ),
                                 SizedBox(
@@ -647,11 +668,9 @@ class _MonthlysalesState extends State<Monthlysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width:
-                                      30, // <-- Add this for QTY, match header width
+                                  width: 30,
                                   child: Text(
-                                    mSales.qty?.toString() ??
-                                        '0', // <-- Display QTY here
+                                    mSales.qty?.toString() ?? '0',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -720,6 +739,45 @@ class _MonthlysalesState extends State<Monthlysales> {
                           );
                         },
                       ),
+              ),
+            ),
+            // Pagination Controls
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Page ${_currentPage + 1} of $_totalPages (${sales.length} total)',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _currentPage > 0
+                            ? () => _goToPage(_currentPage - 1)
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: _currentPage > 0
+                              ? const Color.fromARGB(255, 26, 11, 167)
+                              : Colors.grey,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _currentPage < _totalPages - 1
+                            ? () => _goToPage(_currentPage + 1)
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: _currentPage < _totalPages - 1
+                              ? const Color.fromARGB(255, 26, 11, 167)
+                              : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

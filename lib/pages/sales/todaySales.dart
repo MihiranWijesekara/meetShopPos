@@ -15,6 +15,9 @@ class _TodaysalesState extends State<Todaysales> {
   bool isLoading = false;
   List<Map<String, dynamic>> _items = [];
 
+  int _currentPage = 0;
+  final int _pageSize = 30;
+
   @override
   void initState() {
     super.initState();
@@ -283,6 +286,22 @@ class _TodaysalesState extends State<Todaysales> {
     );
   }
 
+  List<Salesmodel> get _pagedSales {
+    final start = _currentPage * _pageSize;
+    return sales.skip(start).take(_pageSize).toList();
+  }
+
+  int get _totalPages {
+    if (sales.isEmpty) return 1;
+    return ((sales.length + _pageSize - 1) / _pageSize).floor();
+  }
+
+  void _goToPage(int page) {
+    setState(() {
+      _currentPage = page.clamp(0, _totalPages - 1);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -546,11 +565,11 @@ class _TodaysalesState extends State<Todaysales> {
                         ),
                       )
                     : ListView.separated(
-                        itemCount: sales.length,
+                        itemCount: _pagedSales.length,
                         separatorBuilder: (context, index) =>
                             Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
-                          final Sales = sales[index];
+                          final Sales = _pagedSales[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -681,6 +700,45 @@ class _TodaysalesState extends State<Todaysales> {
                           );
                         },
                       ),
+              ),
+            ),
+            // Pagination Controls
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Page ${_currentPage + 1} of $_totalPages',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _currentPage > 0
+                            ? () => _goToPage(_currentPage - 1)
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: _currentPage > 0
+                              ? const Color.fromARGB(255, 26, 11, 167)
+                              : Colors.grey,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _currentPage < _totalPages - 1
+                            ? () => _goToPage(_currentPage + 1)
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: _currentPage < _totalPages - 1
+                              ? const Color.fromARGB(255, 26, 11, 167)
+                              : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

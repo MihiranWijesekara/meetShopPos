@@ -2,6 +2,7 @@ import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 class Weeklysales extends StatefulWidget {
   const Weeklysales({super.key});
@@ -14,6 +15,8 @@ class _WeeklysalesState extends State<Weeklysales> {
   List<Salesmodel> sales = [];
   bool isLoading = false;
   List<Map<String, dynamic>> _items = [];
+  int _currentPage = 0;
+  final int _pageSize = 30;
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _WeeklysalesState extends State<Weeklysales> {
       print('Loaded sales data: $data');
       setState(() {
         sales = data.map((map) => Salesmodel.fromMap(map)).toList();
+        _currentPage = 0;
         isLoading = false;
       });
     } catch (e) {
@@ -59,8 +63,26 @@ class _WeeklysalesState extends State<Weeklysales> {
     }
   }
 
+  List<Salesmodel> get _pagedSales {
+    final start = _currentPage * _pageSize;
+    final end = start + _pageSize;
+    if (sales.isEmpty) return [];
+    return sales.sublist(start, end > sales.length ? sales.length : end);
+  }
+
+  int get _totalPages {
+    if (sales.isEmpty) return 1;
+    return ((sales.length + _pageSize - 1) / _pageSize).ceil();
+  }
+
+  void _goToPage(int page) {
+    setState(() {
+      _currentPage = page.clamp(0, max(_totalPages - 1, 0));
+    });
+  }
+
   void _editItem(int index) async {
-    final sale = sales[index];
+    final sale = _pagedSales[index];
 
     int? selectedItemId = sale.itemId;
     final shopController = TextEditingController(text: sale.shopName ?? '');
@@ -223,7 +245,7 @@ class _WeeklysalesState extends State<Weeklysales> {
   }
 
   void _deleteItem(int index) {
-    final sale = sales[index];
+    final sale = _pagedSales[index];
     final id = sale.id;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -430,19 +452,8 @@ class _WeeklysalesState extends State<Weeklysales> {
                         ),
                       ),
                     ),
-                    // SizedBox(
-                    //   width: 30, // Make sure this is 30 for both header and row
-                    //   child: Text(
-                    //     'Item',
-                    //     style: TextStyle(
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 11,
-                    //       color: Colors.grey[800],
-                    //     ),
-                    //   ),
-                    // ),
                     SizedBox(
-                      width: 25, // Make sure this is 30 for both header and row
+                      width: 25,
                       child: Text(
                         'Item',
                         style: TextStyle(
@@ -556,11 +567,11 @@ class _WeeklysalesState extends State<Weeklysales> {
                         ),
                       )
                     : ListView.separated(
-                        itemCount: sales.length,
+                        itemCount: _pagedSales.length,
                         separatorBuilder: (context, index) =>
                             Divider(height: 1, color: Colors.grey[200]),
                         itemBuilder: (context, index) {
-                          final saless = sales[index];
+                          final saless = _pagedSales[index];
                           String formattedDate = '';
                           if (saless.addedDate != null &&
                               saless.addedDate!.toString().length >= 10) {
@@ -628,17 +639,15 @@ class _WeeklysalesState extends State<Weeklysales> {
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontWeight: FontWeight.w700,
                                     ),
-                                    maxLines: 2, // <-- Allow up to 2 lines
-                                    overflow: TextOverflow
-                                        .visible, // <-- Show wrapped text
-                                    softWrap: true, // <-- Enable soft wrapping
+                                    maxLines: 2,
+                                    overflow: TextOverflow.visible,
+                                    softWrap: true,
                                   ),
                                 ),
                                 SizedBox(
                                   width: 25,
                                   child: Text(
-                                    saless.itemId
-                                        .toString(), // <-- This displays the item ID
+                                    saless.itemId.toString(),
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -660,10 +669,9 @@ class _WeeklysalesState extends State<Weeklysales> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 25, // <-- Add this for QTY
+                                  width: 25,
                                   child: Text(
-                                    saless.qty?.toString() ??
-                                        '0', // <-- Display QTY here
+                                    saless.qty?.toString() ?? '0',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),
@@ -732,6 +740,45 @@ class _WeeklysalesState extends State<Weeklysales> {
                           );
                         },
                       ),
+              ),
+            ),
+            // Pagination Controls
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Page ${_currentPage + 1} of $_totalPages (${sales.length} total)',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _currentPage > 0
+                            ? () => _goToPage(_currentPage - 1)
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: _currentPage > 0
+                              ? const Color.fromARGB(255, 26, 11, 167)
+                              : Colors.grey,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _currentPage < _totalPages - 1
+                            ? () => _goToPage(_currentPage + 1)
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: _currentPage < _totalPages - 1
+                              ? const Color.fromARGB(255, 26, 11, 167)
+                              : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
