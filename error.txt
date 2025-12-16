@@ -1,3 +1,5 @@
-1 - Today sales , weekly sales , montly sales add pagination
-2- All sales add pagination
-3 - All stock add pagination
+1- Gram ganaath adu wena widiyta ona hadanna
+2- item id eka display wena eke aulak thiyenawa
+3 - sales delete wenakota e tika stock ekata add wenna ona
+5 - sales eka display wena eke aulk thioyenawa
+6 - Recipt print wena ekata model ekak set karanna
