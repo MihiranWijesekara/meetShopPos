@@ -19,6 +19,8 @@ class _AddStockPageState extends State<AddStockPage> {
   final _amountController = TextEditingController();
   final _qtyController = TextEditingController();
   final _dateController = TextEditingController();
+  final _kgController = TextEditingController();
+  final _gramController = TextEditingController();
   List<ItemModel> _items = [];
   int? _selectedItemId; // was String? _selectedItem
   DateTime? _selectedDate;
@@ -368,68 +370,125 @@ class _AddStockPageState extends State<AddStockPage> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _weightController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(fontSize: 14),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _kgController,
+                                keyboardType: TextInputType.number,
+                                style: TextStyle(fontSize: 14),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  hintText: 'Kg',
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                  ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF5F7FA),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  isDense: true,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'kg?';
+                                  }
+                                  if (int.tryParse(value) == null) {
+                                    return 'Invalid';
+                                  }
+                                  if (int.parse(value) < 0) {
+                                    return 'Invalid';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _gramController,
+                                keyboardType: TextInputType.number,
+                                style: TextStyle(fontSize: 14),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  hintText: 'Gram',
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                  ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF5F7FA),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  isDense: true,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'gram?';
+                                  }
+                                  if (int.tryParse(value) == null) {
+                                    return 'Invalid';
+                                  }
+                                  if (int.parse(value) < 0 ||
+                                      int.parse(value) > 999) {
+                                    return '0-999';
+                                  }
+                                  return null;
+                                },
+                              ),
                             ),
                           ],
-                          decoration: InputDecoration(
-                            hintText: 'Enter weight',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                            suffixText: 'kg',
-                            suffixStyle: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter weight';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter valid weight';
-                            }
-                            if (double.parse(value) <= 0) {
-                              return 'Weight must be greater than 0';
-                            }
-                            return null;
-                          },
                         ),
                       ],
                     ),
