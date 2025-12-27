@@ -208,13 +208,6 @@ class _AddItemPageState extends State<AddItemPage> {
                             if (words.length < 1 || words.length > 2) {
                               return 'Short code must be 1 or 2 words';
                             }
-                            for (final w in words) {
-                              if (!RegExp(
-                                r'^[A-Za-z]{1,4} 0-]*',
-                              ).hasMatch(w)) {
-                                return 'Only letters allowed';
-                              }
-                            }
                             return null;
                           },
                         ),

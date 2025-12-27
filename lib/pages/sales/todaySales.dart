@@ -606,7 +606,7 @@ class _TodaysalesState extends State<Todaysales> {
                                 SizedBox(
                                   width: 25,
                                   child: Text(
-                                    Sales.itemId.toString(),
+                                    Sales.shortCode ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

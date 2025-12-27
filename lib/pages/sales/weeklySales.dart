@@ -647,7 +647,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                                 SizedBox(
                                   width: 25,
                                   child: Text(
-                                    saless.itemId.toString(),
+                                    saless.shortCode ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

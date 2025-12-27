@@ -646,7 +646,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                 SizedBox(
                                   width: 25,
                                   child: Text(
-                                    mSales.itemId.toString(),
+                                    mSales.shortCode ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

@@ -388,32 +388,37 @@ class _ItemPageState extends State<ItemPage> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 80,
+                                  width: 56,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      InkWell(
-                                        onTap: () => _editItem(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(6),
-                                          child: Icon(
-                                            Icons.edit_outlined,
-                                            color: Colors.blue,
-                                            size: 18,
-                                          ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit_outlined,
+                                          color: Colors.blue,
+                                          size: 18,
                                         ),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 28,
+                                          minHeight: 28,
+                                        ),
+                                        splashRadius: 18,
+                                        onPressed: () => _editItem(index),
                                       ),
-                                      const SizedBox(width: 8),
-                                      InkWell(
-                                        onTap: () => _deleteItem(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(6),
-                                          child: Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
-                                            size: 18,
-                                          ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red,
+                                          size: 18,
                                         ),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 28,
+                                          minHeight: 28,
+                                        ),
+                                        splashRadius: 18,
+                                        onPressed: () => _deleteItem(index),
                                       ),
                                     ],
                                   ),

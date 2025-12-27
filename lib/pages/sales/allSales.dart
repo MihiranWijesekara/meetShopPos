@@ -368,13 +368,12 @@ class _AllsalesState extends State<Allsales> {
                     onTap: () => _selectDate(context),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(
-                          color: Colors.grey[300]!,
-                          width: 1,
-                        ),
+                        border: Border.all(color: Colors.grey[300]!, width: 1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -413,8 +412,10 @@ class _AllsalesState extends State<Allsales> {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Search by shop name, bill number',
-                        hintStyle:
-                            TextStyle(fontSize: 14, color: Colors.grey[400]),
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[400],
+                        ),
                         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                         filled: true,
                         fillColor: Colors.white,
@@ -424,7 +425,10 @@ class _AllsalesState extends State<Allsales> {
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                          borderSide: BorderSide(
+                            color: Colors.grey[300]!,
+                            width: 1,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -682,7 +686,7 @@ class _AllsalesState extends State<Allsales> {
                                 SizedBox(
                                   width: 30,
                                   child: Text(
-                                    saless.itemId.toString(),
+                                    saless.shortCode ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: const Color.fromARGB(255, 0, 0, 0),

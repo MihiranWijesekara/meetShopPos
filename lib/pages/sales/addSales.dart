@@ -187,12 +187,24 @@ class _AddsalesState extends State<Addsales> {
       return;
     }
 
+    // Validate weight is a valid number and > 0
+    final weight = double.tryParse(_weightController.text);
+    if (weight == null || weight <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid weight greater than 0'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final selectedItem = _items.firstWhere(
       (item) => item.id == _selectedItemId,
     );
     final originalPrice = selectedItem.price;
     final sellingPrice = double.parse(_sellingRateController.text);
-    final weight = double.parse(_weightController.text);
+    // Use the already parsed 'weight' variable above
     final amount = sellingPrice * weight;
     final discount = (originalPrice > sellingPrice)
         ? (originalPrice - sellingPrice) * weight
