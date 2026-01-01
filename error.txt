@@ -1,5 +1,12 @@
-1- Gram ganaath adu wena widiyta ona hadanna
-2- item id eka display wena eke aulak thiyenawa
+1- Gram ganaath adu wena widiyta ona hadanna = Done
+2- item id eka display wena eke aulak thiyenawa = Done
+
+5 - sales eka display wena eke aulk thioyenawa = Done
+6 - Recipt print wena ekata model ekak set karanna = Done
+
+
 3 - sales delete wenakota e tika stock ekata add wenna ona
-5 - sales eka display wena eke aulk thioyenawa
-6 - Recipt print wena ekata model ekak set karanna
+7 = All sales and All stock display 2026/1 this month disply current year  , but can't display past 
+year january month sales and stock
+
+8 = 

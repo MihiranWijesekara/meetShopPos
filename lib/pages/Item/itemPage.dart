@@ -346,14 +346,14 @@ class _ItemPageState extends State<ItemPage> {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 60),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Items',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 28,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
