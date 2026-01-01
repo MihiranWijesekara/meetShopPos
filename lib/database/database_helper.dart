@@ -35,7 +35,7 @@ class DatabaseHelper {
       CREATE TABLE items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        price REAL NOT NULL,
+        price REAL NOT NULL
       )
     ''');
 

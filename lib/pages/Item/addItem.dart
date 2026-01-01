@@ -30,10 +30,7 @@ class _AddItemPageState extends State<AddItemPage> {
         final itemName = _itemNameController.text;
         final sellingRate = double.parse(_sellingRateController.text);
 
-        final newItem = ItemModel(
-          name: itemName,
-          price: sellingRate,
-        );
+        final newItem = ItemModel(name: itemName, price: sellingRate);
         final id = await DatabaseHelper.instance.insertItem(newItem);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -166,15 +163,6 @@ class _AddItemPageState extends State<AddItemPage> {
                             }
                             return null;
                           },
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Short Code',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
                         ),
                       ],
                     ),

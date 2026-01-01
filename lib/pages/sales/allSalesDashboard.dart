@@ -74,7 +74,7 @@ class Allsalesdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allsales( month: 5)),
+            MaterialPageRoute(builder: (context) => const Allsales(month: 5)),
           );
         },
       ),
@@ -102,7 +102,7 @@ class Allsalesdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allsales( month: 7)),
+            MaterialPageRoute(builder: (context) => const Allsales(month: 7)),
           );
         },
       ),
@@ -116,7 +116,7 @@ class Allsalesdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allsales( month: 8)),
+            MaterialPageRoute(builder: (context) => const Allsales(month: 8)),
           );
         },
       ),
@@ -130,7 +130,7 @@ class Allsalesdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allsales( month: 9)),
+            MaterialPageRoute(builder: (context) => const Allsales(month: 9)),
           );
         },
       ),
@@ -172,7 +172,7 @@ class Allsalesdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allsales( month: 12)),
+            MaterialPageRoute(builder: (context) => const Allsales(month: 12)),
           );
         },
       ),
@@ -216,7 +216,7 @@ class Allsalesdashboard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'All Stock Dashboard',
+                            'All Sales Dashboard',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
