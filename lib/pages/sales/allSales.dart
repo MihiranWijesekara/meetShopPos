@@ -15,19 +15,24 @@ class _AllsalesState extends State<Allsales> {
   List<Salesmodel> sales = [];
   List<Salesmodel> filteredSales = [];
   bool isLoading = false;
+
   List<Map<String, dynamic>> _items = [];
   DateTime? _selectedDate;
   final TextEditingController _searchController = TextEditingController();
+
+  // ✅ Year selector (default current year)
+  int _selectedYear = DateTime.now().year;
 
   int _currentPage = 0;
   final int _pageSize = 30;
 
   // For expansion state
-  Set<String> _expandedBills = {};
+  final Set<String> _expandedBills = {};
 
   @override
   void initState() {
     super.initState();
+    _selectedYear = DateTime.now().year;
     _loadItems();
     _loadStocks();
   }
@@ -40,21 +45,34 @@ class _AllsalesState extends State<Allsales> {
 
   Future<void> _loadItems() async {
     final items = await DatabaseHelper.instance.getAllItems();
+    if (!mounted) return;
     setState(() {
       _items = items.map((item) => {'id': item.id, 'name': item.name}).toList();
     });
   }
 
+  // ✅ Loads sales by (month + year)
   Future<void> _loadStocks() async {
     setState(() => isLoading = true);
     try {
-      final data = await DatabaseHelper.instance.getSalesByMonths(widget.month);
+      final data = await DatabaseHelper.instance.getSalesByMonthAndYear(
+        widget.month,
+        _selectedYear,
+      );
+
+      if (!mounted) return;
       setState(() {
         sales = data.map((map) => Salesmodel.fromMap(map)).toList();
-        filteredSales = sales;
+        filteredSales = List.from(sales);
         isLoading = false;
+        _expandedBills.clear();
+        _currentPage = 0;
       });
+
+      // Apply current filters again (date/search)
+      _filterSales();
     } catch (e) {
+      if (!mounted) return;
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -87,15 +105,15 @@ class _AllsalesState extends State<Allsales> {
   }
 
   void _filterSales() {
+    if (!mounted) return;
     setState(() {
       filteredSales = sales.where((sale) {
+        final q = _searchController.text.trim().toLowerCase();
+
         final matchesSearch =
-            _searchController.text.isEmpty ||
-            (sale.shopName?.toLowerCase().contains(
-                  _searchController.text.toLowerCase(),
-                ) ??
-                false) ||
-            (sale.billNo?.toString().contains(_searchController.text) ?? false);
+            q.isEmpty ||
+            (sale.shopName?.toLowerCase().contains(q) ?? false) ||
+            (sale.billNo?.toString().contains(q) ?? false);
 
         final matchesDate =
             _selectedDate == null ||
@@ -104,13 +122,14 @@ class _AllsalesState extends State<Allsales> {
 
         return matchesSearch && matchesDate;
       }).toList();
-      _currentPage = 0; // Reset to first page after filtering
+
+      _currentPage = 0;
     });
   }
 
   bool _isSameDate(String dateString, DateTime selectedDate) {
     try {
-      // Handle DD/MM/YYYY format
+      // Handles "DD/MM/YYYY" and "D/M/YYYY"
       final parts = dateString.split('/');
       if (parts.length == 3) {
         final day = int.parse(parts[0]);
@@ -120,10 +139,16 @@ class _AllsalesState extends State<Allsales> {
             month == selectedDate.month &&
             year == selectedDate.year;
       }
-    } catch (e) {
+    } catch (_) {
       return false;
     }
     return false;
+  }
+
+  String _formatDDMMYYYY(DateTime d) {
+    final dd = d.day.toString().padLeft(2, '0');
+    final mm = d.month.toString().padLeft(2, '0');
+    return '$dd/$mm/${d.year}';
   }
 
   void _editItem(Salesmodel sale) async {
@@ -188,7 +213,7 @@ class _AllsalesState extends State<Allsales> {
                 TextField(
                   controller: quantityController,
                   decoration: const InputDecoration(
-                    labelText: 'Quantity (Kg)',
+                    labelText: 'Quantity (grams)',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -232,14 +257,13 @@ class _AllsalesState extends State<Allsales> {
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: _selectedDate ?? DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2101),
                     );
                     if (picked != null) {
                       setDialogState(() {
-                        dateController.text =
-                            '${picked.day}/${picked.month}/${picked.year}';
+                        dateController.text = _formatDDMMYYYY(picked);
                       });
                     }
                   },
@@ -260,7 +284,7 @@ class _AllsalesState extends State<Allsales> {
                   'id': sale.id,
                   'bill_no': billController.text.trim(),
                   'shop_id': sale.shopId,
-                  'item_id': selectedItemId!,
+                  'item_id': selectedItemId,
                   'selling_price': int.tryParse(rateController.text) ?? 0,
                   'quantity_kg': int.tryParse(quantityController.text),
                   'amount': double.tryParse(amountController.text),
@@ -269,8 +293,11 @@ class _AllsalesState extends State<Allsales> {
                 };
 
                 await DatabaseHelper.instance.updateSale(sale.id!, updateData);
+                if (!mounted) return;
                 Navigator.pop(context);
                 await _loadStocks();
+
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Sale updated'),
@@ -311,9 +338,11 @@ class _AllsalesState extends State<Allsales> {
           TextButton(
             onPressed: () async {
               final rows = await DatabaseHelper.instance.deleteSale(id);
+              if (!mounted) return;
               Navigator.pop(context);
               if (rows > 0) {
                 await _loadStocks();
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Sale deleted'),
@@ -337,17 +366,13 @@ class _AllsalesState extends State<Allsales> {
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      setState(() => _selectedDate = picked);
       _filterSales();
     }
   }
 
   void _clearDate() {
-    setState(() {
-      _selectedDate = null;
-    });
+    setState(() => _selectedDate = null);
     _filterSales();
   }
 
@@ -383,13 +408,13 @@ class _AllsalesState extends State<Allsales> {
           onPressed: () => Navigator.pop(context),
         ),
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color.fromARGB(255, 26, 11, 167),
-                const Color.fromARGB(255, 21, 5, 196),
+                Color.fromARGB(255, 26, 11, 167),
+                Color.fromARGB(255, 21, 5, 196),
               ],
             ),
           ),
@@ -401,26 +426,16 @@ class _AllsalesState extends State<Allsales> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const SizedBox(width: 40),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'All Sales - Month: ${widget.month}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      const SizedBox(width: 40),
+                      Text(
+                        'All Sales - Month: ${widget.month} / $_selectedYear',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -434,9 +449,47 @@ class _AllsalesState extends State<Allsales> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            // Date Filter and Search Bar
+            // Filters
             Row(
               children: [
+                // ✅ Year dropdown
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        value: _selectedYear,
+                        isExpanded: true,
+                        items: List.generate(10, (i) {
+                          final year = DateTime.now().year - i;
+                          return DropdownMenuItem<int>(
+                            value: year,
+                            child: Text(
+                              'Year: $year',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          );
+                        }),
+                        onChanged: (v) async {
+                          if (v == null) return;
+                          setState(() => _selectedYear = v);
+                          await _loadStocks();
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+
                 // Date Filter
                 Expanded(
                   flex: 1,
@@ -494,7 +547,9 @@ class _AllsalesState extends State<Allsales> {
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 10),
+
                 // Search Bar
                 Expanded(
                   flex: 2,
@@ -525,8 +580,8 @@ class _AllsalesState extends State<Allsales> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 26, 11, 167),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 26, 11, 167),
                             width: 2,
                           ),
                         ),
@@ -541,9 +596,13 @@ class _AllsalesState extends State<Allsales> {
               ],
             ),
 
-            // Bills List
+            const SizedBox(height: 6),
+
+            // Content
             Expanded(
-              child: filteredSales.isEmpty
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredSales.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -573,7 +632,6 @@ class _AllsalesState extends State<Allsales> {
                         final firstSale = billSales.first;
                         final isExpanded = _expandedBills.contains(billKey);
 
-                        // Calculate totals
                         final totalAmount = billSales.fold<double>(
                           0,
                           (sum, sale) => sum + (sale.amount ?? 0),
@@ -596,7 +654,6 @@ class _AllsalesState extends State<Allsales> {
                           ),
                           child: Column(
                             children: [
-                              // Bill Header - Always Visible
                               InkWell(
                                 onTap: () {
                                   setState(() {
@@ -610,140 +667,137 @@ class _AllsalesState extends State<Allsales> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
                                   padding: const EdgeInsets.all(16),
-                                  child: Column(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Bill Icon
-                                          Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: const Color.fromARGB(
-                                                255,
-                                                26,
-                                                11,
-                                                167,
-                                              ).withOpacity(0.08),
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                            ),
-                                            child: Icon(
-                                              Icons.receipt,
-                                              color: const Color.fromARGB(
-                                                255,
-                                                26,
-                                                11,
-                                                167,
-                                              ),
-                                              size: 16,
-                                            ),
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            26,
+                                            11,
+                                            167,
+                                          ).withOpacity(0.08),
+                                          borderRadius: BorderRadius.circular(
+                                            7,
                                           ),
-                                          const SizedBox(width: 12),
-                                          // Bill Info
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                        ),
+                                        child: const Icon(
+                                          Icons.receipt,
+                                          color: Color.fromARGB(
+                                            255,
+                                            26,
+                                            11,
+                                            167,
+                                          ),
+                                          size: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      'Bill #${firstSale.billNo ?? 'N/A'}',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: Colors.black87,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Expanded(
-                                                      child: Text(
-                                                        firstSale.shopName ??
-                                                            'Unknown Shop',
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black54,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 6,
-                                                            vertical: 2,
-                                                          ),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.green
-                                                            .withOpacity(0.08),
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              4,
-                                                            ),
-                                                      ),
-                                                      child: Text(
-                                                        '$totalItems items',
-                                                        style: TextStyle(
-                                                          fontSize: 10,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Colors.green[700],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
+                                                Text(
+                                                  'Bill #${firstSale.billNo ?? 'N/A'}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black87,
+                                                  ),
                                                 ),
-                                                const SizedBox(height: 2),
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.calendar_today,
-                                                      size: 10,
-                                                      color: Colors.grey[500],
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    firstSale.shopName ??
+                                                        'Unknown Shop',
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.black54,
                                                     ),
-                                                    const SizedBox(width: 2),
-                                                    Text(
-                                                      firstSale.addedDate ??
-                                                          'N/A',
-                                                      style: TextStyle(
-                                                        fontSize: 10,
-                                                        color: Colors.grey[600],
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2,
                                                       ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.green
+                                                        .withOpacity(0.08),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          4,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    '$totalItems items',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: Colors.green[700],
                                                     ),
-                                                  ],
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          // Expand Icon
-                                          Icon(
-                                            isExpanded
-                                                ? Icons.keyboard_arrow_up
-                                                : Icons.keyboard_arrow_down,
-                                            color: Colors.grey[600],
-                                            size: 28,
-                                          ),
-                                        ],
+                                            const SizedBox(height: 2),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.calendar_today,
+                                                  size: 10,
+                                                  color: Colors.grey[500],
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Text(
+                                                  firstSale.addedDate ?? 'N/A',
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                                Text(
+                                                  'Total: ${totalAmount.toStringAsFixed(2)}',
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Icon(
+                                        isExpanded
+                                            ? Icons.keyboard_arrow_up
+                                            : Icons.keyboard_arrow_down,
+                                        color: Colors.grey[600],
+                                        size: 28,
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
 
-                              // Expanded Items
                               if (isExpanded) ...[
                                 Divider(height: 1, color: Colors.grey[300]),
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   child: Column(
                                     children: [
-                                      // Items Header
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
@@ -769,7 +823,7 @@ class _AllsalesState extends State<Allsales> {
                                               ),
                                             ),
                                             SizedBox(
-                                              width: 50,
+                                              width: 70,
                                               child: Text(
                                                 'Qty',
                                                 textAlign: TextAlign.center,
@@ -781,7 +835,7 @@ class _AllsalesState extends State<Allsales> {
                                               ),
                                             ),
                                             SizedBox(
-                                              width: 50,
+                                              width: 55,
                                               child: Text(
                                                 'Rate',
                                                 textAlign: TextAlign.right,
@@ -793,7 +847,7 @@ class _AllsalesState extends State<Allsales> {
                                               ),
                                             ),
                                             SizedBox(
-                                              width: 60,
+                                              width: 70,
                                               child: Text(
                                                 'Amount',
                                                 textAlign: TextAlign.right,
@@ -805,7 +859,7 @@ class _AllsalesState extends State<Allsales> {
                                               ),
                                             ),
                                             SizedBox(
-                                              width: 60,
+                                              width: 70,
                                               child: Text(
                                                 'Action',
                                                 textAlign: TextAlign.center,
@@ -820,7 +874,7 @@ class _AllsalesState extends State<Allsales> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      // Items List
+
                                       ...billSales.map((sale) {
                                         return Container(
                                           padding: const EdgeInsets.symmetric(
@@ -846,7 +900,7 @@ class _AllsalesState extends State<Allsales> {
                                                 flex: 3,
                                                 child: Text(
                                                   _getItemName(sale.itemId),
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 13,
                                                     fontWeight: FontWeight.w500,
                                                     color: Colors.black87,
@@ -854,34 +908,34 @@ class _AllsalesState extends State<Allsales> {
                                                 ),
                                               ),
                                               SizedBox(
-                                                width: 50,
+                                                width: 70,
                                                 child: Text(
                                                   '${((sale.quantityKg ?? 0) / 1000).toStringAsFixed(2)} kg',
                                                   textAlign: TextAlign.center,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.black87,
                                                   ),
                                                 ),
                                               ),
                                               SizedBox(
-                                                width: 50,
+                                                width: 55,
                                                 child: Text(
                                                   sale.sellingPrice.toString(),
                                                   textAlign: TextAlign.right,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.black87,
                                                   ),
                                                 ),
                                               ),
                                               SizedBox(
-                                                width: 60,
+                                                width: 70,
                                                 child: Text(
                                                   (sale.amount ?? 0)
                                                       .toStringAsFixed(2),
                                                   textAlign: TextAlign.right,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w600,
                                                     color: Colors.black87,
@@ -889,7 +943,7 @@ class _AllsalesState extends State<Allsales> {
                                                 ),
                                               ),
                                               SizedBox(
-                                                width: 60,
+                                                width: 70,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
@@ -910,7 +964,7 @@ class _AllsalesState extends State<Allsales> {
                                                                 6,
                                                               ),
                                                         ),
-                                                        child: Icon(
+                                                        child: const Icon(
                                                           Icons.edit_outlined,
                                                           color: Colors.blue,
                                                           size: 16,
@@ -934,7 +988,7 @@ class _AllsalesState extends State<Allsales> {
                                                                 6,
                                                               ),
                                                         ),
-                                                        child: Icon(
+                                                        child: const Icon(
                                                           Icons.delete_outline,
                                                           color: Colors.red,
                                                           size: 16,
@@ -959,8 +1013,8 @@ class _AllsalesState extends State<Allsales> {
                     ),
             ),
 
-            // Pagination Controls
-            if (filteredSales.isNotEmpty)
+            // Pagination
+            if (!isLoading && filteredSales.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(

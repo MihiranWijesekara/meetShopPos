@@ -396,21 +396,27 @@ class DatabaseHelper {
   }
 
   // Get all sales
-  Future<List<Map<String, dynamic>>> getSalesByMonths(int month) async {
-    final db = await database;
-    final paddedMonth = month.toString().padLeft(2, '0');
-    return await db.rawQuery(
-      '''
-      SELECT Sales.*, items.name as item_name, shops.shop_name
-      FROM Sales
-      LEFT JOIN items ON Sales.item_id = items.id
-      LEFT JOIN shops ON Sales.shop_id = shops.id
-      WHERE added_date LIKE ? OR added_date LIKE ?
-      ORDER BY Sales.id DESC
+ Future<List<Map<String, dynamic>>> getSalesByMonthAndYear(int month, int year) async {
+  final db = await database;
+  final paddedMonth = month.toString().padLeft(2, '0');
+  final yyyy = year.toString();
+
+  return await db.rawQuery(
+    '''
+    SELECT Sales.*, items.name as item_name, shops.shop_name
+    FROM Sales
+    LEFT JOIN items ON Sales.item_id = items.id
+    LEFT JOIN shops ON Sales.shop_id = shops.id
+    WHERE (added_date LIKE ? OR added_date LIKE ?)
+    ORDER BY Sales.id DESC
     ''',
-      ['%/$paddedMonth/%', '%/$month/%'],
-    );
-  }
+    [
+      '%/$paddedMonth/$yyyy%', // DD/MM/YYYY (01/01/2026)
+      '%/$month/$yyyy%',       // D/M/YYYY (1/1/2026)
+    ],
+  );
+}
+
 
   //Today sales
   Future<List<Map<String, dynamic>>> getTodaySales() async {
