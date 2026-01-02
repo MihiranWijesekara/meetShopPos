@@ -271,7 +271,7 @@ class _StockDisplayState extends State<StockDisplay> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        toolbarHeight: screenHeight * 0.10,
+        toolbarHeight: screenHeight * 0.08,
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,

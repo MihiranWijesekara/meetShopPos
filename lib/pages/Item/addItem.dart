@@ -61,7 +61,7 @@ class _AddItemPageState extends State<AddItemPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: 60,
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -91,7 +91,7 @@ class _AddItemPageState extends State<AddItemPage> {
                         'Add Item',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28,
+                          fontSize: 25,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),

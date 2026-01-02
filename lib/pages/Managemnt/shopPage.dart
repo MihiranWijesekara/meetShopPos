@@ -170,7 +170,9 @@ class _ShopPageState extends State<ShopPage> {
 
   List<Shopmodel> get paginatedShops {
     final start = currentPage * pageSize;
-    final end = (start + pageSize) > shops.length ? shops.length : (start + pageSize);
+    final end = (start + pageSize) > shops.length
+        ? shops.length
+        : (start + pageSize);
     return shops.sublist(start, end);
   }
 
@@ -181,7 +183,7 @@ class _ShopPageState extends State<ShopPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: 60,
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -337,145 +339,165 @@ class _ShopPageState extends State<ShopPage> {
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : shops.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.store_outlined,
-                                  size: 64,
-                                  color: Colors.grey[400],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No shops available',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.store_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
                             ),
-                          )
-                        : Column(
-                            children: [
-                              Expanded(
-                                child: ListView.separated(
-                                  itemCount: paginatedShops.length,
-                                  separatorBuilder: (context, index) =>
-                                      Divider(height: 1, color: Colors.grey[200]),
-                                  itemBuilder: (context, index) {
-                                    final shop = paginatedShops[index];
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 10,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          SizedBox(
-                                            width: 30,
-                                            child: Text(
-                                              '${index + 1 + (currentPage * pageSize)}',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey[700],
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 2,
-                                            child: Text(
-                                              shop.Shopname,
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: const Color.fromARGB(255, 0, 0, 0),
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.visible,
-                                              softWrap: true,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 100,
-                                            child: Text(
-                                              shop.rootName ?? 'N/A',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey[800],
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 80,
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                InkWell(
-                                                  onTap: () => _editItem(index + (currentPage * pageSize)),
-                                                  child: Container(
-                                                    padding: const EdgeInsets.all(6),
-                                                    child: Icon(
-                                                      Icons.edit_outlined,
-                                                      color: Colors.blue,
-                                                      size: 18,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                InkWell(
-                                                  onTap: () => _deleteItem(index + (currentPage * pageSize)),
-                                                  child: Container(
-                                                    padding: const EdgeInsets.all(6),
-                                                    child: Icon(
-                                                      Icons.delete_outline,
-                                                      color: Colors.red,
-                                                      size: 18,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No shops available',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
                               ),
-                              // Pagination controls
-                              if (totalPages > 1)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          Expanded(
+                            child: ListView.separated(
+                              itemCount: paginatedShops.length,
+                              separatorBuilder: (context, index) =>
+                                  Divider(height: 1, color: Colors.grey[200]),
+                              itemBuilder: (context, index) {
+                                final shop = paginatedShops[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      ElevatedButton(
-                                        onPressed: currentPage > 0
-                                            ? () => setState(() => currentPage--)
-                                            : null,
-                                        child: const Text('Previous'),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      SizedBox(
+                                        width: 30,
                                         child: Text(
-                                          'Page  a0${currentPage + 1} of $totalPages',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          '${index + 1 + (currentPage * pageSize)}',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey[700],
+                                          ),
                                         ),
                                       ),
-                                      ElevatedButton(
-                                        onPressed: currentPage < totalPages - 1
-                                            ? () => setState(() => currentPage++)
-                                            : null,
-                                        child: const Text('Next'),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          shop.Shopname,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              0,
+                                              0,
+                                              0,
+                                            ),
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(
+                                          shop.rootName ?? 'N/A',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey[800],
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 80,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            InkWell(
+                                              onTap: () => _editItem(
+                                                index +
+                                                    (currentPage * pageSize),
+                                              ),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  6,
+                                                ),
+                                                child: Icon(
+                                                  Icons.edit_outlined,
+                                                  color: Colors.blue,
+                                                  size: 18,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            InkWell(
+                                              onTap: () => _deleteItem(
+                                                index +
+                                                    (currentPage * pageSize),
+                                              ),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  6,
+                                                ),
+                                                child: Icon(
+                                                  Icons.delete_outline,
+                                                  color: Colors.red,
+                                                  size: 18,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                            ],
+                                );
+                              },
+                            ),
                           ),
+                          // Pagination controls
+                          if (totalPages > 1)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: currentPage > 0
+                                        ? () => setState(() => currentPage--)
+                                        : null,
+                                    child: const Text('Previous'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      'Page  a0${currentPage + 1} of $totalPages',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: currentPage < totalPages - 1
+                                        ? () => setState(() => currentPage++)
+                                        : null,
+                                    child: const Text('Next'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
               ),
             ),
           ],

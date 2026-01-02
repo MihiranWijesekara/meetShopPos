@@ -337,7 +337,7 @@ class _AllstockState extends State<Allstock> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: 50,
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -596,7 +596,7 @@ class _AllstockState extends State<Allstock> {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            'Item Name',
+                            'Item',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
@@ -605,7 +605,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 30,
+                          width: 55,
                           child: Text(
                             'QTY',
                             style: TextStyle(
@@ -653,7 +653,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 50,
+                          width: 52,
                           child: Text(
                             'Remaining\nStock',
                             style: TextStyle(

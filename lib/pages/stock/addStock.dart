@@ -477,19 +477,19 @@ class _AddStockPageState extends State<AddStockPage> {
                                   ),
                                   isDense: true,
                                 ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'gram?';
-                                  }
-                                  if (int.tryParse(value) == null) {
-                                    return 'Invalid';
-                                  }
-                                  if (int.parse(value) < 0 ||
-                                      int.parse(value) > 999) {
-                                    return '0-999';
-                                  }
-                                  return null;
-                                },
+                                // validator: (value) {
+                                //   if (value == null || value.isEmpty) {
+                                //     return 'gram?';
+                                //   }
+                                //   if (int.tryParse(value) == null) {
+                                //     return 'Invalid';
+                                //   }
+                                //   if (int.parse(value) < 0 ||
+                                //       int.parse(value) > 999) {
+                                //     return '0-999';
+                                //   }
+                                //   return null;
+                                // },
                               ),
                             ),
                           ],
@@ -667,18 +667,18 @@ class _AddStockPageState extends State<AddStockPage> {
                             ),
                             isDense: true,
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter quantity';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter valid quantity';
-                            }
-                            if (int.parse(value) <= 0) {
-                              return 'Quantity must be greater than 0';
-                            }
-                            return null;
-                          },
+                          // validator: (value) {
+                          //   if (value == null || value.isEmpty) {
+                          //     return 'Please enter quantity';
+                          //   }
+                          //   if (int.tryParse(value) == null) {
+                          //     return 'Please enter valid quantity';
+                          //   }
+                          //   if (int.parse(value) <= 0) {
+                          //     return 'Quantity must be greater than 0';
+                          //   }
+                          //   return null;
+                          // },
                         ),
                       ],
                     ),
