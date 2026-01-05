@@ -1,7 +1,6 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/StockModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
-import 'package:chicken_dilivery/pages/stock/addStock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,7 +19,9 @@ class _AllstockState extends State<Allstock> {
   bool isLoading = true;
   DateTime? _selectedDate;
   int? _selectedMonth;
-  int? _selectedYear;
+
+  // ✅ Year selector (default current year)
+  int _selectedYear = DateTime.now().year;
 
   int _currentPage = 0;
   final int _pageSize = 30;
@@ -30,6 +31,7 @@ class _AllstockState extends State<Allstock> {
     super.initState();
     _loadItems();
     _loadStocks();
+    _selectedYear = DateTime.now().year;
   }
 
   List<StockModel> get _groupedStocks {
@@ -65,7 +67,10 @@ class _AllstockState extends State<Allstock> {
   Future<void> _loadStocks() async {
     setState(() => isLoading = true);
     try {
-      final data = await DatabaseHelper.instance.getStockByMonth(widget.month);
+      final data = await DatabaseHelper.instance.getStockByMonthAndYear(
+        widget.month,
+        _selectedYear,
+      );
       setState(() {
         stocks = data;
         _applyDateFilter();
@@ -451,61 +456,41 @@ class _AllstockState extends State<Allstock> {
                       children: [
                         // Year Filter
                         Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              final now = DateTime.now();
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime(
-                                  _selectedYear ?? now.year,
-                                ),
-                                firstDate: DateTime(now.year - 5),
-                                lastDate: DateTime(now.year + 5),
-                                initialDatePickerMode: DatePickerMode.year,
-                              );
-                              if (picked != null) {
-                                setState(() {
-                                  _selectedYear = picked.year;
-                                  _selectedMonth = null;
-                                  _selectedDate = null;
-                                  _applyDateFilter();
-                                });
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 12,
+                          child: Container(
+                            height: 38,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: Colors.grey[300]!,
+                                width: 1,
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: Colors.grey[300]!,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<int>(
+                                value: _selectedYear,
+                                isExpanded: true,
+                                isDense: true,
+                                iconSize: 18,
+                                items: List.generate(10, (i) {
+                                  final year = DateTime.now().year - i;
+                                  return DropdownMenuItem<int>(
+                                    value: year,
                                     child: Text(
-                                      (_selectedYear ?? DateTime.now().year)
-                                          .toString(),
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black87,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                      'Year: $year',
+                                      style: const TextStyle(fontSize: 12),
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.calendar_today,
-                                    color: Colors.grey[600],
-                                    size: 18,
-                                  ),
-                                ],
+                                  );
+                                }),
+                                onChanged: (v) async {
+                                  if (v == null) return;
+                                  setState(() => _selectedYear = v);
+                                  await _loadStocks();
+                                },
                               ),
                             ),
                           ),
@@ -517,7 +502,6 @@ class _AllstockState extends State<Allstock> {
                             onTap: () {
                               setState(() {
                                 _selectedMonth = null;
-                                _selectedYear = null;
                                 _applyDateFilter();
                               });
                             },

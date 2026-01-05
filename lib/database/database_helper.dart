@@ -196,70 +196,6 @@ class DatabaseHelper {
     return await db.insert('Stock', stock.toMap());
   }
 
-  // Insert sale
-  // Future<int> insertSaleFIFO(Map<String, dynamic> sale) async {
-  //   final db = await database;
-  //   final itemId = sale['item_id'];
-  //   num qtyToSell = (sale['quantity_grams'] ?? 0) as num;
-
-  //   if (qtyToSell <= 0) {
-  //     throw Exception('Quantity must be greater than 0');
-  //   }
-
-  //   // Use a transaction for atomic operation
-  //   return await db.transaction<int>((txn) async {
-  //     // Get available stock for the item, oldest first (FIFO)
-  //     final stockList = await txn.query(
-  //       'Stock',
-  //       where: 'item_id = ? AND COALESCE(remain_quantity, 0) > 0',
-  //       whereArgs: [itemId],
-  //       orderBy: 'added_date ASC, id ASC',
-  //     );
-
-  //     for (var stock in stockList) {
-  //       double remainQty = (stock['remain_quantity'] ?? 0) is num
-  //           ? ((stock['remain_quantity'] ?? 0) as num).toDouble()
-  //           : double.tryParse(stock['remain_quantity']?.toString() ?? '0') ??
-  //                 0.0;
-
-  //       if (remainQty >= qtyToSell) {
-  //         remainQty -= qtyToSell;
-
-  //         await txn.update(
-  //           'Stock',
-  //           {'remain_quantity': remainQty},
-  //           where: 'id = ?',
-  //           whereArgs: [stock['id']],
-  //         );
-
-  //         qtyToSell = 0;
-  //         break;
-  //       } else {
-  //         // Use up this stock and continue
-  //         qtyToSell -= remainQty;
-  //         await txn.update(
-  //           'Stock',
-  //           {'remain_quantity': 0},
-  //           where: 'id = ?',
-  //           whereArgs: [stock['id']],
-  //         );
-  //       }
-  //     }
-
-  //     if (qtyToSell > 0) {
-  //       throw Exception('Insufficient stock for item ID $itemId');
-  //     }
-
-  //     // Calculate amount for the sale
-  //     sale['amount'] =
-  //         (sale['quantity_grams'] as int) * (sale['selling_price'] as int);
-
-  //     // Insert sale
-  //     final saleId = await txn.insert('Sales', sale);
-  //     return saleId;
-  //   });
-  // }
-
   Future<int> insertSaleFIFO(Map<String, dynamic> sale) async {
     final db = await database;
 
@@ -364,9 +300,10 @@ class DatabaseHelper {
   }
 
   // Get all stock
-  Future<List<StockModel>> getStockByMonth(int month) async {
+  Future<List<StockModel>> getStockByMonthAndYear(int month, int year) async {
     final db = await database;
     final paddedMonth = month.toString().padLeft(2, '0');
+    final yyyy = year.toString();
 
     final result = await db.rawQuery(
       '''
@@ -376,7 +313,10 @@ class DatabaseHelper {
      WHERE added_date LIKE ? OR added_date LIKE ?
     ORDER BY Stock.id ASC
   ''',
-      ['%/$paddedMonth/%', '%/$month/%'],
+      [
+        '%/$paddedMonth/$yyyy%', // DD/MM/YYYY (01/01/2026)
+        '%/$month/$yyyy%', // D/M/YYYY (1/1/2026)
+      ],
     );
 
     return result.map((m) => StockModel.fromMap(m)).toList();
@@ -396,13 +336,16 @@ class DatabaseHelper {
   }
 
   // Get all sales
- Future<List<Map<String, dynamic>>> getSalesByMonthAndYear(int month, int year) async {
-  final db = await database;
-  final paddedMonth = month.toString().padLeft(2, '0');
-  final yyyy = year.toString();
+  Future<List<Map<String, dynamic>>> getSalesByMonthAndYear(
+    int month,
+    int year,
+  ) async {
+    final db = await database;
+    final paddedMonth = month.toString().padLeft(2, '0');
+    final yyyy = year.toString();
 
-  return await db.rawQuery(
-    '''
+    return await db.rawQuery(
+      '''
     SELECT Sales.*, items.name as item_name, shops.shop_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
@@ -410,13 +353,12 @@ class DatabaseHelper {
     WHERE (added_date LIKE ? OR added_date LIKE ?)
     ORDER BY Sales.id DESC
     ''',
-    [
-      '%/$paddedMonth/$yyyy%', // DD/MM/YYYY (01/01/2026)
-      '%/$month/$yyyy%',       // D/M/YYYY (1/1/2026)
-    ],
-  );
-}
-
+      [
+        '%/$paddedMonth/$yyyy%', // DD/MM/YYYY (01/01/2026)
+        '%/$month/$yyyy%', // D/M/YYYY (1/1/2026)
+      ],
+    );
+  }
 
   //Today sales
   Future<List<Map<String, dynamic>>> getTodaySales() async {
