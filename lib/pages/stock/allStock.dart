@@ -1,6 +1,7 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/StockModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
+import 'package:chicken_dilivery/widget/StockSummaryDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -165,6 +166,9 @@ class _AllstockState extends State<Allstock> {
     final rateController = TextEditingController(
       text: stock.stock_price.toString(),
     );
+    final sellingRateController = TextEditingController(
+      text: stock.selling_price.toString(),
+    );
     final amountController = TextEditingController(
       text: (stock.amount ?? (stock.stock_price * (stock.quantity_grams ?? 0)))
           .toString(),
@@ -291,6 +295,9 @@ class _AllstockState extends State<Allstock> {
                   item_id: selectedItemId!,
                   stock_price:
                       int.tryParse(rateController.text) ?? stock.stock_price,
+                  selling_price:
+                      int.tryParse(sellingRateController.text) ??
+                      stock.selling_price,
                   quantity_grams: int.tryParse(weightController.text),
                   remain_quantity: double.tryParse(remainController.text),
                   amount: double.tryParse(amountController.text),
@@ -371,7 +378,7 @@ class _AllstockState extends State<Allstock> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        toolbarHeight: 50,
+        toolbarHeight: 70,
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -416,6 +423,47 @@ class _AllstockState extends State<Allstock> {
                                 ),
                               ),
                             ],
+                          ),
+                          SizedBox(width: 130),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.assessment,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return StockSummaryDialog(
+                                      totalItems: stocks.length,
+                                      filteredItems: filteredStocks.length,
+                                      stocks: filteredStocks,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.download,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              onPressed: () {},
+                            ),
                           ),
                         ],
                       ),
@@ -666,18 +714,6 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 52,
-                          child: Text(
-                            'Remaining\nStock',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                              color: Colors.grey[800],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        SizedBox(
                           width: 50,
                           child: Text(
                             'Date',
@@ -810,17 +846,6 @@ class _AllstockState extends State<Allstock> {
                                   width: 55,
                                   child: Text(
                                     stock.amount?.toStringAsFixed(0) ?? 'N/A',
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 50,
-                                  child: Text(
-                                    '${stock.remain_quantity != null ? (stock.remain_quantity! / 1000).toStringAsFixed(3) : '0.000'} Kg',
                                     style: const TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,

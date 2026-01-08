@@ -34,8 +34,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        price REAL NOT NULL
+        name TEXT NOT NULL
       )
     ''');
 
@@ -60,6 +59,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         item_id INTEGER NOT NULL,
         stock_price INTEGER NOT NULL,
+        selling_price INTEGER NOT NULL,
         quantity_grams  INTEGER,           -- Total stock in grams
         remain_quantity INTEGER,           -- Remaining stock in grams
         amount REAL DEFAULT 0,             -- NEW COLUMN
@@ -114,6 +114,7 @@ class DatabaseHelper {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           item_id INTEGER NOT NULL,
           stock_price INTEGER NOT NULL,
+          selling_price INTEGER NOT NULL,
           quantity_grams INTEGER,
           remain_quantity INTEGER,
           amount REAL DEFAULT 0,

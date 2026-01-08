@@ -2,6 +2,7 @@ class StockModel {
   final int? id;
   final int item_id;
   final int stock_price;
+  final int selling_price;
   final int? quantity_grams;
   final double? remain_quantity;
   final double? amount;
@@ -13,6 +14,7 @@ class StockModel {
     this.id,
     required this.item_id,
     required this.stock_price,
+    required this.selling_price,
     this.quantity_grams,
     this.remain_quantity,
     this.amount,
@@ -26,6 +28,7 @@ class StockModel {
       'id': id,
       'item_id': item_id,
       'stock_price': stock_price,
+      'selling_price': selling_price,
       'quantity_grams': quantity_grams,
       'remain_quantity': remain_quantity,
       'amount': amount,
@@ -40,6 +43,7 @@ class StockModel {
       id: map['id'],
       item_id: map['item_id'],
       stock_price: map['stock_price'],
+      selling_price: map['selling_price'],
       quantity_grams: map['quantity_grams'],
       remain_quantity: (map['remain_quantity'] as num?)?.toDouble(),
       amount: (map['amount'] as num?)?.toDouble(),

@@ -15,12 +15,10 @@ class AddItemPage extends StatefulWidget {
 class _AddItemPageState extends State<AddItemPage> {
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();
-  final _sellingRateController = TextEditingController();
 
   @override
   void dispose() {
     _itemNameController.dispose();
-    _sellingRateController.dispose();
     super.dispose();
   }
 
@@ -28,9 +26,8 @@ class _AddItemPageState extends State<AddItemPage> {
     if (_formKey.currentState!.validate()) {
       try {
         final itemName = _itemNameController.text;
-        final sellingRate = double.parse(_sellingRateController.text);
 
-        final newItem = ItemModel(name: itemName, price: sellingRate);
+        final newItem = ItemModel(name: itemName);
         final id = await DatabaseHelper.instance.insertItem(newItem);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -40,12 +37,11 @@ class _AddItemPageState extends State<AddItemPage> {
           ),
         );
 
-        Navigator.pop(context, {
-          'id': id,
-          'name': itemName,
-          'price': sellingRate,
-        });
+        Navigator.pop(context, {'id': id, 'name': itemName});
       } catch (e) {
+        print('Error: $e'); // ✅ Print to console
+        debugPrint('Error: ${e.toString()}'); // ✅ Better for debugging
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
@@ -168,80 +164,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Selling Rate Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Selling Rate',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _sellingRateController,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            hintText: 'Enter selling rate',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            prefixText: 'RS ',
-                            prefixStyle: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F7FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter selling rate';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter valid amount';
-                            }
-                            if (double.parse(value) <= 0) {
-                              return 'Amount must be greater than 0';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
                 const SizedBox(height: 32),
                 // Save Button
                 SizedBox(

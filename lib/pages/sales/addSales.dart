@@ -2,6 +2,7 @@ import 'package:chicken_dilivery/Model/CartItemModel.dart';
 import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/RootModel.dart';
 import 'package:chicken_dilivery/Model/ShopModel.dart';
+import 'package:chicken_dilivery/Model/StockModel.dart';
 import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,9 @@ class _AddsalesState extends State<Addsales> {
   DateTime? _selectedDate;
   int? _selectedItemId;
 
+  //stock model
+  List<StockModel> _stockList = [];
+
   // Cart items list
   List<CartItem> _cartItems = [];
 
@@ -47,6 +51,7 @@ class _AddsalesState extends State<Addsales> {
   @override
   void initState() {
     super.initState();
+    _loadStock();
     _loadItems();
     _loadRoots();
     _loadShops();
@@ -104,6 +109,32 @@ class _AddsalesState extends State<Addsales> {
     }
   }
 
+  Future<void> _loadStock() async {
+    try {
+      final now = DateTime.now();
+      final stock = await DatabaseHelper.instance.getStockByMonthAndYear(
+        now.month,
+        now.year,
+      );
+      if (mounted) {
+        setState(() {
+          _stockList = stock;
+          _isLoadingRoots = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingRoots = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading roots: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _loadShops() async {
     try {
       final shops = await DatabaseHelper.instance.getAllShops();
@@ -139,10 +170,11 @@ class _AddsalesState extends State<Addsales> {
 
   void _onItemSelected(int? itemId) {
     if (itemId == null) return;
-    final selectedItem = _items.firstWhere((item) => item.id == itemId);
+    final stock = _getStockForItem(itemId);
     setState(() {
       _selectedItemId = itemId;
-      _sellingRateController.text = selectedItem.price.toStringAsFixed(2);
+      _sellingRateController.text = (stock?.selling_price.toDouble() ?? 0)
+          .toStringAsFixed(2);
     });
   }
 
@@ -222,11 +254,12 @@ class _AddsalesState extends State<Addsales> {
     }
     // Set the weightController for compatibility (if needed elsewhere)
 
+    final stock = _getStockForItem(_selectedItemId!);
     final selectedItem = _items.firstWhere(
       (item) => item.id == _selectedItemId,
     );
-    final originalPrice = selectedItem.price;
-    final sellingPrice = double.parse(_sellingRateController.text);
+    final sellingPrice = double.tryParse(_sellingRateController.text) ?? 0;
+    final originalPrice = stock?.selling_price.toDouble() ?? sellingPrice;
     final amount = sellingPrice * weight;
     final discount = (originalPrice > sellingPrice)
         ? (originalPrice - sellingPrice) * weight
@@ -353,27 +386,6 @@ class _AddsalesState extends State<Addsales> {
       debugPrint(
         'Saving sales: billNo=$billNumber, date=$date, vat=$vatNumber',
       );
-
-      // Save each cart item to database
-      // for (var cartItem in _cartItems) {
-      //   debugPrint(
-      //     'Saving cartItem: itemId=${cartItem.itemId}, weight=${cartItem.weight}, amount=${cartItem.amount}',
-      //   );
-      //   final newSales = Salesmodel(
-      //     billNo: billNumber,
-      //     shopId: _selectedShop!.id,
-      //     itemId: cartItem.itemId,
-      //     sellingPrice: cartItem.sellingPrice.toInt(),
-      //     quantityKg: cartItem.weight.toInt(),
-      //     amount: cartItem.amount,
-      //     vatNumber: vatNumber,
-      //     addedDate: date,
-      //     qty: int.tryParse(_qtyController.text),
-      //   );
-
-      //   await DatabaseHelper.instance.insertSaleFIFO(newSales.toMap());
-      // }
-
       for (var cartItem in _cartItems) {
         final int qtyGrams = (cartItem.weight * 1000)
             .round(); // ✅ convert kg -> grams
@@ -460,6 +472,14 @@ class _AddsalesState extends State<Addsales> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  StockModel? _getStockForItem(int itemId) {
+    try {
+      return _stockList.lastWhere((s) => s.item_id == itemId);
+    } catch (_) {
+      return null;
     }
   }
 

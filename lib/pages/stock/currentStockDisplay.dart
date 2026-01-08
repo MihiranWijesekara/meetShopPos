@@ -68,6 +68,9 @@ class _StockDisplayState extends State<StockDisplay> {
     final remainController = TextEditingController(
       text: stock.remain_quantity?.toString() ?? '',
     );
+    final sellingRateController = TextEditingController(
+      text: stock.selling_price?.toString() ?? '',
+    );
     final dateController = TextEditingController(text: stock.added_date ?? '');
 
     showDialog(
@@ -181,6 +184,8 @@ class _StockDisplayState extends State<StockDisplay> {
                   item_id: selectedItemId!,
                   stock_price:
                       int.tryParse(rateController.text) ?? stock.stock_price,
+                  selling_price:
+                      int.tryParse(sellingRateController.text) ?? stock.selling_price,
                   quantity_grams: int.tryParse(qtyController.text),
                   remain_quantity: double.tryParse(remainController.text),
                   amount: double.tryParse(amountController.text),

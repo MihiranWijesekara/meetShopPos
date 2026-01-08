@@ -1,8 +1,6 @@
 import 'package:chicken_dilivery/pages/Managemnt/managementDashboard.dart';
-import 'package:chicken_dilivery/pages/sales/allSales.dart';
 import 'package:chicken_dilivery/pages/sales/allSalesDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/salesDashboard.dart';
-import 'package:chicken_dilivery/pages/stock/allStock.dart';
 import 'package:chicken_dilivery/pages/stock/allStockDashboard.dart';
 import 'package:chicken_dilivery/pages/stock/currentStockDisplay.dart';
 import 'package:flutter/material.dart';
@@ -153,7 +151,7 @@ class DashboardPage extends StatelessWidget {
                           ),
                           onPressed: () {
                             // Navigate to notifications
-                            Navigator.pushNamed(context, '/notifications');
+                            // Navigator.pushNamed(context, '/notifications');
                           },
                         ),
                       ),

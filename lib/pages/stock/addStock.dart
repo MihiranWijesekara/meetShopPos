@@ -15,6 +15,7 @@ class _AddStockPageState extends State<AddStockPage> {
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();
   final _sellingRateController = TextEditingController();
+  final _stockRateController = TextEditingController();
   final _weightController = TextEditingController();
   final _amountController = TextEditingController();
   final _qtyController = TextEditingController();
@@ -29,6 +30,7 @@ class _AddStockPageState extends State<AddStockPage> {
   void dispose() {
     _itemNameController.dispose();
     _sellingRateController.dispose();
+    _stockRateController.dispose();
     _weightController.dispose();
     _amountController.dispose();
     _qtyController.dispose();
@@ -70,6 +72,7 @@ class _AddStockPageState extends State<AddStockPage> {
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       final itemId = _selectedItemId;
+      final stockRate = double.parse(_stockRateController.text);
       final sellingRate = double.parse(_sellingRateController.text);
       // Calculate total grams from kg and gram fields
       final kg = int.tryParse(_kgController.text) ?? 0;
@@ -81,7 +84,8 @@ class _AddStockPageState extends State<AddStockPage> {
 
       final newStock = StockModel(
         item_id: itemId!,
-        stock_price: sellingRate.toInt(),
+        stock_price: stockRate.toInt(),
+        selling_price: sellingRate.toInt(),
         quantity_grams: weight.toInt(),
         amount: amount,
         remain_quantity: weight.toInt().toDouble(),
@@ -90,7 +94,7 @@ class _AddStockPageState extends State<AddStockPage> {
       );
       await DatabaseHelper.instance.insertStock(newStock); // persist
 
-      Navigator.pop(context, {'itemId': itemId, 'price': sellingRate});
+      Navigator.pop(context, {'itemId': itemId, 'price': stockRate});
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Stock saved'),
@@ -248,7 +252,7 @@ class _AddStockPageState extends State<AddStockPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Selling Rate Field
+                // Stock Rate Field
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -269,6 +273,104 @@ class _AddStockPageState extends State<AddStockPage> {
                       children: [
                         Text(
                           'Stock Price',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _stockRateController,
+                          keyboardType: TextInputType.number,
+                          enableInteractiveSelection: true,
+                          style: TextStyle(fontSize: 14),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: 'Enter Stock rate',
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                            prefixText: 'RS ',
+                            prefixStyle: TextStyle(
+                              color: Colors.grey[800],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F7FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 1.5,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            isDense: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter selling rate';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Please enter valid amount';
+                            }
+                            if (double.parse(value) <= 0) {
+                              return 'Amount must be greater than 0';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+                // Selling Rate Field
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Selling Price',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

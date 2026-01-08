@@ -44,7 +44,7 @@ class _ItemPageState extends State<ItemPage> {
   void _editItem(int index) async {
     final item = items[index];
     final nameController = TextEditingController(text: item.name);
-    final priceController = TextEditingController(text: item.price.toString());
+
 
     showDialog(
       context: context,
@@ -60,15 +60,6 @@ class _ItemPageState extends State<ItemPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: priceController,
-              decoration: const InputDecoration(
-                labelText: 'Price',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
           ],
         ),
         actions: [
@@ -79,25 +70,11 @@ class _ItemPageState extends State<ItemPage> {
           TextButton(
             onPressed: () async {
               final name = nameController.text.trim();
-              final priceTxt = priceController.text.trim();
-
-              if (name.isEmpty || priceTxt.isEmpty) return;
-
-              final price = double.tryParse(priceTxt);
-              if (price == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Invalid price value'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
+              if (name.isEmpty) return;
 
               final updatedItem = ItemModel(
                 id: item.id,
                 name: name,
-                price: price,
               );
 
               await DatabaseHelper.instance.updateItem(updatedItem);
@@ -181,14 +158,6 @@ class _ItemPageState extends State<ItemPage> {
         children: [
           SizedBox(width: 42, child: Text('No.', style: headerStyle)),
           Expanded(child: Text('Item Name', style: headerStyle)),
-          SizedBox(
-            width: 90,
-            child: Text(
-              'Price',
-              style: headerStyle,
-              textAlign: TextAlign.right,
-            ),
-          ),
           const SizedBox(width: 8),
           SizedBox(
             width: 92,
@@ -258,19 +227,6 @@ class _ItemPageState extends State<ItemPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                SizedBox(
-                  width: 90,
-                  child: Text(
-                    'Rs ${item.price.toStringAsFixed(0)}',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[900],
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
                 SizedBox(
                   width: 92,
                   child: Row(
