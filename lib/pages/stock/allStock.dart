@@ -4,6 +4,9 @@ import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:chicken_dilivery/widget/StockSummaryDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class Allstock extends StatefulWidget {
   final int month;
@@ -462,7 +465,7 @@ class _AllstockState extends State<Allstock> {
                                 color: Colors.white,
                                 size: 24,
                               ),
-                              onPressed: () {},
+                              onPressed: _downloadStockPdf,
                             ),
                           ),
                         ],
@@ -981,5 +984,42 @@ class _AllstockState extends State<Allstock> {
       'Dec',
     ];
     return months[month - 1];
+  }
+
+  Future<void> _downloadStockPdf() async {
+    final pdf = pw.Document();
+
+    // Create PDF content
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (context) {
+          return [
+            pw.Text('Stock List', style: pw.TextStyle(fontSize: 24)),
+            pw.SizedBox(height: 20),
+            pw.Table.fromTextArray(
+              headers: ['Item', 'QTY', 'Weight (Kg)', 'Rate', 'Amount', 'Date'],
+              data: filteredStocks.map((stock) {
+                return [
+                  stock.item_name ?? '',
+                  stock.QTY?.toStringAsFixed(1) ?? 'N/A',
+                  stock.quantity_grams != null
+                      ? (stock.quantity_grams! / 1000).toStringAsFixed(3)
+                      : '0.000',
+                  stock.stock_price.toString(),
+                  stock.amount?.toStringAsFixed(2) ?? 'N/A',
+                  stock.added_date ?? '',
+                ];
+              }).toList(),
+            ),
+          ];
+        },
+      ),
+    );
+
+    // Save PDF (opens share/save dialog)
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
   }
 }

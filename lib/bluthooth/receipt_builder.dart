@@ -15,9 +15,6 @@ class ReceiptBuilder {
 
     List<int> bytes = [];
 
-    // Top margin
-    bytes += generator.feed(3);
-
     // Shop Header
     bytes += generator.text(
       'DILANKA DISTRIBUTOR R W K',
@@ -72,7 +69,6 @@ class ReceiptBuilder {
     // Cart Items header with clearer spacing
     bytes += generator.hr(ch: '-');
     bytes += generator.row([
-      PosColumn(text: '', width: 1), // left padding for centering
       PosColumn(text: 'Item', width: 5, styles: PosStyles(bold: true)),
       PosColumn(
         text: 'Weight',
@@ -81,7 +77,7 @@ class ReceiptBuilder {
       ),
       PosColumn(
         text: 'Rate',
-        width: 3,
+        width: 4,
         styles: PosStyles(align: PosAlign.right, bold: true),
       ),
     ]);
@@ -90,7 +86,6 @@ class ReceiptBuilder {
     // Cart Items data
     for (final item in cartItems) {
       bytes += generator.row([
-        PosColumn(text: '', width: 1), // left padding for centering
         PosColumn(text: item.itemName, width: 5),
         PosColumn(
           text: '${item.weight.toStringAsFixed(2)}kg',
@@ -99,7 +94,7 @@ class ReceiptBuilder {
         ),
         PosColumn(
           text: 'RS ${item.amount.toStringAsFixed(2)}',
-          width: 3,
+          width: 4,
           styles: PosStyles(align: PosAlign.right),
         ),
       ]);
@@ -120,7 +115,7 @@ class ReceiptBuilder {
       styles: PosStyles(align: PosAlign.right, bold: true),
     );
 
-    bytes += generator.feed(4); // Adds extra bottom height for tear space
+    bytes += generator.feed(2); // Adds height
 
     // Footer Section
     bytes += generator.text(

@@ -46,6 +46,9 @@ dependencies:
   http: ^1.6.0
   collection: ^1.19.1
 
+  pdf: ^3.11.0
+  printing: ^5.11.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
