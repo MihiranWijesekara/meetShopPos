@@ -70,28 +70,6 @@ class StockSummaryDialog extends StatelessWidget {
                   children: [
                     const SizedBox(height: 10),
                     const Text(
-                      'Total Items',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color.fromARGB(255, 54, 54, 54),
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '$totalItems',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 26, 11, 167),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    const Text(
                       'Total Weight',
                       style: TextStyle(
                         fontSize: 12,

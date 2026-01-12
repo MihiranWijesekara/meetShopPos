@@ -2,6 +2,9 @@ import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class Allsales extends StatefulWidget {
   final int month;
@@ -400,6 +403,115 @@ class _AllsalesState extends State<Allsales> {
     });
   }
 
+  Future<void> _downloadSalesPdf() async {
+    final pdf = pw.Document();
+
+    // Create PDF content with bills grouped
+    final billEntries = _groupedSales.entries.toList();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (context) {
+          final pages = <pw.Widget>[];
+
+          for (int i = 0; i < billEntries.length; i++) {
+            final entry = billEntries[i];
+            final billSales = entry.value;
+            final firstSale = billSales.first;
+
+            final billContent = pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                // Header
+                pw.Text(
+                  'Bill #${firstSale.billNo ?? 'N/A'}',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+
+                // Bill Details
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'Shop: ${firstSale.shopName ?? 'N/A'}',
+                          style: pw.TextStyle(fontSize: 10),
+                        ),
+                        pw.Text(
+                          'Date: ${firstSale.addedDate ?? 'N/A'}',
+                          style: pw.TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 8),
+
+                // Items Table
+                pw.Table.fromTextArray(
+                  headers: ['Item', 'Qty (kg)', 'Rate', 'Amount'],
+                  headerHeight: 20,
+                  cellHeight: 18,
+                  columnWidths: {
+                    0: const pw.FlexColumnWidth(2),
+                    1: const pw.FlexColumnWidth(1),
+                    2: const pw.FlexColumnWidth(1),
+                    3: const pw.FlexColumnWidth(1),
+                  },
+                  cellStyle: pw.TextStyle(fontSize: 9),
+                  headerStyle: pw.TextStyle(
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                  data: billSales.map((sale) {
+                    return [
+                      _getItemName(sale.itemId),
+                      ((sale.quantityKg ?? 0) / 1000).toStringAsFixed(2),
+                      sale.sellingPrice.toString(),
+                      (sale.amount ?? 0).toStringAsFixed(2),
+                    ];
+                  }).toList(),
+                ),
+                pw.SizedBox(height: 4),
+
+                // Total
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  children: [
+                    pw.Text(
+                      'Total: ${billSales.fold<double>(0, (sum, sale) => sum + (sale.amount ?? 0)).toStringAsFixed(2)}',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Divider(height: 12),
+              ],
+            );
+
+            pages.add(billContent);
+          }
+
+          return pages;
+        },
+      ),
+    );
+
+    // Save PDF
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -432,15 +544,34 @@ class _AllsalesState extends State<Allsales> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(width: 40),
-                      Text(
-                        'All Sales - Month: ${widget.month} / $_selectedYear',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                      Row(
+                        children: [
+                          const SizedBox(width: 40),
+                          Text(
+                            'All Sales - Month: ${widget.month} / $_selectedYear',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.download,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          onPressed: _downloadSalesPdf,
                         ),
                       ),
                     ],

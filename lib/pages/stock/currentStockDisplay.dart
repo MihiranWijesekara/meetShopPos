@@ -185,7 +185,8 @@ class _StockDisplayState extends State<StockDisplay> {
                   stock_price:
                       int.tryParse(rateController.text) ?? stock.stock_price,
                   selling_price:
-                      int.tryParse(sellingRateController.text) ?? stock.selling_price,
+                      int.tryParse(sellingRateController.text) ??
+                      stock.selling_price,
                   quantity_grams: int.tryParse(qtyController.text),
                   remain_quantity: double.tryParse(remainController.text),
                   amount: double.tryParse(amountController.text),
@@ -570,8 +571,19 @@ class _StockDisplayState extends State<StockDisplay> {
               children: [
                 Expanded(
                   child: _buildDetailItem(
-                    'Rate',
+                    'Stock Rate',
                     'Rs ${stock.stock_price ?? 0}',
+                    // sale.sellingPrice.toString(),
+                    Icons.attach_money,
+                    iconSize,
+                    fontSizeSmall,
+                    fontSizeSubtitle,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailItem(
+                    'Selling Rate',
+                    'Rs ${stock.selling_price ?? 0}',
                     Icons.attach_money,
                     iconSize,
                     fontSizeSmall,
