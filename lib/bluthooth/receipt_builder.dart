@@ -15,34 +15,33 @@ class ReceiptBuilder {
 
     List<int> bytes = [];
 
-    // Shop Header
+    // ===== HEADER =====
+    bytes += generator.feed(2);
     bytes += generator.text(
       'DILANKA DISTRIBUTOR R W K',
       styles: PosStyles(align: PosAlign.center, bold: true),
     );
-
-    bytes += generator.feed(2); // Adds height
+    bytes += generator.feed(1);
 
     bytes += generator.text(
-      'D.S ABEGUNAWARDANA MAWATHA KATUDENIYA OKANDAWATTA,MORAWAKA',
+      'D.S ABEGUNAWARDANA MAWATHA\nKATUDENIYA OKANDAWATTA, MORAWAKA',
       styles: PosStyles(align: PosAlign.center),
     );
-    bytes += generator.feed(2); // Adds height
+    bytes += generator.feed(1);
+
     bytes += generator.text(
       'TP : 07709109413',
       styles: PosStyles(align: PosAlign.center),
     );
-    bytes += generator.feed(2); // Adds height
     bytes += generator.text(
       'Authorized Distributor For CRYSBRO Chicken',
       styles: PosStyles(align: PosAlign.center),
     );
-    bytes += generator.feed(2); // Adds height
     bytes += generator.text(
       'Hotline : 077-2797276',
       styles: PosStyles(align: PosAlign.center),
     );
-    bytes += generator.feed(2); // Adds height
+    bytes += generator.feed(1);
 
     bytes += generator.hr();
     bytes += generator.text(
@@ -50,114 +49,110 @@ class ReceiptBuilder {
       styles: PosStyles(align: PosAlign.center, bold: true),
     );
     bytes += generator.hr();
-    bytes += generator.feed(2); // Adds height
-    // Customer Info
+
+    // ===== CUSTOMER INFO =====
+    bytes += generator.text('Bill No : $billNo');
     bytes += generator.text(
       'Customer : $shopName',
-      styles: PosStyles(align: PosAlign.left, bold: true),
+      styles: PosStyles(bold: true),
     );
-    bytes += generator.feed(2); // Adds height
-    bytes += generator.text(
-      'Address : $rootName',
-      styles: PosStyles(align: PosAlign.left, bold: true),
-    );
-    bytes += generator.feed(2); // Adds height
-    bytes += generator.text(
-      'Deliverd to : $shopName',
-      styles: PosStyles(align: PosAlign.left, bold: true),
-    );
-    bytes += generator.feed(2); // Adds height
-    bytes += generator.text(
-      'Inv.Date : $date',
-      styles: PosStyles(align: PosAlign.left, bold: true),
-    );
-    bytes += generator.feed(2); // Adds height
-    bytes += generator.text(
-      'Bill No: $billNo',
-      styles: PosStyles(align: PosAlign.left),
-    );
+    bytes += generator.text('Address  : $rootName');
+    bytes += generator.text('Delivered to : $shopName');
+    bytes += generator.text('Inv.Date : $date');
     bytes += generator.hr();
-    bytes += generator.feed(2); // Adds height
 
-    // Cart Items header with clearer spacing
-    bytes += generator.hr(ch: '-');
+    // ===== ITEM HEADER =====
     bytes += generator.row([
-      PosColumn(text: 'Item', width: 4, styles: PosStyles(bold: true)),
+      PosColumn(text: '#', width: 1, styles: PosStyles(bold: true)),
+      PosColumn(text: 'Item', width: 11, styles: PosStyles(bold: true)),
+    ]);
+
+    bytes += generator.row([
+      PosColumn(text: '', width: 1),
       PosColumn(
         text: 'Weight',
-        width: 2,
-        styles: PosStyles(align: PosAlign.right, bold: true),
+        width: 3,
+        styles: PosStyles(align: PosAlign.right),
       ),
       PosColumn(
         text: 'Rate',
-        width: 3,
-        styles: PosStyles(align: PosAlign.right, bold: true),
+        width: 4,
+        styles: PosStyles(align: PosAlign.right),
       ),
       PosColumn(
-        text: 'Total',
-        width: 3,
-        styles: PosStyles(align: PosAlign.right, bold: true),
+        text: 'Amount',
+        width: 4,
+        styles: PosStyles(align: PosAlign.right),
       ),
     ]);
+
     bytes += generator.hr(ch: '-');
+
+    // ===== ITEMS =====
     int index = 1;
-
     for (final item in cartItems) {
-      double itemTotal = item.amount;
+      final double itemTotal = item.amount;
 
+      // Item name line
       bytes += generator.row([
-        PosColumn(text: '$index. ${item.itemName}', width: 4),
+        PosColumn(text: '$index', width: 1),
+        PosColumn(text: item.itemName, width: 11),
+      ]);
+
+      // Item details line (TOTAL WIDTH = 12 ✅)
+      bytes += generator.row([
+        PosColumn(text: '', width: 1),
         PosColumn(
-          text: '${item.weight.toStringAsFixed(2)}',
-          width: 2,
+          text: item.weight.toStringAsFixed(3),
+          width: 3,
           styles: PosStyles(align: PosAlign.right),
         ),
         PosColumn(
           text: 'RS ${item.amount.toStringAsFixed(2)}',
-          width: 3,
+          width: 4,
           styles: PosStyles(align: PosAlign.right),
         ),
         PosColumn(
           text: itemTotal.toStringAsFixed(2),
-          width: 3,
+          width: 4,
           styles: PosStyles(align: PosAlign.right),
         ),
       ]);
 
-      // Add a small spacer line after each item to increase receipt height
-      bytes += generator.text(' ');
-
+      bytes += generator.feed(1);
       index++;
     }
 
     bytes += generator.hr();
+
+    // ===== TOTALS =====
     double totalDiscount = cartItems.fold(
       0.0,
       (sum, item) => sum + item.discount,
     );
 
     bytes += generator.text(
-      "TOTAL: RS ${totalAmount.toStringAsFixed(2)}",
-      styles: PosStyles(align: PosAlign.right, bold: true),
-    );
-    bytes += generator.text(
-      "TOTAL DISCOUNT: RS ${totalDiscount.toStringAsFixed(2)}",
+      'TOTAL : RS ${totalAmount.toStringAsFixed(2)}',
       styles: PosStyles(align: PosAlign.right, bold: true),
     );
 
-    bytes += generator.feed(2); // Adds height
-
     bytes += generator.text(
-      "Original Print Printed on ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
-      styles: PosStyles(align: PosAlign.left),
+      'DISCOUNT : RS ${totalDiscount.toStringAsFixed(2)}',
+      styles: PosStyles(align: PosAlign.right),
     );
-    bytes += generator.feed(2); // Adds height
+
+    bytes += generator.feed(2);
+
+    // ===== FOOTER =====
+    bytes += generator.text(
+      'Printed on ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+    );
     bytes += generator.hr();
     bytes += generator.text(
-      "-------Thank you----",
+      '------- Thank You -------',
       styles: PosStyles(align: PosAlign.center, bold: true),
     );
-    bytes += generator.feed(3);
+    bytes += generator.feed(4);
 
     return bytes;
   }

@@ -156,175 +156,6 @@ class _AllstockState extends State<Allstock> {
     }
   }
 
-  void _editStock(int index) async {
-    final stock = _groupedStocks[index];
-
-    int? selectedItemId = stock.item_id;
-    final qtyController = TextEditingController(
-      text: stock.QTY?.toString() ?? '',
-    );
-    final weightController = TextEditingController(
-      text: stock.quantity_grams?.toString() ?? '',
-    );
-    final rateController = TextEditingController(
-      text: stock.stock_price.toString(),
-    );
-    final sellingRateController = TextEditingController(
-      text: stock.selling_price.toString(),
-    );
-    final amountController = TextEditingController(
-      text: (stock.amount ?? (stock.stock_price * (stock.quantity_grams ?? 0)))
-          .toString(),
-    );
-    final remainController = TextEditingController(
-      text: stock.remain_quantity?.toString() ?? '',
-    );
-    final dateController = TextEditingController(text: stock.added_date ?? '');
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Edit Stock'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<int>(
-                  value: selectedItemId,
-                  decoration: const InputDecoration(
-                    labelText: 'Item',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: _items.map((item) {
-                    return DropdownMenuItem<int>(
-                      value: item.id,
-                      child: Text(item.name),
-                    );
-                  }).toList(),
-                  onChanged: (v) => setDialogState(() => selectedItemId = v),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: qtyController,
-                  decoration: const InputDecoration(
-                    labelText: 'QTY',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: weightController,
-                  decoration: const InputDecoration(
-                    labelText: 'Weight (Kg)',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (_) => setDialogState(() {
-                    final w = int.tryParse(weightController.text) ?? 0;
-                    final r = double.tryParse(rateController.text) ?? 0;
-                    amountController.text = (w * r).toStringAsFixed(2);
-                  }),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: rateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Rate',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (_) => setDialogState(() {
-                    final w = int.tryParse(weightController.text) ?? 0;
-                    final r = double.tryParse(rateController.text) ?? 0;
-                    amountController.text = (w * r).toStringAsFixed(2);
-                  }),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: amountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    border: OutlineInputBorder(),
-                  ),
-                  readOnly: true,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: remainController,
-                  decoration: const InputDecoration(
-                    labelText: 'Remain Stock',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: dateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Date',
-                    border: OutlineInputBorder(),
-                  ),
-                  readOnly: true,
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (picked != null) {
-                      setDialogState(() {
-                        dateController.text =
-                            '${picked.day}/${picked.month}/${picked.year}';
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (selectedItemId == null) return;
-                final updated = StockModel(
-                  id: stock.id,
-                  item_id: selectedItemId!,
-                  stock_price:
-                      int.tryParse(rateController.text) ?? stock.stock_price,
-                  selling_price:
-                      int.tryParse(sellingRateController.text) ??
-                      stock.selling_price,
-                  quantity_grams: int.tryParse(weightController.text),
-                  remain_quantity: double.tryParse(remainController.text),
-                  amount: double.tryParse(amountController.text),
-                  QTY: double.tryParse(qtyController.text),
-                  added_date: dateController.text,
-                );
-                await DatabaseHelper.instance.updateStock(updated);
-                Navigator.pop(context);
-                await _loadStocks();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Stock updated'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _deleteItem(int index) {
     final stock = _groupedStocks[index];
     final id = stock.id;
@@ -427,7 +258,7 @@ class _AllstockState extends State<Allstock> {
                               ),
                             ],
                           ),
-                          SizedBox(width: 130),
+                          SizedBox(width: 120),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
@@ -437,7 +268,7 @@ class _AllstockState extends State<Allstock> {
                               icon: const Icon(
                                 Icons.assessment,
                                 color: Colors.white,
-                                size: 24,
+                                size: 20,
                               ),
                               onPressed: () {
                                 showDialog(
@@ -463,7 +294,7 @@ class _AllstockState extends State<Allstock> {
                               icon: const Icon(
                                 Icons.download,
                                 color: Colors.white,
-                                size: 24,
+                                size: 20,
                               ),
                               onPressed: _downloadStockPdf,
                             ),
@@ -669,19 +500,7 @@ class _AllstockState extends State<Allstock> {
                           ),
                         ),
                         SizedBox(
-                          width: 55,
-                          child: Text(
-                            'QTY',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              color: Colors.grey[800],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 35,
+                          width: 50,
                           child: Text(
                             'Weight',
                             style: TextStyle(
@@ -696,6 +515,18 @@ class _AllstockState extends State<Allstock> {
                           width: 40,
                           child: Text(
                             'Rate',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            'Selling Rate',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
@@ -812,20 +643,8 @@ class _AllstockState extends State<Allstock> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 35,
-                                  child: Text(
-                                    stock.QTY?.toStringAsFixed(1) ?? 'N/A',
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                SizedBox(
                                   width: 45,
                                   child: Text(
-                                    // stock.quantity_grams?.toString() ?? 'N/A',
                                     '${stock.quantity_grams != null ? (stock.quantity_grams! / 1000).toStringAsFixed(3) : '0.000'} Kg',
                                     style: const TextStyle(
                                       fontSize: 10,
@@ -838,6 +657,17 @@ class _AllstockState extends State<Allstock> {
                                   width: 40,
                                   child: Text(
                                     stock.stock_price.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 40,
+                                  child: Text(
+                                    stock.selling_price.toString(),
                                     style: const TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
@@ -889,18 +719,6 @@ class _AllstockState extends State<Allstock> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      InkWell(
-                                        onTap: () => _editStock(index),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          child: const Icon(
-                                            Icons.edit_outlined,
-                                            color: Colors.blue,
-                                            size: 18,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 3),
                                       InkWell(
                                         onTap: () => _deleteItem(index),
                                         child: Container(
