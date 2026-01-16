@@ -94,7 +94,7 @@ class _AddStockPageState extends State<AddStockPage> {
       );
       await DatabaseHelper.instance.insertStock(newStock); // persist
 
-      Navigator.pop(context, {'itemId': itemId, 'price': stockRate});
+      Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Stock saved'),

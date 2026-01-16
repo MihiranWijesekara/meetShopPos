@@ -120,23 +120,26 @@ class _WeeklysalesState extends State<Weeklysales> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<int>(
-                  value: selectedItemId,
-                  decoration: const InputDecoration(
-                    labelText: 'Item',
-                    border: OutlineInputBorder(),
+                AbsorbPointer(
+                  child: DropdownButtonFormField<int>(
+                    value: selectedItemId,
+                    decoration: const InputDecoration(
+                      labelText: 'Item',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: _items.map((item) {
+                      return DropdownMenuItem<int>(
+                        value: item['id'],
+                        child: Text(item['name']),
+                      );
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() => selectedItemId = v),
                   ),
-                  items: _items.map((item) {
-                    return DropdownMenuItem<int>(
-                      value: item['id'],
-                      child: Text(item['name']),
-                    );
-                  }).toList(),
-                  onChanged: (v) => setDialogState(() => selectedItemId = v),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: quantityController,
+                  enabled: false,
                   decoration: const InputDecoration(
                     labelText: 'Quantity (g)',
                     border: OutlineInputBorder(),

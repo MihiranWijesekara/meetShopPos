@@ -102,6 +102,7 @@ class _TodaysalesState extends State<Todaysales> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // ...existing code...
                 TextField(
                   controller: billController,
                   enabled: false,
@@ -210,13 +211,107 @@ class _TodaysalesState extends State<Todaysales> {
               onPressed: () async {
                 if (selectedItemId == null) return;
 
+                // --- Stock Adjustment Logic ---
+                final db = DatabaseHelper.instance;
+                final prevItemId = sale.itemId;
+                final prevQty = sale.quantityKg ?? 0;
+                final newItemId = selectedItemId!;
+                final newQty = int.tryParse(quantityController.text) ?? 0;
+
+                // 1. Restore previous stock (add back previous quantity to previous item)
+                if (prevItemId != null && prevQty > 0) {
+                  // Find all stock entries for prevItemId, newest first
+                  final stockList = await db.database.then(
+                    (d) => d.query(
+                      'Stock',
+                      where: 'item_id = ?',
+                      whereArgs: [prevItemId],
+                      orderBy: 'added_date DESC, id DESC',
+                    ),
+                  );
+                  var qtyToRestore = prevQty.toDouble();
+                  for (var stock in stockList) {
+                    if (qtyToRestore <= 0) break;
+                    final remain = ((stock['remain_quantity'] ?? 0) as num)
+                        .toDouble();
+                    final total = ((stock['quantity_grams'] ?? 0) as num)
+                        .toDouble();
+                    final canRestore = total - remain;
+                    if (canRestore > 0) {
+                      final restoreAmount = qtyToRestore > canRestore
+                          ? canRestore
+                          : qtyToRestore;
+                      final newRemain = remain + restoreAmount;
+                      await db.database.then(
+                        (d) => d.update(
+                          'Stock',
+                          {'remain_quantity': newRemain},
+                          where: 'id = ?',
+                          whereArgs: [stock['id']],
+                        ),
+                      );
+                      qtyToRestore -= restoreAmount;
+                    }
+                  }
+                }
+
+                // 2. Reduce stock for new item (FIFO)
+                if (newItemId != null && newQty > 0) {
+                  final stockList = await db.database.then(
+                    (d) => d.query(
+                      'Stock',
+                      where: 'item_id = ? AND COALESCE(remain_quantity, 0) > 0',
+                      whereArgs: [newItemId],
+                      orderBy: 'added_date ASC, id ASC',
+                    ),
+                  );
+                  var qtyToSell = newQty.toDouble();
+                  for (var stock in stockList) {
+                    final remain = ((stock['remain_quantity'] ?? 0) as num)
+                        .toDouble();
+                    if (remain >= qtyToSell) {
+                      final newRemain = remain - qtyToSell;
+                      await db.database.then(
+                        (d) => d.update(
+                          'Stock',
+                          {'remain_quantity': newRemain},
+                          where: 'id = ?',
+                          whereArgs: [stock['id']],
+                        ),
+                      );
+                      qtyToSell = 0;
+                      break;
+                    } else {
+                      qtyToSell -= remain;
+                      await db.database.then(
+                        (d) => d.update(
+                          'Stock',
+                          {'remain_quantity': 0},
+                          where: 'id = ?',
+                          whereArgs: [stock['id']],
+                        ),
+                      );
+                    }
+                  }
+                  if (qtyToSell > 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Insufficient stock for selected item.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+                }
+
+                // --- Update Sale Record ---
                 final updateData = {
                   'id': sale.id,
                   'bill_no': billController.text.trim(),
                   'shop_id': sale.shopId,
                   'item_id': selectedItemId!,
                   'selling_price': int.tryParse(rateController.text) ?? 0,
-                  'quantity_grams': int.tryParse(quantityController.text),
+                  'quantity_grams': newQty,
                   'amount': double.tryParse(amountController.text),
                   'Vat_Number': sale.vatNumber,
                   'added_date': dateController.text,
@@ -227,7 +322,7 @@ class _TodaysalesState extends State<Todaysales> {
                 await _loadStocks();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Sale updated'),
+                    content: Text('Sale updated and stock adjusted'),
                     backgroundColor: Colors.green,
                   ),
                 );

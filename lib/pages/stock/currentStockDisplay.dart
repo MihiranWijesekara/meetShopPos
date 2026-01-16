@@ -222,6 +222,17 @@ class _StockDisplayState extends State<StockDisplay> {
       );
       return;
     }
+    // Only allow delete if remain_quantity == quantity_grams (full stock remains)
+    if ((stock.remain_quantity ?? 0).toDouble() !=
+        (stock.quantity_grams ?? 0).toDouble()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot delete: Some stock has already been used.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     showDialog(
       context: context,

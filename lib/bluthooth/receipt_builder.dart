@@ -108,7 +108,7 @@ class ReceiptBuilder {
           styles: PosStyles(align: PosAlign.right),
         ),
         PosColumn(
-          text: 'RS ${item.amount.toStringAsFixed(2)}',
+          text: 'RS ${item.sellingPrice.toStringAsFixed(2)}',
           width: 4,
           styles: PosStyles(align: PosAlign.right),
         ),
@@ -135,7 +135,7 @@ class ReceiptBuilder {
       'TOTAL : RS ${totalAmount.toStringAsFixed(2)}',
       styles: PosStyles(align: PosAlign.right, bold: true),
     );
-
+    bytes += generator.feed(1);
     bytes += generator.text(
       'DISCOUNT : RS ${totalDiscount.toStringAsFixed(2)}',
       styles: PosStyles(align: PosAlign.right),
