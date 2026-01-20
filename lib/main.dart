@@ -1,12 +1,16 @@
+import 'package:chicken_dilivery/pages/Auth/signIn.dart';
+import 'package:chicken_dilivery/pages/Auth/signUp.dart';
 import 'package:chicken_dilivery/pages/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'database/database_helper.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(); // <-- This line is required!
 
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
     sqfliteFfiInit();
@@ -34,7 +38,7 @@ class MyApp extends StatelessWidget {
       title: 'Chicken Sales',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      home: const DashboardPage(),
+      home: const Signup(),
       // home: const Printpage(),
     );
   }

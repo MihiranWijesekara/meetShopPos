@@ -48,6 +48,7 @@ dependencies:
 
   pdf: ^3.11.0
   printing: ^5.11.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +105,8 @@ flutter:
   # App icon asset (used by flutter_launcher_icons)
   assets:
     - assets/icon/CRYSBRO.jpg
+    - images/
+    - .env
 
 # Configuration for flutter_launcher_icons (automates icon generation)
 flutter_icons:
