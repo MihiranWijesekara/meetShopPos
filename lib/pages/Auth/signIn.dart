@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:chicken_dilivery/pages/dashboard.dart';
+import 'package:chicken_dilivery/service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:chicken_dilivery/pages/Auth/signUp.dart';
 
@@ -12,6 +16,60 @@ class _SigninPageState extends State<SigninPage> {
   // Controllers for the input fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false;
+
+  Future<void> loginUser() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter username and password")),
+      );
+      return;
+    }
+    setState(() => isLoading = true);
+    final success = await AuthService.signIn(username, password);
+    setState(() => isLoading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF00bf63),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Login Success",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+          elevation: 6,
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => DashboardPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ Invalid Username or Password")),
+      );
+    }
+  }
 
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
@@ -191,7 +249,7 @@ class _SigninPageState extends State<SigninPage> {
                     children: [
                       SizedBox(
                         height: 18,
-                        width: 18,
+                        width: 20,
                         child: Checkbox(
                           value: _rememberMe,
                           onChanged: (value) {
@@ -215,19 +273,19 @@ class _SigninPageState extends State<SigninPage> {
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: Navigate to forgot password
-                    },
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: const Color(0xFF00bf63),
-                        fontSize: isSmallScreen ? 12 : 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     // TODO: Navigate to forgot password
+                  //   },
+                  //   child: Text(
+                  //     'Forgot Password?',
+                  //     style: TextStyle(
+                  //       color: const Color(0xFF00bf63),
+                  //       fontSize: isSmallScreen ? 12 : 13,
+                  //       fontWeight: FontWeight.w600,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
 
@@ -236,16 +294,7 @@ class _SigninPageState extends State<SigninPage> {
               Container(
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Handle sign in logic
-                    if (_usernameController.text.isNotEmpty &&
-                        _passwordController.text.isNotEmpty) {
-                      // Sign in logic here
-                      print('Username: ${_usernameController.text}');
-                      print('Password: ${_passwordController.text}');
-                      print('Remember me: $_rememberMe');
-                    }
-                  },
+                  onPressed: isLoading ? null : loginUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00bf63),
                     foregroundColor: Colors.white,
@@ -304,3 +353,8 @@ class _SigninPageState extends State<SigninPage> {
     );
   }
 }
+
+
+
+//add no internet connection displaay correctly 
+//develop remeber me function 

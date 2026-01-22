@@ -1,6 +1,8 @@
 import 'package:chicken_dilivery/pages/Auth/signIn.dart';
 import 'package:chicken_dilivery/pages/Auth/signUp.dart';
 import 'package:chicken_dilivery/pages/dashboard.dart';
+import 'package:chicken_dilivery/widget/signIntest.dart';
+import 'package:chicken_dilivery/widget/signUpTest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
       title: 'Chicken Sales',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      home: const Signup(),
+      home: const SigninPage(),
       // home: const Printpage(),
     );
   }

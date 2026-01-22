@@ -65,7 +65,7 @@ class _SignupState extends State<Signup> {
     });
 
     try {
-      final registerUrl = dotenv.env['registerUrl'];
+      final registerUrl = dotenv.env['Url'];
       if (registerUrl == null || registerUrl.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Registration URL not configured.")),
@@ -164,7 +164,7 @@ class _SignupState extends State<Signup> {
   }
 
   bool _isPasswordVisible = false;
-  bool _agreeToTerms = false;
+  // bool _agreeToTerms = false;
 
   @override
   void dispose() {
