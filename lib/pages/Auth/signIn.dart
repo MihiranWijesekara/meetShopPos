@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chicken_dilivery/pages/dashboard.dart';
 import 'package:chicken_dilivery/service/auth_service.dart';
 import 'package:flutter/material.dart';

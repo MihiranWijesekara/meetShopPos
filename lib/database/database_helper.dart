@@ -32,6 +32,15 @@ class DatabaseHelper {
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
+      CREATE TABLE user (
+        id INTEGER PRIMARY KEY,
+        userName TEXT,
+        password TEXT,
+        status TEXT
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL
@@ -645,5 +654,75 @@ class DatabaseHelper {
   Future close() async {
     final db = await database;
     db.close();
+  }
+
+  // ------------------------
+  // Local user helpers
+  // ------------------------
+  /// Save or update a user record locally.
+  Future<void> saveUserCredentials(
+    String userName,
+    String password,
+    String status,
+  ) async {
+    final db = await database;
+    final existing = await db.query(
+      'user',
+      where: 'userName = ?',
+      whereArgs: [userName],
+      limit: 1,
+    );
+
+    final values = {
+      'userName': userName,
+      'password': password,
+      'status': status,
+    };
+
+    if (existing.isEmpty) {
+      await db.insert('user', values);
+    } else {
+      await db.update(
+        'user',
+        values,
+        where: 'userName = ?',
+        whereArgs: [userName],
+      );
+    }
+  }
+
+  /// Get a local saved user. If [userName] is omitted returns the first saved user.
+  Future<Map<String, dynamic>?> getLocalUser([String? userName]) async {
+    final db = await database;
+    List<Map<String, Object?>> rows;
+    if (userName == null) {
+      rows = await db.query('user', limit: 1);
+    } else {
+      rows = await db.query(
+        'user',
+        where: 'userName = ?',
+        whereArgs: [userName],
+        limit: 1,
+      );
+    }
+
+    if (rows.isEmpty) return null;
+    final r = rows.first;
+    return {
+      'id': r['id'],
+      'userName': r['userName'],
+      'password': r['password'],
+      'status': r['status'],
+    };
+  }
+
+  /// Delete a local saved user by username.
+  Future<int> deleteLocalUser(String userName) async {
+    final db = await database;
+    return await db.delete(
+      'user',
+      where: 'userName = ?',
+      whereArgs: [userName],
+    );
   }
 }

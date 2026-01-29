@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:chicken_dilivery/pages/Auth/signIn.dart';
+import 'package:chicken_dilivery/service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -65,30 +66,13 @@ class _SignupState extends State<Signup> {
     });
 
     try {
-      final registerUrl = dotenv.env['Url'];
-      if (registerUrl == null || registerUrl.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registration URL not configured.")),
-        );
-        setState(() {
-          isLoading = false;
-        });
-        return;
-      }
-      final url = Uri.parse(registerUrl);
-
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "action": "register",
-          "userName": _usernameController.text.trim(),
-          "firstName": _firstNameController.text.trim(),
-          "lastName": _lastNameController.text.trim(),
-          "shopName": _shopNameController.text.trim(),
-          "phoneNumber": _phoneNumberController.text.trim(),
-          "password": _passwordController.text.trim(),
-        }),
+      final result = await AuthService.signUp(
+        userName: _usernameController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        shopName: _shopNameController.text.trim(),
+        phoneNumber: _phoneNumberController.text.trim(),
+        password: _passwordController.text.trim(),
       );
 
       setState(() {
@@ -96,56 +80,24 @@ class _SignupState extends State<Signup> {
       });
 
       // Google Apps Script typically returns 200 or 302 for successful requests
-      if (response.statusCode == 200 ||
-          response.statusCode == 201 ||
-          response.statusCode == 302) {
-        try {
-          final responseData = jsonDecode(response.body);
-          if (responseData['status'] == 'success' ||
-              responseData['result'] == 'success') {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Registered Successfully!"),
-                backgroundColor: Colors.green,
-              ),
-            );
-            // Clear the form
-            _usernameController.clear();
-            _firstNameController.clear();
-            _lastNameController.clear();
-            _shopNameController.clear();
-            _phoneNumberController.clear();
-            _passwordController.clear();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(responseData['message'] ?? "Registration Failed"),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        } catch (e) {
-          // If response is not JSON, treat as success based on status code
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Registered Successfully!"),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Clear the form
-          _usernameController.clear();
-          _firstNameController.clear();
-          _lastNameController.clear();
-          _shopNameController.clear();
-          _phoneNumberController.clear();
-          _passwordController.clear();
-        }
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Clear the form
+        _usernameController.clear();
+        _firstNameController.clear();
+        _lastNameController.clear();
+        _shopNameController.clear();
+        _phoneNumberController.clear();
+        _passwordController.clear();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              "Registration Failed (Status: ${response.statusCode})",
-            ),
+            content: Text(result['message']),
             backgroundColor: Colors.red,
           ),
         );
