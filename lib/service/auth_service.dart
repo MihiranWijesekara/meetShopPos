@@ -118,22 +118,24 @@ class AuthService {
 
     // Offline login flow
     final local = await db.getLocalUser(username);
-    if (local == null)
+    if (local == null) {
       return {
         'loggedIn': false,
         'source': 'offline',
         'message': 'No local credentials',
       };
+    }
 
     final savedPass = local['password'] as String? ?? '';
     final savedStatus = (local['status'] as String?)?.toLowerCase() ?? '';
 
-    if (savedPass != password)
+    if (savedPass != password) {
       return {
         'loggedIn': false,
         'source': 'offline',
         'message': 'Invalid credentials (offline)',
       };
+    }
 
     // Only active users can login while offline
     if (savedStatus == 'active') {
@@ -181,7 +183,6 @@ class AuthService {
             'data': {},
           };
         }
-        ;
       } else {
         return {
           'success': false,

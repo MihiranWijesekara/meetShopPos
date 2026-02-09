@@ -1,5 +1,6 @@
 import 'package:chicken_dilivery/pages/dashboard.dart';
 import 'package:chicken_dilivery/service/auth_service.dart';
+import 'package:chicken_dilivery/service/preferences_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:chicken_dilivery/pages/Auth/signUp.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -17,10 +18,25 @@ Future<bool> hasInternet() async {
 }
 
 class _SigninPageState extends State<SigninPage> {
-  // Controllers for the input fields
+  final _preferencesHelper = PreferencesHelper();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _rememberMe = false;
   bool isLoading = false;
+  bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   Future<void> loginUser() async {
     final username = _usernameController.text.trim();
@@ -49,6 +65,15 @@ class _SigninPageState extends State<SigninPage> {
     if (result['loggedIn'] == true) {
       final source = result['source']; // online / offline
       final status = result['status']; // active
+
+      // ✅ IMPORTANT: Save credentials if "Remember Me" is checked
+      await _preferencesHelper.saveCredentials(
+        username,
+        password,
+        _rememberMe, // This was missing
+      );
+
+      await _preferencesHelper.setLoggedIn(true);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -95,18 +120,16 @@ class _SigninPageState extends State<SigninPage> {
     );
   }
 
-  bool _isPasswordVisible = false;
-  bool _rememberMe = false;
-  @override
-  void initState() {
-    super.initState();
-  }
+  Future<void> _loadSavedCredentials() async {
+    final savedData = await _preferencesHelper.getSavedCredentials();
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+    setState(() {
+      _rememberMe = savedData['rememberMe'];
+      if (_rememberMe) {
+        _usernameController.text = savedData['username'];
+        _passwordController.text = savedData['password'];
+      }
+    });
   }
 
   Widget _buildTextField({
@@ -301,19 +324,6 @@ class _SigninPageState extends State<SigninPage> {
                       ),
                     ],
                   ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     // TODO: Navigate to forgot password
-                  //   },
-                  //   child: Text(
-                  //     'Forgot Password?',
-                  //     style: TextStyle(
-                  //       color: const Color(0xFF00bf63),
-                  //       fontSize: isSmallScreen ? 12 : 13,
-                  //       fontWeight: FontWeight.w600,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
 
@@ -381,8 +391,3 @@ class _SigninPageState extends State<SigninPage> {
     );
   }
 }
-
-
-
-//add no internet connection displaay correctly 
-//develop remeber me function 
