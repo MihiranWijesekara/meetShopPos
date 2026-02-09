@@ -46,10 +46,10 @@ class AuthService {
         // The Apps Script should ideally return the account status in the response
         // (e.g. { status: 'success', accountStatus: 'Temporary' })
         final accountStatus =
-          responseData['accountStatus'] ??
-          responseData['userStatus'] ??
-          responseData['statusDetail'] ??
-          '';
+            responseData['accountStatus'] ??
+            responseData['userStatus'] ??
+            responseData['statusDetail'] ??
+            '';
         final success =
             (responseData['status'] == 'success' ||
             responseData['result'] == 'success');
@@ -80,6 +80,17 @@ class AuthService {
     if (internetAvailable) {
       final result = await loginOnline(username, password);
 
+      final message = (result['message'] ?? '').toString();
+      final isNetworkError =
+          message.contains('SocketException') ||
+          message.contains('Failed host lookup') ||
+          message.contains('No address associated with hostname');
+
+      if (isNetworkError) {
+        // Treat as offline when connectivity exists but internet is unreachable.
+        internetAvailable = false;
+      }
+
       if (result['success'] == true) {
         String status = (result['accountStatus'] as String?) ?? '';
         if (status.isEmpty) {
@@ -94,41 +105,46 @@ class AuthService {
         return {'loggedIn': true, 'source': 'online', 'status': status};
       }
 
-      return {
-        'loggedIn': false,
-        'source': 'online',
-        'message': result['message'],
-      };
-    } else {
-      final local = await db.getLocalUser(username);
-      if (local == null)
+      if (internetAvailable) {
         return {
           'loggedIn': false,
-          'source': 'offline',
-          'message': 'No local credentials',
+          'source': 'online',
+          'message': result['message'],
         };
-
-      final savedPass = local['password'] as String? ?? '';
-      final savedStatus = (local['status'] as String?)?.toLowerCase() ?? '';
-
-      if (savedPass != password)
-        return {
-          'loggedIn': false,
-          'source': 'offline',
-          'message': 'Invalid credentials (offline)',
-        };
-
-      // Only active users can login while offline
-      if (savedStatus == 'active') {
-        return {'loggedIn': true, 'source': 'offline', 'status': 'active'};
       }
 
+      // Fall through to offline flow when network is unreachable.
+    }
+
+    // Offline login flow
+    final local = await db.getLocalUser(username);
+    if (local == null)
       return {
         'loggedIn': false,
         'source': 'offline',
-        'message': 'Offline login requires active status',
+        'message': 'No local credentials',
       };
+
+    final savedPass = local['password'] as String? ?? '';
+    final savedStatus = (local['status'] as String?)?.toLowerCase() ?? '';
+
+    if (savedPass != password)
+      return {
+        'loggedIn': false,
+        'source': 'offline',
+        'message': 'Invalid credentials (offline)',
+      };
+
+    // Only active users can login while offline
+    if (savedStatus == 'active') {
+      return {'loggedIn': true, 'source': 'offline', 'status': 'active'};
     }
+
+    return {
+      'loggedIn': false,
+      'source': 'offline',
+      'message': 'Offline login requires active status',
+    };
   }
 
   static Future<Map<String, dynamic>> signUp({

@@ -2,6 +2,7 @@ import 'package:chicken_dilivery/pages/dashboard.dart';
 import 'package:chicken_dilivery/service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:chicken_dilivery/pages/Auth/signUp.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SigninPage extends StatefulWidget {
   const SigninPage({super.key});
@@ -10,13 +11,17 @@ class SigninPage extends StatefulWidget {
   State<SigninPage> createState() => _SigninPageState();
 }
 
+Future<bool> hasInternet() async {
+  final connectivityResult = await Connectivity().checkConnectivity();
+  return connectivityResult != ConnectivityResult.none;
+}
+
 class _SigninPageState extends State<SigninPage> {
   // Controllers for the input fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
 
- 
   Future<void> loginUser() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -27,11 +32,24 @@ class _SigninPageState extends State<SigninPage> {
       );
       return;
     }
+
     setState(() => isLoading = true);
-    final success = await AuthService.signIn(username, password);
+
+    final internetAvailable = await hasInternet();
+
+    final result = await AuthService.loginWithOfflineSupport(
+      username,
+      password,
+      internetAvailable: internetAvailable,
+    );
+
     setState(() => isLoading = false);
 
-    if (success) {
+    // ✅ LOGIN SUCCESS
+    if (result['loggedIn'] == true) {
+      final source = result['source']; // online / offline
+      final status = result['status']; // active
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color(0xFF00bf63),
@@ -45,7 +63,9 @@ class _SigninPageState extends State<SigninPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "Login Success",
+                  source == 'offline'
+                      ? "Offline Login Successful"
+                      : "Login Successful",
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -56,18 +76,23 @@ class _SigninPageState extends State<SigninPage> {
             ],
           ),
           duration: const Duration(seconds: 2),
-          elevation: 6,
         ),
       );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => DashboardPage()),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Invalid Username or Password")),
-      );
+      return;
     }
+
+    // ❌ LOGIN FAILED
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result['message'] ?? "Login failed"),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   bool _isPasswordVisible = false;
