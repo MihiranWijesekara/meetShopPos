@@ -5,7 +5,7 @@ import 'package:chicken_dilivery/database/database_helper.dart';
 class AuthService {
   //correct ul
   static const String apiUrl =
-      'https://script.google.com/macros/s/AKfycbw6amldD40c19Ovo2MN4gdCD4ERvt2WPDBum8iPn0qozr8BQ4wtX0L7huO4aZfScE3a/exec';
+      'https://script.google.com/macros/s/AKfycbxWkvsXB7z1dj1p8nreqbBJRvbHYoraXwnFRmfStmaI0GcbIXyuwxq-gkDeaA1lRS5c/exec';
 
   //correct sign in method
   static Future<bool> signIn(String username, String password) async {
@@ -46,11 +46,10 @@ class AuthService {
         // The Apps Script should ideally return the account status in the response
         // (e.g. { status: 'success', accountStatus: 'Temporary' })
         final accountStatus =
-            responseData['accountStatus'] ??
-            responseData['userStatus'] ??
-            responseData['statusDetail'] ??
-            responseData['status'] ??
-            '';
+          responseData['accountStatus'] ??
+          responseData['userStatus'] ??
+          responseData['statusDetail'] ??
+          '';
         final success =
             (responseData['status'] == 'success' ||
             responseData['result'] == 'success');
@@ -84,9 +83,9 @@ class AuthService {
       if (result['success'] == true) {
         String status = (result['accountStatus'] as String?) ?? '';
         if (status.isEmpty) {
-          // If server didn't return explicit account status, default to 'Temporary'.
+          // If server didn't return explicit account status, default to 'active'.
           // Prefer updating your Apps Script to include the real status in the response.
-          status = 'Temporary';
+          status = 'active';
         }
 
         // Save locally so future offline login works for active users

@@ -16,6 +16,7 @@ class _SigninPageState extends State<SigninPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
 
+ 
   Future<void> loginUser() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -71,6 +72,10 @@ class _SigninPageState extends State<SigninPage> {
 
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {

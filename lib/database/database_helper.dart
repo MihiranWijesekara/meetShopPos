@@ -97,6 +97,17 @@ class DatabaseHelper {
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Ensure legacy databases get the `user` table if it was introduced later.
+    // Use IF NOT EXISTS so this is safe to run on any version.
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS user (
+        id INTEGER PRIMARY KEY,
+        userName TEXT,
+        password TEXT,
+        status TEXT
+      )
+    ''');
+
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS roots (

@@ -1,3 +1,4 @@
+import 'package:chicken_dilivery/pages/Auth/signIn.dart';
 import 'package:chicken_dilivery/pages/Managemnt/managementDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/allSalesDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/salesDashboard.dart';
@@ -145,13 +146,17 @@ class DashboardPage extends StatelessWidget {
                         ),
                         child: IconButton(
                           icon: const Icon(
-                            Icons.notifications_outlined,
+                            Icons.logout_outlined,
                             color: Colors.white,
                             size: 24,
                           ),
                           onPressed: () {
-                            // Navigate to notifications
-                            // Navigator.pushNamed(context, '/notifications');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SigninPage(),
+                              ),
+                            );
                           },
                         ),
                       ),
