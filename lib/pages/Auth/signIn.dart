@@ -21,7 +21,7 @@ class _SigninPageState extends State<SigninPage> {
   final _preferencesHelper = PreferencesHelper();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _rememberMe = false;
+  bool _rememberMe = true;
   bool isLoading = false;
   bool _isPasswordVisible = false;
 
@@ -124,7 +124,7 @@ class _SigninPageState extends State<SigninPage> {
     final savedData = await _preferencesHelper.getSavedCredentials();
 
     setState(() {
-      _rememberMe = savedData['rememberMe'];
+      _rememberMe = (savedData['rememberMe'] as bool?) ?? true;
       if (_rememberMe) {
         _usernameController.text = savedData['username'];
         _passwordController.text = savedData['password'];

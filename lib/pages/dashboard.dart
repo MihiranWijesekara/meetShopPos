@@ -17,8 +17,8 @@ class DashboardPage extends StatelessWidget {
         title: 'Sales',
         subtitle: 'View sales',
         icon: Icons.trending_up,
-        color: const Color(0xFF4CAF50),
-        gradientColors: [const Color(0xFF4CAF50), const Color(0xFF66BB6A)],
+        color: const Color(0xFF2D8B8B),
+        gradientColors: [const Color(0xFF2D8B8B), const Color(0xFF1F6363)],
         onTap: () {
           // Navigate to Items page
           Navigator.push(
@@ -31,8 +31,8 @@ class DashboardPage extends StatelessWidget {
         title: 'Stock',
         subtitle: 'Inventory',
         icon: Icons.inventory_2_outlined,
-        color: const Color(0xFF2196F3),
-        gradientColors: [const Color(0xFF2196F3), const Color(0xFF42A5F5)],
+        color: const Color(0xFF4A90E2),
+        gradientColors: [const Color(0xFF4A90E2), const Color(0xFF357ABD)],
         onTap: () {
           // Navigate to Items page
           Navigator.push(
@@ -45,8 +45,8 @@ class DashboardPage extends StatelessWidget {
         title: 'All Sales',
         subtitle: 'History of sales',
         icon: Icons.receipt_long_outlined,
-        color: const Color(0xFFFF9800),
-        gradientColors: [const Color(0xFFFF9800), const Color(0xFFFFB74D)],
+        color: const Color(0xFFA68E6B),
+        gradientColors: [const Color(0xFFA68E6B), const Color(0xFF8C7758)],
         onTap: () {
           // Navigate to Items page
           Navigator.push(
@@ -59,8 +59,8 @@ class DashboardPage extends StatelessWidget {
         title: 'All Stocks',
         subtitle: 'History of stocks',
         icon: Icons.history,
-        color: const Color(0xFFE91E63),
-        gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
+        color: const Color(0xFFF04579),
+        gradientColors: [const Color(0xFFF04579), const Color(0xFFD13262)],
         onTap: () {
           // Navigate to Items page
           Navigator.push(
@@ -74,8 +74,8 @@ class DashboardPage extends StatelessWidget {
         title: 'Management',
         subtitle: 'Items & Settings',
         icon: Icons.category_outlined,
-        color: const Color(0xFF9C27B0),
-        gradientColors: [const Color(0xFF9C27B0), const Color(0xFFAB47BC)],
+        color: const Color(0xFF8E9AAF),
+        gradientColors: [const Color(0xFF8E9AAF), const Color(0xFF727D91)],
         onTap: () {
           // Navigate to Items page
           Navigator.push(
@@ -89,23 +89,14 @@ class DashboardPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         toolbarHeight: 80,
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                const Color.fromARGB(255, 26, 11, 167),
-                const Color.fromARGB(255, 21, 5, 196),
-              ],
-            ),
-          ),
+          color: const Color(0xFFF8F9FA),
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -122,18 +113,17 @@ class DashboardPage extends StatelessWidget {
                           Text(
                             'Dashboard',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                              color: const Color(0xFF1A1A1A),
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Welcome back!',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
+                              color: const Color(0xFF7D7D7D),
+                              fontSize: 16,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -147,7 +137,7 @@ class DashboardPage extends StatelessWidget {
                         child: IconButton(
                           icon: const Icon(
                             Icons.logout_outlined,
-                            color: Colors.white,
+                            color: Color.fromARGB(255, 239, 7, 7),
                             size: 24,
                           ),
                           onPressed: () {
@@ -251,13 +241,12 @@ class _DashboardCardState extends State<_DashboardCard>
             end: Alignment.bottomRight,
             colors: widget.cardData.gradientColors,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: widget.cardData.color.withOpacity(0.3),
-              spreadRadius: 0,
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -293,17 +282,16 @@ class _DashboardCardState extends State<_DashboardCard>
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     widget.cardData.subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                 ],
