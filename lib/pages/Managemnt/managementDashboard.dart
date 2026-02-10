@@ -24,34 +24,6 @@ class Managementdashboard extends StatelessWidget {
           );
         },
       ),
-      _DashCardData(
-        title: 'Shop',
-        subtitle: 'Store Settings',
-        icon: Icons.store_outlined,
-        color: const Color(0xFF2196F3),
-        gradientColors: [const Color(0xFF2196F3), const Color(0xFF42A5F5)],
-        onTap: () {
-          // Navigate to Shop page
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ShopPage()),
-          );
-        },
-      ),
-      _DashCardData(
-        title: 'Root',
-        subtitle: 'Admin Access',
-        icon: Icons.admin_panel_settings_outlined,
-        color: const Color(0xFFE91E63),
-        gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],
-        onTap: () {
-          // Navigate to Root page
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Rootpage()),
-          );
-        },
-      ),
     ];
 
     return Scaffold(
