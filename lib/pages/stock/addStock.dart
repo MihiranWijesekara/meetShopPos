@@ -100,7 +100,8 @@ class _AddStockPageState extends State<AddStockPage> {
           content: Text('Stock saved'),
           backgroundColor: Colors.green,
         ),
-      );
+    
+           );
     }
   }
 

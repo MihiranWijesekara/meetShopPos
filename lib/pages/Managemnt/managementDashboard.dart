@@ -1,6 +1,4 @@
 import 'package:chicken_dilivery/pages/Item/itemPage.dart';
-import 'package:chicken_dilivery/pages/Managemnt/rootPage.dart';
-import 'package:chicken_dilivery/pages/Managemnt/shopPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

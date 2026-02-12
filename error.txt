@@ -1,12 +1,6 @@
-1- Gram ganaath adu wena widiyta ona hadanna = Done
-2- item id eka display wena eke aulak thiyenawa = Done
+Daily profit
+weekly profit
+monthly profit
 
-5 - sales eka display wena eke aulk thioyenawa = Done
-6 - Recipt print wena ekata model ekak set karanna = Done
-
-
-3 - sales delete wenakota e tika stock ekata add wenna ona
-7 = All sales and All stock display 2026/1 this month disply current year  , but can't display past 
-year january month sales and stock
-
-8 = 
+report section ekak add karalaa masen maset item kochara sell welada profit eka kiyada total profit eka display karamu card ekak set karala
+ita passe ekin eka item tika kochara kg ganak sell welada sahan eke profit eka display karamu

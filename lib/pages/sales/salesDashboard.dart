@@ -171,7 +171,7 @@ class _SalesDashboardState extends State<SalesDashboard> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: _SummaryCard(
-                    title: 'Yesterday',
+                    title: 'Yesterday Sales',
                     amount: loading
                         ? 'Loading...'
                         : 'RS ${yesterdayTotal!.toStringAsFixed(2)}',
