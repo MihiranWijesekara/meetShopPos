@@ -357,6 +357,43 @@ class _WeeklysalesState extends State<Weeklysales> {
                           ),
                         ],
                       ),
+
+                      Row(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 35,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Profit',
+                                  style: TextStyle(
+                                    color: const Color.fromARGB(244, 3, 3, 3),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  'RS 12,345',
+                                  style: TextStyle(
+                                    color: const Color.fromARGB(255, 0, 0, 0),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
