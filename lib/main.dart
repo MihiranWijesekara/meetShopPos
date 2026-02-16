@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
       home: const SigninPage(),
-      // home: const Printpage(),
+      // home: const Printpage(),+
     );
   }
 }

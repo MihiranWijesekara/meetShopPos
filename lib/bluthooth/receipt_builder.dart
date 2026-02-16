@@ -3,12 +3,10 @@ import 'package:chicken_dilivery/Model/CartItemModel.dart';
 
 class ReceiptBuilder {
   static Future<List<int>> buildReceipt({
-    required String shopName,
     required String billNo,
     required String date,
     required List<CartItem> cartItems,
     required double totalAmount,
-    required String rootName,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
@@ -52,12 +50,6 @@ class ReceiptBuilder {
 
     // ===== CUSTOMER INFO =====
     bytes += generator.text('Bill No : $billNo');
-    bytes += generator.text(
-      'Customer : $shopName',
-      styles: PosStyles(bold: true),
-    );
-    bytes += generator.text('Address  : $rootName');
-    bytes += generator.text('Delivered to : $shopName');
     bytes += generator.text('Inv.Date : $date');
     bytes += generator.hr();
 

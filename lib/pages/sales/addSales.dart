@@ -20,9 +20,7 @@ class _AddsalesState extends State<Addsales> {
   final _formKey = GlobalKey<FormState>();
   final _sellingRateController = TextEditingController();
   final _billNumberController = TextEditingController();
-  final _vatController = TextEditingController();
   final _dateController = TextEditingController();
-  final _qtyController = TextEditingController(); // <-- Add this line
   final _kgController = TextEditingController();
   final _gramController = TextEditingController();
 
@@ -42,8 +40,6 @@ class _AddsalesState extends State<Addsales> {
   // Root + shops state
   List<RootModel> _roots = [];
   List<Shopmodel> _shops = [];
-  int? _selectedRootId;
-  Shopmodel? _selectedShop;
   bool _isGeneratingBillNumber = true;
 
   @override
@@ -61,9 +57,7 @@ class _AddsalesState extends State<Addsales> {
   void dispose() {
     _sellingRateController.dispose();
     _billNumberController.dispose();
-    _vatController.dispose();
     _dateController.dispose();
-    _qtyController.dispose();
     _kgController.dispose();
     _gramController.dispose();
     super.dispose();
@@ -282,23 +276,11 @@ class _AddsalesState extends State<Addsales> {
   Future<void> _saveAllSales() async {
     debugPrint('--- _saveAllSales called ---');
     debugPrint('Cart items: ${_cartItems.length}');
-    debugPrint('Selected shop: $_selectedShop');
     if (_cartItems.isEmpty) {
       debugPrint('Cart is empty.');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cart is empty. Add items first.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    if (_selectedShop == null) {
-      debugPrint('No shop selected.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a shop'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -340,10 +322,6 @@ class _AddsalesState extends State<Addsales> {
     try {
       final billNumber = _billNumberController.text;
       final date = _dateController.text;
-      final vatNumber = _vatController.text;
-      debugPrint(
-        'Saving sales: billNo=$billNumber, date=$date, vat=$vatNumber',
-      );
       for (var cartItem in _cartItems) {
         final int qtyGrams = (cartItem.weight * 1000)
             .round(); // ✅ convert kg -> grams
@@ -354,7 +332,6 @@ class _AddsalesState extends State<Addsales> {
 
         final newSales = Salesmodel(
           billNo: billNumber,
-          shopId: _selectedShop!.id,
           itemId: cartItem.itemId,
 
           // store as int if your DB column is int (price per KG)
@@ -366,9 +343,7 @@ class _AddsalesState extends State<Addsales> {
               .toInt(), // convert double to int for quantityKg
 
           amount: cartItem.amount,
-          vatNumber: vatNumber,
           addedDate: date,
-          qty: int.tryParse(_qtyController.text),
         );
 
         final saleMap = newSales.toMap();
@@ -388,14 +363,10 @@ class _AddsalesState extends State<Addsales> {
       if (shouldPrint) {
         debugPrint('Printing receipt...');
         await PrinterService.printReceipt(
-          shopName: _selectedShop!.Shopname,
           billNo: billNumber,
           date: date,
           cartItems: _cartItems,
           totalAmount: _totalAmount,
-          rootName: _selectedRootId != null
-              ? _roots.firstWhere((root) => root.id == _selectedRootId!).name
-              : '',
         );
       }
 
@@ -413,10 +384,6 @@ class _AddsalesState extends State<Addsales> {
       // Clear cart and reset
       setState(() {
         _cartItems.clear();
-        _selectedShop = null;
-        _selectedRootId = null;
-        _vatController.clear();
-        _qtyController.clear();
       });
 
       // Generate new bill number for next sale

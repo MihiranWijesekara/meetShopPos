@@ -92,7 +92,6 @@ class DatabaseHelper {
       )
     ''');
 
-
     if (oldVersion < 4) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS Stock (
@@ -163,7 +162,6 @@ class DatabaseHelper {
     final db = await database;
     return await db.insert('items', item.toMap());
   }
-
 
   // Insert stock
   Future<int> insertStock(StockModel stock) async {
@@ -248,13 +246,46 @@ class DatabaseHelper {
     });
   }
 
+  //Daily total Profit (Correct)
+  Future<double> getTodayTotalProfit() async {
+    final db = await database;
+    final today = DateTime.now();
+    final padded =
+        '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+    final unpadded = '${today.day}/${today.month}/${today.year}';
+    // For each sale today, get the latest stock_price for the item
+    final rows = await db.rawQuery(
+      '''
+      SELECT S.selling_price, S.Quantity_grams, St.stock_price
+      FROM Sales S
+      LEFT JOIN (
+        SELECT item_id, MAX(id) as max_stock_id
+        FROM Stock
+        GROUP BY item_id
+      ) latestStock ON S.item_id = latestStock.item_id
+      LEFT JOIN Stock St ON St.id = latestStock.max_stock_id
+      WHERE S.added_date = ? OR S.added_date = ?
+    ''',
+      [padded, unpadded],
+    );
+
+    double totalProfit = 0.0;
+    for (final row in rows) {
+      final sellingPrice = (row['selling_price'] ?? 0) as num;
+      final stockPrice = (row['stock_price'] ?? 0) as num;
+      final qtyGrams = (row['quantity_grams'] ?? 0) as num;
+      final profit = (sellingPrice - stockPrice) * (qtyGrams / 1000.0);
+      totalProfit += profit;
+    }
+    return totalProfit;
+  }
+
   // Get all items
   Future<List<ItemModel>> getAllItems() async {
     final db = await database;
     final result = await db.query('items', orderBy: 'id ASC');
     return result.map((map) => ItemModel.fromMap(map)).toList();
   }
-
 
   // Get all stock
   Future<List<StockModel>> getStockByMonthAndYear(int month, int year) async {

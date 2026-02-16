@@ -1,5 +1,6 @@
+import 'package:chicken_dilivery/pages/Report/reportPage.dart';
 import 'package:chicken_dilivery/pages/Auth/signIn.dart';
-import 'package:chicken_dilivery/pages/Managemnt/managementDashboard.dart';
+import 'package:chicken_dilivery/pages/Item/itemPage.dart';
 import 'package:chicken_dilivery/pages/sales/allSalesDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/salesDashboard.dart';
 import 'package:chicken_dilivery/pages/stock/allStockDashboard.dart';
@@ -71,8 +72,8 @@ class DashboardPage extends StatelessWidget {
       ),
 
       _DashCardData(
-        title: 'Management',
-        subtitle: 'Items & Settings',
+        title: 'Items',
+        subtitle: 'Manage items',
         icon: Icons.category_outlined,
         color: const Color(0xFF8E9AAF),
         gradientColors: [const Color(0xFF8E9AAF), const Color(0xFF727D91)],
@@ -80,9 +81,24 @@ class DashboardPage extends StatelessWidget {
           // Navigate to Items page
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const Managementdashboard(),
-            ),
+            MaterialPageRoute(builder: (context) => const ItemPage()),
+          );
+        },
+      ),
+      _DashCardData(
+        title: 'Reports',
+        subtitle: 'Generate reports',
+        icon: Icons.bar_chart_outlined,
+        // Using a vibrant Indigo to contrast the Pink and Brown cards
+        color: const Color(0xFF5C6BC0),
+        gradientColors: [
+          const Color(0xFF5C6BC0), // Lighter top-left
+          const Color(0xFF3F51B5), // Darker bottom-right for depth
+        ],
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReportPage()),
           );
         },
       ),

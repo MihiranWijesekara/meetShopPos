@@ -11,12 +11,10 @@ class PrinterService {
   static final BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
 
   static Future<void> printMobileBluetooth({
-    required String shopName,
     required String billNo,
     required String date,
     required List<CartItem> cartItems,
     required double totalAmount,
-    required String rootName,
   }) async {
     try {
       var isConnected = await bluetooth.isConnected ?? false;
@@ -26,12 +24,10 @@ class PrinterService {
         await bluetooth.connect(devices[0]);
       }
       List<int> data = await ReceiptBuilder.buildReceipt(
-        shopName: shopName,
         billNo: billNo,
         date: date,
         cartItems: cartItems,
         totalAmount: totalAmount,
-        rootName: rootName,
       );
       bluetooth.writeBytes(Uint8List.fromList(data));
     } catch (e) {
@@ -42,12 +38,10 @@ class PrinterService {
   // -------------------- DESKTOP PRINTER --------------------
   // Works for Windows, macOS, Linux via network/USB printers
   static Future<void> printDesktop({
-    required String shopName,
     required String billNo,
     required String date,
     required List<CartItem> cartItems,
     required double totalAmount,
-    required String rootName,
   }) async {
     final profile = await CapabilityProfile.load();
     final printer = NetworkPrinter(PaperSize.mm58, profile);
@@ -57,43 +51,36 @@ class PrinterService {
     final result = await printer.connect(printerIp, port: 9100);
     if (result == PosPrintResult.success) {
       printer.rawBytes(await ReceiptBuilder.buildReceipt(
-        shopName: shopName,
         billNo: billNo,
         date: date,
         cartItems: cartItems,
         totalAmount: totalAmount,
-        rootName: rootName,
       ));
       printer.disconnect();
     }
   }
 
   static Future<void> printReceipt({
-    required String shopName,
     required String billNo,
     required String date,
     required List<CartItem> cartItems,
     required double totalAmount,
-    required String rootName,
   }) async {
     try {
       if (Platform.isAndroid || Platform.isIOS) {
         await printMobileBluetooth(
-          shopName: shopName,
           billNo: billNo,
           date: date,
           cartItems: cartItems,
           totalAmount: totalAmount,
-          rootName: rootName,
         );
       } else {
         await printDesktop(
-          shopName: shopName,
           billNo: billNo,
           date: date,
           cartItems: cartItems,
           totalAmount: totalAmount,
-          rootName: rootName,
+
         );
       }
     } catch (e) {
