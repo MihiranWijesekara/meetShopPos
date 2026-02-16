@@ -14,6 +14,7 @@ class _MonthlysalesState extends State<Monthlysales> {
   List<Salesmodel> sales = [];
   bool isLoading = false;
   List<Map<String, dynamic>> _items = [];
+  double profit = 0.0;
 
   int _currentPage = 0;
   final int _pageSize = 30;
@@ -26,6 +27,14 @@ class _MonthlysalesState extends State<Monthlysales> {
     super.initState();
     _loadItems();
     _loadStocks();
+    _monthlyProfit();
+  }
+
+  Future<void> _monthlyProfit() async {
+    final result = await DatabaseHelper.instance.getTodayTotalProfit();
+    setState(() {
+      profit = result is num ? result.toDouble() : 0.0;
+    });
   }
 
   Future<void> _loadItems() async {
@@ -383,7 +392,7 @@ class _MonthlysalesState extends State<Monthlysales> {
                                   ),
                                 ),
                                 Text(
-                                  'RS 12,345',
+                                  'RS ${profit.toStringAsFixed(2)}',
                                   style: TextStyle(
                                     color: const Color.fromARGB(255, 0, 0, 0),
                                     fontSize: 12,

@@ -14,6 +14,7 @@ class _WeeklysalesState extends State<Weeklysales> {
   List<Salesmodel> sales = [];
   bool isLoading = false;
   List<Map<String, dynamic>> _items = [];
+  double profit = 0.0;
 
   int _currentPage = 0;
   final int _pageSize = 30;
@@ -26,6 +27,14 @@ class _WeeklysalesState extends State<Weeklysales> {
     super.initState();
     _loadItems();
     _loadStocks();
+    _weeklyProfit();
+  }
+
+  Future<void> _weeklyProfit() async {
+    final result = await DatabaseHelper.instance.getWeeklyTotalProfit();
+    setState(() {
+      profit = result is num ? result.toDouble() : 0.0;
+    });
   }
 
   Future<void> _loadItems() async {
@@ -382,7 +391,7 @@ class _WeeklysalesState extends State<Weeklysales> {
                                   ),
                                 ),
                                 Text(
-                                  'RS 12,345',
+                                  'RS ${profit.toStringAsFixed(2)}',
                                   style: TextStyle(
                                     color: const Color.fromARGB(255, 0, 0, 0),
                                     fontSize: 12,

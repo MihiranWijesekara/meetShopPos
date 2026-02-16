@@ -268,7 +268,81 @@ class DatabaseHelper {
     ''',
       [padded, unpadded],
     );
+    double totalProfit = 0.0;
+    for (final row in rows) {
+      final sellingPrice = (row['selling_price'] ?? 0) as num;
+      final stockPrice = (row['stock_price'] ?? 0) as num;
+      final qtyGrams = (row['quantity_grams'] ?? 0) as num;
+      final profit = (sellingPrice - stockPrice) * (qtyGrams / 1000.0);
+      totalProfit += profit;
+    }
+    return totalProfit;
+  }
 
+  // Weekly total profit
+  Future<double> getWeeklyTotalProfit() async {
+    final db = await database;
+    final now = DateTime.now();
+    // Get the start of the week (Monday)
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    // Generate all dates in the current week as D/M/YYYY (no leading zeros)
+    List<String> weekDates = [];
+    for (int i = 0; i < 7; i++) {
+      final date = startOfWeek.add(Duration(days: i));
+      weekDates.add('${date.day}/${date.month}/${date.year}');
+    }
+    // Create placeholders for the IN clause
+    final placeholders = List.filled(weekDates.length, '?').join(',');
+    final rows = await db.rawQuery('''
+      SELECT S.selling_price, S.Quantity_grams, St.stock_price
+      FROM Sales S
+      LEFT JOIN (
+        SELECT item_id, MAX(id) as max_stock_id
+        FROM Stock
+        GROUP BY item_id
+      ) latestStock ON S.item_id = latestStock.item_id
+      LEFT JOIN Stock St ON St.id = latestStock.max_stock_id
+      WHERE S.added_date IN ($placeholders)
+    ''', weekDates);
+    double totalProfit = 0.0;
+    for (final row in rows) {
+      final sellingPrice = (row['selling_price'] ?? 0) as num;
+      final stockPrice = (row['stock_price'] ?? 0) as num;
+      final qtyGrams = (row['quantity_grams'] ?? 0) as num;
+      final profit = (sellingPrice - stockPrice) * (qtyGrams / 1000.0);
+      totalProfit += profit;
+    }
+    return totalProfit;
+  }
+
+  Future<double> getMonthlyTotalProfit() async {
+    final db = await database;
+    final now = DateTime.now();
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+
+    // Get the last day of the current month
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+    // Generate all dates in the current month
+    List<String> monthDates = [];
+    for (int i = 0; i < lastDayOfMonth.day; i++) {
+      final date = firstDayOfMonth.add(Duration(days: i));
+      monthDates.add('${date.day}/${date.month}/${date.year}');
+    }
+
+    // Create placeholders for the IN clause
+    final placeholders = List.filled(monthDates.length, '?').join(',');
+    final rows = await db.rawQuery('''
+      SELECT S.selling_price, S.Quantity_grams, St.stock_price
+      FROM Sales S
+      LEFT JOIN (
+        SELECT item_id, MAX(id) as max_stock_id
+        FROM Stock
+        GROUP BY item_id
+      ) latestStock ON S.item_id = latestStock.item_id
+      LEFT JOIN Stock St ON St.id = latestStock.max_stock_id
+      WHERE S.added_date IN ($placeholders)
+    ''', monthDates);
     double totalProfit = 0.0;
     for (final row in rows) {
       final sellingPrice = (row['selling_price'] ?? 0) as num;

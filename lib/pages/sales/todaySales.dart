@@ -483,7 +483,7 @@ class _TodaysalesState extends State<Todaysales> {
                                   ),
                                 ),
                                 Text(
-                                  profit.toStringAsFixed(2),
+                                  'RS ${profit.toStringAsFixed(2)}',
                                   style: TextStyle(
                                     color: const Color.fromARGB(255, 0, 0, 0),
                                     fontSize: 12,
