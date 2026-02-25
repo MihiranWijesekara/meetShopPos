@@ -1,3 +1,4 @@
+import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,66 +15,12 @@ class ReportItem {
   });
 
   final String name;
-  final int stockKg;
-  final int soldKg;
+  final double stockKg;
+  final double soldKg;
   final double income;
   final double profit;
   final String? imageUrl;
 }
-
-// ── Sample data ──────────────────────────────────────────────────────────────
-
-const List<ReportItem> _sampleItems = [
-  ReportItem(
-    name: 'Blueberries',
-    stockKg: 1500,
-    soldKg: 1320,
-    income: 100000,
-    profit: 120000,
-  ),
-  ReportItem(
-    name: 'Strawberries',
-    stockKg: 350,
-    soldKg: 280,
-    income: 1920,
-    profit: 560,
-  ),
-  ReportItem(
-    name: 'Raspberries',
-    stockKg: 300,
-    soldKg: 200,
-    income: 1960,
-    profit: 490,
-  ),
-  ReportItem(
-    name: 'Apples',
-    stockKg: 400,
-    soldKg: 150,
-    income: 1720,
-    profit: 430,
-  ),
-  ReportItem(
-    name: 'Blueberries Mix',
-    stockKg: 400,
-    soldKg: 150,
-    income: 1740,
-    profit: 435,
-  ),
-  ReportItem(
-    name: 'Mangoes',
-    stockKg: 600,
-    soldKg: 410,
-    income: 2460,
-    profit: 820,
-  ),
-  ReportItem(
-    name: 'Peaches',
-    stockKg: 250,
-    soldKg: 190,
-    income: 1140,
-    profit: 380,
-  ),
-];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -86,30 +33,6 @@ String _fmt(double v) {
         (m) => '${m[1]},',
       );
   return 'RS $formatted';
-}
-
-class _FruitTheme {
-  final Color iconColor;
-  final Color bgColor;
-  final String emoji;
-  const _FruitTheme(this.iconColor, this.bgColor, this.emoji);
-}
-
-_FruitTheme _fruitTheme(String name) {
-  final n = name.toLowerCase();
-  if (n.contains('blue'))
-    return const _FruitTheme(Color(0xFF3B6FD4), Color(0xFFDEE8FF), '🫐');
-  if (n.contains('straw'))
-    return const _FruitTheme(Color(0xFFD63B3B), Color(0xFFFFE4E4), '🍓');
-  if (n.contains('rasp'))
-    return const _FruitTheme(Color(0xFFC2185B), Color(0xFFFFE0F0), '🍒');
-  if (n.contains('apple'))
-    return const _FruitTheme(Color(0xFF388E3C), Color(0xFFDFF5E0), '🍎');
-  if (n.contains('mango'))
-    return const _FruitTheme(Color(0xFFE65100), Color(0xFFFFF3E0), '🥭');
-  if (n.contains('peach'))
-    return const _FruitTheme(Color(0xFFD84315), Color(0xFFFBE9E7), '🍑');
-  return const _FruitTheme(Color(0xFF757575), Color(0xFFF5F5F5), '🌿');
 }
 
 // ── Main widget ──────────────────────────────────────────────────────────────
@@ -125,8 +48,37 @@ class _ReportPageState extends State<ReportPage> {
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
 
-  double get _totalIncome => _sampleItems.fold(0, (s, i) => s + i.income);
-  double get _totalProfit => _sampleItems.fold(0, (s, i) => s + i.profit);
+  List<ReportItem> _reportItems = [];
+  double _totalIncome = 0;
+  double _totalProfit = 0;
+  bool _isLoading = true;
+
+  Future<void> _loadReport() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await DatabaseHelper.instance.getMonthlyReport(
+      _selectedMonth,
+      _selectedYear,
+    );
+
+    setState(() {
+      _reportItems = result["items"];
+      _totalIncome = result["total_income"];
+      _totalProfit = result["total_profit"];
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReport();
+  }
+
+  // double get _totalIncome => _sampleItems.fold(0, (s, i) => s + i.income);
+  // double get _totalProfit => _sampleItems.fold(0, (s, i) => s + i.profit);
 
   // ── Month picker ──────────────────────────────────────────────────────────
 
@@ -289,6 +241,14 @@ class _ReportPageState extends State<ReportPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Back button
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: Color(0xFF1A1D2E),
+                      ),
+                      onPressed: () => Navigator.of(context).maybePop(),
+                    ),
                     const Text(
                       'Reports',
                       style: TextStyle(
@@ -408,18 +368,20 @@ class _ReportPageState extends State<ReportPage> {
                         color: Color(0xFFF0F0F0),
                       ),
                       Expanded(
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          itemCount: _sampleItems.length,
-                          separatorBuilder: (_, __) => const Divider(
-                            height: 1,
-                            thickness: 1,
-                            indent: 68,
-                            color: Color(0xFFF5F5F5),
-                          ),
-                          itemBuilder: (_, i) =>
-                              _ItemRow(item: _sampleItems[i]),
-                        ),
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView.separated(
+                                padding: EdgeInsets.zero,
+                                itemCount: _reportItems.length,
+                                separatorBuilder: (_, __) => const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  indent: 68,
+                                  color: Color(0xFFF5F5F5),
+                                ),
+                                itemBuilder: (_, i) =>
+                                    _ItemRow(item: _reportItems[i]),
+                              ),
                       ),
                     ],
                   ),
@@ -547,8 +509,6 @@ class _ItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _fruitTheme(item.name);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
@@ -575,7 +535,7 @@ class _ItemRow extends StatelessWidget {
           Expanded(
             flex: 4,
             child: Text(
-              '${item.stockKg}/${item.soldKg}',
+              '${item.stockKg.toStringAsFixed(2)}/${item.soldKg.toStringAsFixed(2)}',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
             ),

@@ -2,6 +2,7 @@ import 'package:chicken_dilivery/Model/ItemModel.dart';
 import 'package:chicken_dilivery/Model/RootModel.dart';
 import 'package:chicken_dilivery/Model/ShopModel.dart';
 import 'package:chicken_dilivery/Model/StockModel.dart';
+import 'package:chicken_dilivery/pages/Report/reportPage.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -764,5 +765,107 @@ class DatabaseHelper {
       where: 'userName = ?',
       whereArgs: [userName],
     );
+  }
+
+  Future<Map<String, dynamic>> getMonthlyReport(int month, int year) async {
+    final db = await database;
+
+    String paddedMonth = month.toString().padLeft(2, '0');
+    String yyyy = year.toString();
+    String like1 = '%/$paddedMonth/$yyyy%'; // matches DD/MM/YYYY
+    String like2 = '%/$month/$yyyy%'; // matches D/M/YYYY
+
+    // Get all items
+    final items = await db.query('items');
+
+    List<ReportItem> reportList = [];
+
+    for (var item in items) {
+      int itemId = item['id'] as int;
+      String itemName = item['name'] as String;
+
+      // 1️⃣ Total Stock (for the month)
+      final stockResult = await db.rawQuery(
+        '''
+      SELECT 
+        IFNULL(SUM(quantity_grams),0) as total_stock
+      FROM Stock
+      WHERE item_id = ?
+        AND (added_date LIKE ? OR added_date LIKE ?)
+    ''',
+        [itemId, like1, like2],
+      );
+
+      double totalStockG = (stockResult.first['total_stock'] as num).toDouble();
+      String totalStockKgStr = (totalStockG / 1000).toStringAsFixed(2);
+      print('Item $itemName - Total Stock: $totalStockKgStr Kg'); // Debug
+
+      // 2️⃣ Monthly Sales
+      final salesResult = await db.rawQuery(
+        '''
+      SELECT 
+        IFNULL(SUM(quantity_grams),0) as total_sold,
+        IFNULL(SUM(amount),0) as total_income
+      FROM Sales
+      WHERE item_id = ?
+        AND (added_date LIKE ? OR added_date LIKE ?)
+    ''',
+        [itemId, like1, like2],
+      );
+
+      int totalSoldG = salesResult.first['total_sold'] as int;
+      print('Item $itemName - Total Sold (g): $totalSoldG'); // Debug
+      double totalIncome = (salesResult.first['total_income'] as num)
+          .toDouble();
+      print('Item $itemName - Total Income: $totalIncome'); // Debug
+
+      // 3️⃣ Profit Calculation (use actual stock price for each sale)
+      // Get all sales for this item in the month
+      final salesRows = await db.rawQuery(
+        '''
+        SELECT S.quantity_grams, S.amount, S.added_date, S.selling_price, St.stock_price
+        FROM Sales S
+        LEFT JOIN (
+          SELECT item_id, MAX(id) as max_stock_id
+          FROM Stock
+          GROUP BY item_id
+        ) latestStock ON S.item_id = latestStock.item_id
+        LEFT JOIN Stock St ON St.id = latestStock.max_stock_id
+        WHERE S.item_id = ? AND (S.added_date LIKE ? OR S.added_date LIKE ?)
+        ''',
+        [itemId, like1, like2],
+      );
+
+      double totalCost = 0.0;
+      for (final row in salesRows) {
+        final qtyGrams = (row['quantity_grams'] ?? 0) as num;
+        final stockPrice = (row['stock_price'] ?? 0) as num;
+        totalCost += (qtyGrams / 1000.0) * stockPrice;
+      }
+      double totalProfit = totalIncome - totalCost;
+
+      reportList.add(
+        ReportItem(
+          name: itemName,
+          stockKg: totalStockG / 1000,
+          soldKg: totalSoldG / 1000,
+          income: totalIncome,
+          profit: totalProfit,
+        ),
+      );
+    }
+
+    // 4️⃣ Grand Totals
+    double grandIncome = reportList.fold(0, (sum, item) => sum + item.income);
+    print('Grand Total Income: $grandIncome'); // Debug
+
+    double grandProfit = reportList.fold(0, (sum, item) => sum + item.profit);
+    print('Grand Total Profit: $grandProfit'); // Debug
+
+    return {
+      "items": reportList,
+      "total_income": grandIncome,
+      "total_profit": grandProfit,
+    };
   }
 }
