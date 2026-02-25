@@ -149,6 +149,7 @@ class _ReportPageState extends State<ReportPage> {
                           setState(() {
                             _selectedYear = year;
                           });
+                          _loadReport(); // <-- update report when year changes
                         },
                       ),
                     );
@@ -197,6 +198,7 @@ class _ReportPageState extends State<ReportPage> {
                       _selectedYear = tempYear;
                     });
                     Navigator.pop(context);
+                    _loadReport(); // <-- update report when month changes
                   },
                 );
               }),
