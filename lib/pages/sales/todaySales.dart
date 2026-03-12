@@ -122,14 +122,6 @@ class _TodaysalesState extends State<Todaysales> {
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: shopController,
-                  decoration: const InputDecoration(
-                    labelText: 'Shop Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
                 DropdownButtonFormField<int>(
                   value: selectedItemId,
                   decoration: const InputDecoration(
@@ -657,14 +649,7 @@ class _TodaysalesState extends State<Todaysales> {
                                                       ),
                                                     ),
                                                     const SizedBox(width: 8),
-                                                    Text(
-                                                      firstSale.shopName ??
-                                                          'Unknown Shop',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.black54,
-                                                      ),
-                                                    ),
+
                                                     const Spacer(),
                                                     Container(
                                                       padding:

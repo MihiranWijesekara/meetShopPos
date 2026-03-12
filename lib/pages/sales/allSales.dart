@@ -681,18 +681,6 @@ class _AllsalesState extends State<Allsales> {
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    firstSale.shopName ??
-                                                        'Unknown Shop',
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.black54,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
                                                 Container(
                                                   padding:
                                                       const EdgeInsets.symmetric(

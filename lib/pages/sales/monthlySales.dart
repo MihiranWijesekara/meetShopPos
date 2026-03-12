@@ -121,14 +121,6 @@ class _MonthlysalesState extends State<Monthlysales> {
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: shopController,
-                  decoration: const InputDecoration(
-                    labelText: 'Shop Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
                 AbsorbPointer(
                   child: DropdownButtonFormField<int>(
                     value: selectedItemId,
@@ -566,14 +558,6 @@ class _MonthlysalesState extends State<Monthlysales> {
                                                       ),
                                                     ),
                                                     const SizedBox(width: 8),
-                                                    Text(
-                                                      firstSale.shopName ??
-                                                          'Unknown Shop',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.black54,
-                                                      ),
-                                                    ),
                                                     const Spacer(),
                                                     Container(
                                                       padding:

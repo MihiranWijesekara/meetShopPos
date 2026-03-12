@@ -1,7 +1,5 @@
 import 'package:chicken_dilivery/Model/CartItemModel.dart';
 import 'package:chicken_dilivery/Model/ItemModel.dart';
-import 'package:chicken_dilivery/Model/RootModel.dart';
-import 'package:chicken_dilivery/Model/ShopModel.dart';
 import 'package:chicken_dilivery/Model/StockModel.dart';
 import 'package:chicken_dilivery/Model/salesModel.dart';
 import 'package:chicken_dilivery/database/database_helper.dart';
@@ -38,12 +36,10 @@ class _AddsalesState extends State<Addsales> {
   bool _isLoadingItems = true;
 
   // Root + shops state
-  List<RootModel> _roots = [];
-  List<Shopmodel> _shops = [];
   bool _isGeneratingBillNumber = true;
 
   @override
-  void initState() {
+  void initState() { 
     super.initState();
     _loadStock();
     _loadItems();

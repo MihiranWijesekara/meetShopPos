@@ -1,6 +1,4 @@
 import 'package:chicken_dilivery/Model/ItemModel.dart';
-import 'package:chicken_dilivery/Model/RootModel.dart';
-import 'package:chicken_dilivery/Model/ShopModel.dart';
 import 'package:chicken_dilivery/Model/StockModel.dart';
 import 'package:chicken_dilivery/pages/Report/reportPage.dart';
 import 'package:sqflite/sqflite.dart';
@@ -67,7 +65,6 @@ class DatabaseHelper {
       CREATE TABLE Sales (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         bill_no TEXT NOT NULL,
-        shop_id INTEGER,
         item_id INTEGER NOT NULL,
         selling_price INTEGER NOT NULL,
         quantity_grams INTEGER,
@@ -76,7 +73,7 @@ class DatabaseHelper {
         QTY INTEGER,
         added_date TEXT,
         FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL,
-        FOREIGN KEY (shop_id) REFERENCES shops (id) ON DELETE SET NULL
+
       )
     ''');
   }
@@ -125,7 +122,6 @@ class DatabaseHelper {
         CREATE TABLE IF NOT EXISTS Sales (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           bill_no TEXT NOT NULL,
-          shop_id INTEGER,
           item_id INTEGER NOT NULL,
           selling_price INTEGER NOT NULL,
           quantity_grams INTEGER,
@@ -133,7 +129,6 @@ class DatabaseHelper {
           Vat_Number TEXT,
           added_date TEXT,
           FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL,
-          FOREIGN KEY (shop_id) REFERENCES shops (id) ON DELETE SET NULL
         )
       ''');
     }
@@ -231,7 +226,6 @@ class DatabaseHelper {
 
       final allowed = <String>{
         'bill_no',
-        'shop_id',
         'item_id',
         'selling_price',
         'quantity_grams',
@@ -409,10 +403,9 @@ class DatabaseHelper {
 
     return await db.rawQuery(
       '''
-    SELECT Sales.*, items.name as item_name, shops.shop_name
+    SELECT Sales.*, items.name as item_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
-    LEFT JOIN shops ON Sales.shop_id = shops.id
     WHERE (added_date LIKE ? OR added_date LIKE ?)
     ORDER BY Sales.id DESC
     ''',
@@ -434,10 +427,9 @@ class DatabaseHelper {
 
     final result = await db.rawQuery(
       '''
-    SELECT Sales.*, items.name as item_name, shops.shop_name
+    SELECT Sales.*, items.name as item_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
-    LEFT JOIN shops ON Sales.shop_id = shops.id
     WHERE Sales.added_date = ?
     ORDER BY Sales.id DESC
   ''',
@@ -469,10 +461,9 @@ class DatabaseHelper {
     final placeholders = List.filled(weekDates.length, '?').join(',');
 
     final result = await db.rawQuery('''
-    SELECT Sales.*, items.name as item_name, shops.shop_name
+    SELECT Sales.*, items.name as item_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
-    LEFT JOIN shops ON Sales.shop_id = shops.id
     WHERE Sales.added_date IN ($placeholders)
     ORDER BY Sales.id DESC
   ''', weekDates);
@@ -505,10 +496,9 @@ class DatabaseHelper {
     final placeholders = List.filled(monthDates.length, '?').join(',');
 
     final result = await db.rawQuery('''
-    SELECT Sales.*, items.name as item_name, shops.shop_name
+    SELECT Sales.*, items.name as item_name
     FROM Sales
     LEFT JOIN items ON Sales.item_id = items.id
-    LEFT JOIN shops ON Sales.shop_id = shops.id
     WHERE Sales.added_date IN ($placeholders)
     ORDER BY Sales.id DESC
   ''', monthDates);
@@ -564,27 +554,7 @@ class DatabaseHelper {
     );
   }
 
-  // Update root
-  Future<int> updateRoot(RootModel root) async {
-    final db = await database;
-    return await db.update(
-      'roots',
-      root.toMap(),
-      where: 'id = ?',
-      whereArgs: [root.id],
-    );
-  }
 
-  // Update shop
-  Future<int> updateShop(Shopmodel shop) async {
-    final db = await database;
-    return await db.update(
-      'shops',
-      shop.toMap(),
-      where: 'id = ?',
-      whereArgs: [shop.id],
-    );
-  }
 
   // Update stock
   Future<int> updateStock(StockModel stock) async {
