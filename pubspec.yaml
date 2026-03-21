@@ -106,7 +106,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
   # App icon asset (used by flutter_launcher_icons)
   assets:
-    - assets/icon/CRYSBRO.jpg
+    - assets/icon/app_icon.png
     - images/
     - .env
 
@@ -114,7 +114,11 @@ flutter:
 flutter_icons:
   android: true
   ios: true
+  web:
+    generate: true
   windows:
     generate: true
-    image_path: "assets/icon/CRYSBRO.jpg"
-  image_path: "assets/icon/CRYSBRO.jpg"
+    image_path: "assets/icon/app_icon.png"
+  macos:
+    generate: true
+  image_path: "assets/icon/app_icon.png"

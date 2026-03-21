@@ -258,7 +258,7 @@ class _AllstockState extends State<Allstock> {
                               ),
                             ],
                           ),
-                          SizedBox(width: 120),
+                          SizedBox(width: 100),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),

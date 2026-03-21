@@ -81,7 +81,7 @@ class _SalesDashboardState extends State<SalesDashboard> {
       ),
       _DashCardData(
         title: 'Monthly Sale',
-        subtitle: 'Sales for the month',
+        subtitle: 'Sales for month',
         icon: Icons.calendar_month_outlined,
         color: const Color(0xFFE91E63),
         gradientColors: [const Color(0xFFE91E63), const Color(0xFFF06292)],

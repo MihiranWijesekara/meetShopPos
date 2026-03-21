@@ -72,8 +72,7 @@ class DatabaseHelper {
         Vat_Number TEXT,
         QTY INTEGER,
         added_date TEXT,
-        FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL,
-
+        FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL
       )
     ''');
   }
@@ -128,7 +127,7 @@ class DatabaseHelper {
           amount REAL DEFAULT 0,
           Vat_Number TEXT,
           added_date TEXT,
-          FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL,
+          FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE SET NULL
         )
       ''');
     }
@@ -553,8 +552,6 @@ class DatabaseHelper {
       whereArgs: [item.id],
     );
   }
-
-
 
   // Update stock
   Future<int> updateStock(StockModel stock) async {

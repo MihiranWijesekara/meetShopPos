@@ -22,7 +22,7 @@ void main() async {
     );
   } else {
     print('[APP] Web runtime detected. Skipping native SQLite init.');
-  }     
+  }
 
   runApp(const MyApp());
 }
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chicken Sales',
+      title: 'කඩේ Bill',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
       home: const SigninPage(),

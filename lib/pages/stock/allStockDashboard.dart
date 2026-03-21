@@ -18,7 +18,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Items page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 1)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 1)),
           );
         },
       ),
@@ -32,7 +32,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Shop page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 2)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 2)),
           );
         },
       ),
@@ -46,7 +46,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 3)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 3)),
           );
         },
       ),
@@ -60,7 +60,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 4)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 4)),
           );
         },
       ),
@@ -74,7 +74,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 5)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 5)),
           );
         },
       ),
@@ -88,7 +88,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 6)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 6)),
           );
         },
       ),
@@ -102,7 +102,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 7)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 7)),
           );
         },
       ),
@@ -116,7 +116,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 8)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 8)),
           );
         },
       ),
@@ -130,7 +130,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 9)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 9)),
           );
         },
       ),
@@ -144,7 +144,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 10)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 10)),
           );
         },
       ),
@@ -158,7 +158,7 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 11)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 11)),
           );
         },
       ),
@@ -172,11 +172,17 @@ class Allstockdashboard extends StatelessWidget {
           // Navigate to Root page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const Allstock( month: 12)),
+            MaterialPageRoute(builder: (context) => const Allstock(month: 12)),
           );
         },
       ),
     ];
+
+    final size = MediaQuery.of(context).size;
+    final isPortrait = size.height > size.width;
+    final crossAxisCount = isPortrait ? 3 : 4;
+    final horizontalPadding = size.width * 0.03;
+    final verticalPadding = size.height * 0.01;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -204,14 +210,14 @@ class Allstockdashboard extends StatelessWidget {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const SizedBox(width: 40),
+                      SizedBox(width: size.width * 0.10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -219,7 +225,7 @@ class Allstockdashboard extends StatelessWidget {
                             'All Stock Dashboard',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 20,
+                              fontSize: size.width * 0.05,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
@@ -236,18 +242,33 @@ class Allstockdashboard extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: GridView.builder(
-            physics: const BouncingScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // 3 columns
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.75, // Square cards
-            ),
-            itemCount: cards.length,
-            itemBuilder: (context, index) {
-              return _DashboardCard(cardData: cards[index]);
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth =
+                  (constraints.maxWidth - (crossAxisCount - 1) * 12) /
+                  crossAxisCount;
+              final cardHeight = cardWidth / 0.75;
+              return GridView.builder(
+                physics: const BouncingScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: cardWidth / cardHeight,
+                ),
+                itemCount: cards.length,
+                itemBuilder: (context, index) {
+                  return _DashboardCard(
+                    cardData: cards[index],
+                    cardWidth: cardWidth,
+                    cardHeight: cardHeight,
+                  );
+                },
+              );
             },
           ),
         ),
@@ -276,8 +297,14 @@ class _DashCardData {
 
 class _DashboardCard extends StatefulWidget {
   final _DashCardData cardData;
+  final double cardWidth;
+  final double cardHeight;
 
-  const _DashboardCard({required this.cardData});
+  const _DashboardCard({
+    required this.cardData,
+    required this.cardWidth,
+    required this.cardHeight,
+  });
 
   @override
   State<_DashboardCard> createState() => _DashboardCardState();
@@ -309,16 +336,23 @@ class _DashboardCardState extends State<_DashboardCard>
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = widget.cardWidth * 0.18;
+    final padding = widget.cardWidth * 0.13;
+    final titleFontSize = widget.cardWidth * 0.11;
+    final subtitleFontSize = widget.cardWidth * 0.085;
+
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Container(
+        width: widget.cardWidth,
+        height: widget.cardHeight,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: widget.cardData.gradientColors,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(widget.cardWidth * 0.13),
           boxShadow: [
             BoxShadow(
               color: widget.cardData.color.withOpacity(0.3),
@@ -331,45 +365,46 @@ class _DashboardCardState extends State<_DashboardCard>
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(widget.cardWidth * 0.13),
             onTap: () {
               _controller.forward().then((_) => _controller.reverse());
               widget.cardData.onTap();
             },
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(padding),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(widget.cardWidth * 0.08),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(
+                        widget.cardWidth * 0.08,
+                      ),
                     ),
                     child: Icon(
                       widget.cardData.icon,
-                      size: 30,
+                      size: iconSize,
                       color: Colors.white,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     widget.cardData.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: titleFontSize,
                       fontWeight: FontWeight.bold,
-                      // letterSpacing: 0.1,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: widget.cardWidth * 0.03),
                   Text(
                     widget.cardData.subtitle,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
-                      fontSize: 12,
+                      fontSize: subtitleFontSize,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
