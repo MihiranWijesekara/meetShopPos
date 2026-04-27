@@ -1,4 +1,5 @@
 import 'package:chicken_dilivery/pages/Auth/signIn.dart';
+import 'package:chicken_dilivery/pages/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -36,8 +37,8 @@ class MyApp extends StatelessWidget {
       title: 'කඩේ Bill',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      home: const SigninPage(),
-      // home: const Printpage(),
+      // home: const SigninPage(),
+      home: const DashboardPage(),
     );
   }
 }

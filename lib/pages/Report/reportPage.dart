@@ -63,8 +63,13 @@ class _ReportPageState extends State<ReportPage> {
       _selectedYear,
     );
 
+    final items = List<ReportItem>.from(result["items"] as List);
+    items.sort((a, b) => b.soldKg.compareTo(a.soldKg));
+
+    if (!mounted) return;
+
     setState(() {
-      _reportItems = result["items"];
+      _reportItems = items;
       _totalIncome = result["total_income"];
       _totalProfit = result["total_profit"];
       _isLoading = false;

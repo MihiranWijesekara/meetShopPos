@@ -81,6 +81,8 @@ class _SignupState extends State<Signup> {
 
       // Google Apps Script typically returns 200 or 302 for successful requests
       if (result['success'] == true) {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message']),
@@ -94,6 +96,11 @@ class _SignupState extends State<Signup> {
         _shopNameController.clear();
         _phoneNumberController.clear();
         _passwordController.clear();
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SigninPage()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

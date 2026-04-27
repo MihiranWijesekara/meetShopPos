@@ -355,6 +355,29 @@ class DatabaseHelper {
     return result.map((map) => ItemModel.fromMap(map)).toList();
   }
 
+  // Get items ordered by how often they have been sold.
+  Future<List<ItemModel>> getItemsOrderedBySales() async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT i.*
+      FROM items i
+      LEFT JOIN (
+        SELECT
+          item_id,
+          COUNT(*) AS sales_count,
+          IFNULL(SUM(quantity_grams), 0) AS total_sold_grams
+        FROM Sales
+        GROUP BY item_id
+      ) salesStats ON salesStats.item_id = i.id
+      ORDER BY
+        CASE WHEN salesStats.sales_count IS NULL THEN 1 ELSE 0 END,
+        salesStats.sales_count DESC,
+        salesStats.total_sold_grams DESC,
+        i.name ASC
+    ''');
+    return result.map((map) => ItemModel.fromMap(map)).toList();
+  }
+
   // Get all stock
   Future<List<StockModel>> getStockByMonthAndYear(int month, int year) async {
     final db = await database;

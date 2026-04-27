@@ -1,6 +1,8 @@
+import 'package:chicken_dilivery/database/database_helper.dart';
 import 'package:chicken_dilivery/pages/Report/reportPage.dart';
 import 'package:chicken_dilivery/pages/Auth/signIn.dart';
 import 'package:chicken_dilivery/pages/Item/itemPage.dart';
+import 'package:chicken_dilivery/pages/sales/addSales.dart';
 import 'package:chicken_dilivery/pages/sales/allSalesDashboard.dart';
 import 'package:chicken_dilivery/pages/sales/salesDashboard.dart';
 import 'package:chicken_dilivery/pages/stock/allStockDashboard.dart';
@@ -8,8 +10,47 @@ import 'package:chicken_dilivery/pages/stock/currentStockDisplay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  double? todayTotal;
+  double? yesterdayTotal;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTotals();
+  }
+
+  Future<void> _loadTotals() async {
+    try {
+      final db = DatabaseHelper.instance;
+      final t = await db.getTodaySalesTotalAmount();
+      final y = await db.getYesterdaySalesTotalAmount();
+      print('[SalesDashboard] Today Total: $t, Yesterday Total: $y');
+      if (mounted) {
+        setState(() {
+          todayTotal = t;
+          yesterdayTotal = y;
+          loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          todayTotal = 0;
+          yesterdayTotal = 0;
+          loading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +230,34 @@ class DashboardPage extends StatelessWidget {
           itemBuilder: (context, index) {
             return _DashboardCard(cardData: cards[index]);
           },
+        ),
+      ),
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          // Navigate to Add Item page
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Addsales()),
+          );
+          // reload totals after adding a sale
+          if (result != null) _loadTotals();
+        },
+        backgroundColor: const Color.fromARGB(255, 26, 11, 167),
+        elevation: 3,
+        icon: const Icon(
+          Icons.add_circle_outline,
+          color: Colors.white,
+          size: 20,
+        ),
+        label: const Text(
+          'Add Sales',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
     );
